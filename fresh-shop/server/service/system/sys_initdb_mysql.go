@@ -30,14 +30,14 @@ func (h MysqlInitHandler) WriteConfig(ctx context.Context) error {
 	if !ok {
 		return errors.New("mysql config invalid")
 	}
-	global.GVA_CONFIG.System.DbType = "mysql"
-	global.GVA_CONFIG.Mysql = c
-	global.GVA_CONFIG.JWT.SigningKey = uuid.NewV4().String()
-	cs := utils.StructToMap(global.GVA_CONFIG)
+	global.Config.System.DbType = "mysql"
+	global.Config.Mysql = c
+	global.Config.JWT.SigningKey = uuid.NewV4().String()
+	cs := utils.StructToMap(global.Config)
 	for k, v := range cs {
-		global.GVA_VP.Set(k, v)
+		global.Viper.Set(k, v)
 	}
-	return global.GVA_VP.WriteConfig()
+	return global.Viper.WriteConfig()
 }
 
 // EnsureDB 创建数据库并初始化 mysql
@@ -66,7 +66,7 @@ func (h MysqlInitHandler) EnsureDB(ctx context.Context, conf *request.InitDB) (n
 	}), &gorm.Config{DisableForeignKeyConstraintWhenMigrating: true}); err != nil {
 		return ctx, err
 	}
-	global.GVA_CONFIG.AutoCode.Root, _ = filepath.Abs("..")
+	global.Config.AutoCode.Root, _ = filepath.Abs("..")
 	next = context.WithValue(next, "db", db)
 	return next, err
 }

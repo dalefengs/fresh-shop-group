@@ -30,25 +30,25 @@ func (*AwsS3) UploadFile(file *multipart.FileHeader) (string, string, error) {
 	uploader := s3manager.NewUploader(session)
 
 	fileKey := fmt.Sprintf("%d%s", time.Now().Unix(), file.Filename)
-	filename := global.GVA_CONFIG.AwsS3.PathPrefix + "/" + fileKey
+	filename := global.Config.AwsS3.PathPrefix + "/" + fileKey
 	f, openError := file.Open()
 	if openError != nil {
-		global.GVA_LOG.Error("function file.Open() Filed", zap.Any("err", openError.Error()))
+		global.Log.Error("function file.Open() Filed", zap.Any("err", openError.Error()))
 		return "", "", errors.New("function file.Open() Filed, err:" + openError.Error())
 	}
 	defer f.Close() // 创建文件 defer 关闭
 
 	_, err := uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(global.GVA_CONFIG.AwsS3.Bucket),
+		Bucket: aws.String(global.Config.AwsS3.Bucket),
 		Key:    aws.String(filename),
 		Body:   f,
 	})
 	if err != nil {
-		global.GVA_LOG.Error("function uploader.Upload() Filed", zap.Any("err", err.Error()))
+		global.Log.Error("function uploader.Upload() Filed", zap.Any("err", err.Error()))
 		return "", "", err
 	}
 
-	return global.GVA_CONFIG.AwsS3.BaseURL + "/" + filename, fileKey, nil
+	return global.Config.AwsS3.BaseURL + "/" + filename, fileKey, nil
 }
 
 //@author: [WqyJh](https://github.com/WqyJh)
@@ -61,15 +61,15 @@ func (*AwsS3) UploadFile(file *multipart.FileHeader) (string, string, error) {
 func (*AwsS3) DeleteFile(key string) error {
 	session := newSession()
 	svc := s3.New(session)
-	filename := global.GVA_CONFIG.AwsS3.PathPrefix + "/" + key
-	bucket := global.GVA_CONFIG.AwsS3.Bucket
+	filename := global.Config.AwsS3.PathPrefix + "/" + key
+	bucket := global.Config.AwsS3.Bucket
 
 	_, err := svc.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(filename),
 	})
 	if err != nil {
-		global.GVA_LOG.Error("function svc.DeleteObject() Filed", zap.Any("err", err.Error()))
+		global.Log.Error("function svc.DeleteObject() Filed", zap.Any("err", err.Error()))
 		return errors.New("function svc.DeleteObject() Filed, err:" + err.Error())
 	}
 
@@ -83,13 +83,13 @@ func (*AwsS3) DeleteFile(key string) error {
 // newSession Create S3 session
 func newSession() *session.Session {
 	sess, _ := session.NewSession(&aws.Config{
-		Region:           aws.String(global.GVA_CONFIG.AwsS3.Region),
-		Endpoint:         aws.String(global.GVA_CONFIG.AwsS3.Endpoint), //minio在这里设置地址,可以兼容
-		S3ForcePathStyle: aws.Bool(global.GVA_CONFIG.AwsS3.S3ForcePathStyle),
-		DisableSSL:       aws.Bool(global.GVA_CONFIG.AwsS3.DisableSSL),
+		Region:           aws.String(global.Config.AwsS3.Region),
+		Endpoint:         aws.String(global.Config.AwsS3.Endpoint), //minio在这里设置地址,可以兼容
+		S3ForcePathStyle: aws.Bool(global.Config.AwsS3.S3ForcePathStyle),
+		DisableSSL:       aws.Bool(global.Config.AwsS3.DisableSSL),
 		Credentials: credentials.NewStaticCredentials(
-			global.GVA_CONFIG.AwsS3.SecretID,
-			global.GVA_CONFIG.AwsS3.SecretKey,
+			global.Config.AwsS3.SecretID,
+			global.Config.AwsS3.SecretKey,
 			"",
 		),
 	})

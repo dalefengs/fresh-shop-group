@@ -25,12 +25,12 @@ func InstallPlugin(Router *gin.Engine) {
 	PrivateGroup.Use(middleware.JWTAuth()).Use(middleware.CasbinHandler())
 	//  添加跟角色挂钩权限的插件 示例 本地示例模式于在线仓库模式注意上方的import 可以自行切换 效果相同
 	PluginInit(PrivateGroup, email.CreateEmailPlug(
-		global.GVA_CONFIG.Email.To,
-		global.GVA_CONFIG.Email.From,
-		global.GVA_CONFIG.Email.Host,
-		global.GVA_CONFIG.Email.Secret,
-		global.GVA_CONFIG.Email.Nickname,
-		global.GVA_CONFIG.Email.Port,
-		global.GVA_CONFIG.Email.IsSSL,
+		global.Config.Email.To,
+		global.Config.Email.From,
+		global.Config.Email.Host,
+		global.Config.Email.Secret,
+		global.Config.Email.Nickname,
+		global.Config.Email.Port,
+		global.Config.Email.IsSSL,
 	))
 }

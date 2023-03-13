@@ -30,7 +30,7 @@ func (s *DictionaryApi) CreateSysDictionary(c *gin.Context) {
 	}
 	err = dictionaryService.CreateSysDictionary(dictionary)
 	if err != nil {
-		global.GVA_LOG.Error("创建失败!", zap.Error(err))
+		global.Log.Error("创建失败!", zap.Error(err))
 		response.FailWithMessage("创建失败", c)
 		return
 	}
@@ -55,7 +55,7 @@ func (s *DictionaryApi) DeleteSysDictionary(c *gin.Context) {
 	}
 	err = dictionaryService.DeleteSysDictionary(dictionary)
 	if err != nil {
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		global.Log.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
 		return
 	}
@@ -80,7 +80,7 @@ func (s *DictionaryApi) UpdateSysDictionary(c *gin.Context) {
 	}
 	err = dictionaryService.UpdateSysDictionary(&dictionary)
 	if err != nil {
-		global.GVA_LOG.Error("更新失败!", zap.Error(err))
+		global.Log.Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败", c)
 		return
 	}
@@ -105,7 +105,7 @@ func (s *DictionaryApi) FindSysDictionary(c *gin.Context) {
 	}
 	sysDictionary, err := dictionaryService.GetSysDictionary(dictionary.Type, dictionary.ID, dictionary.Status)
 	if err != nil {
-		global.GVA_LOG.Error("字典未创建或未开启!", zap.Error(err))
+		global.Log.Error("字典未创建或未开启!", zap.Error(err))
 		response.FailWithMessage("字典未创建或未开启", c)
 		return
 	}
@@ -135,7 +135,7 @@ func (s *DictionaryApi) GetSysDictionaryList(c *gin.Context) {
 	}
 	list, total, err := dictionaryService.GetSysDictionaryInfoList(pageInfo)
 	if err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		global.Log.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 		return
 	}

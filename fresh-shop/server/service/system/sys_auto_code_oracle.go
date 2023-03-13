@@ -16,7 +16,7 @@ func (s *autoCodeOracle) GetDB(businessDB string) (data []response.Db, err error
 	var entities []response.Db
 	sql := `SELECT lower(username) AS "database" FROM all_users`
 
-	err = global.GVA_DBList[businessDB].Raw(sql).Scan(&entities).Error
+	err = global.DbList[businessDB].Raw(sql).Scan(&entities).Error
 	return entities, err
 }
 
@@ -27,7 +27,7 @@ func (s *autoCodeOracle) GetTables(businessDB string, dbName string) (data []res
 	var entities []response.Table
 	sql := `select lower(table_name) as "table_name" from all_tables where lower(owner) = ?`
 
-	err = global.GVA_DBList[businessDB].Raw(sql, dbName).Scan(&entities).Error
+	err = global.DbList[businessDB].Raw(sql, dbName).Scan(&entities).Error
 	return entities, err
 }
 
@@ -49,6 +49,6 @@ func (s *autoCodeOracle) GetColumn(businessDB string, tableName string, dbName s
 		 and lower(a.OWNER) = ?		 
 `
 
-	err = global.GVA_DBList[businessDB].Raw(sql, tableName, dbName).Scan(&entities).Error
+	err = global.DbList[businessDB].Raw(sql, tableName, dbName).Scan(&entities).Error
 	return entities, err
 }

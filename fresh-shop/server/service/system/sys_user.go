@@ -26,14 +26,14 @@ func (userService *UserService) Register(u system.SysUser) (userInter system.Sys
 	if u.Username == "" { // 生成用户名
 		u.Username = utils.GenerateUsername("U", 6)
 		// 判断错误是否是由 gorm.ErrRecordNotFound 引起的
-		for !errors.Is(global.GVA_DB.Where("username = ?", u.Username).First(&user).Error, gorm.ErrRecordNotFound) {
+		for !errors.Is(global.DB.Where("username = ?", u.Username).First(&user).Error, gorm.ErrRecordNotFound) {
 			name := utils.GenerateUsername("U", 6)
-			global.Logger.Warnf("注册用户 --- 用户名：%s 已存在！重新生成新用户名：%s", u.Username, name)
+			global.SugarLog.Warnf("注册用户 --- 用户名：%s 已存在！重新生成新用户名：%s", u.Username, name)
 			u.Username = name
 		}
-		global.Logger.Infof("注册用户 --- 用户名：%s 验证通过", u.Username)
+		global.SugarLog.Infof("注册用户 --- 用户名：%s 验证通过", u.Username)
 	} else {
-		if !errors.Is(global.GVA_DB.Where("username = ?", u.Username).First(&user).Error, gorm.ErrRecordNotFound) { // 判断用户名是否注册
+		if !errors.Is(global.DB.Where("username = ?", u.Username).First(&user).Error, gorm.ErrRecordNotFound) { // 判断用户名是否注册
 			return userInter, errors.New("用户名已注册")
 		}
 	}
@@ -41,9 +41,9 @@ func (userService *UserService) Register(u system.SysUser) (userInter system.Sys
 	user = system.SysUser{}
 	u.InvitationCode = utils.GenerateInviteCode(8)
 	// 生成邀请码
-	for !errors.Is(global.GVA_DB.Where("invitation_code = ?", u.InvitationCode).First(&user).Error, gorm.ErrRecordNotFound) {
+	for !errors.Is(global.DB.Where("invitation_code = ?", u.InvitationCode).First(&user).Error, gorm.ErrRecordNotFound) {
 		code := utils.GenerateInviteCode(8)
-		global.Logger.Warnf("注册用户 --- 用户名：%s, 邀请码：%s 已存在！重新生成新邀请码：%s", u.Username, u.InvitationCode, code)
+		global.SugarLog.Warnf("注册用户 --- 用户名：%s, 邀请码：%s 已存在！重新生成新邀请码：%s", u.Username, u.InvitationCode, code)
 		u.InvitationCode = code
 	}
 
@@ -57,7 +57,7 @@ func (userService *UserService) Register(u system.SysUser) (userInter system.Sys
 
 	// 生成对应币种账户信息
 
-	err = global.GVA_DB.Create(&u).Error
+	err = global.DB.Create(&u).Error
 	// 提交事务
 	return u, err
 }
@@ -70,12 +70,12 @@ func (userService *UserService) Register(u system.SysUser) (userInter system.Sys
 //@return: err error, userInter *model.SysUser
 
 func (userService *UserService) Login(u *system.SysUser) (userInter *system.SysUser, err error) {
-	if nil == global.GVA_DB {
+	if nil == global.DB {
 		return nil, fmt.Errorf("db not init")
 	}
 
 	var user system.SysUser
-	err = global.GVA_DB.Where("username = ?", u.Username).Preload("Authorities").Preload("Authority").First(&user).Error
+	err = global.DB.Where("username = ?", u.Username).Preload("Authorities").Preload("Authority").First(&user).Error
 	if err == nil {
 		// 验证密码
 		if ok := utils.BcryptCheck(u.Password, user.Password); !ok {
@@ -94,14 +94,14 @@ func (userService *UserService) Login(u *system.SysUser) (userInter *system.SysU
 
 func (userService *UserService) ChangePassword(u *system.SysUser, newPassword string) (userInter *system.SysUser, err error) {
 	var user system.SysUser
-	if err = global.GVA_DB.Where("id = ?", u.ID).First(&user).Error; err != nil {
+	if err = global.DB.Where("id = ?", u.ID).First(&user).Error; err != nil {
 		return nil, err
 	}
 	if ok := utils.BcryptCheck(u.Password, user.Password); !ok {
 		return nil, errors.New("原密码错误")
 	}
 	user.Password = utils.BcryptHash(newPassword)
-	err = global.GVA_DB.Save(&user).Error
+	err = global.DB.Save(&user).Error
 	return &user, err
 
 }
@@ -115,7 +115,7 @@ func (userService *UserService) ChangePassword(u *system.SysUser, newPassword st
 func (userService *UserService) GetUserInfoList(info sysReq.UserList, order string, desc bool) (list interface{}, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
-	db := global.GVA_DB.Model(&system.SysUser{})
+	db := global.DB.Model(&system.SysUser{})
 	var userList []system.SysUser
 
 	if info.Username != "" {
@@ -159,11 +159,11 @@ func (userService *UserService) GetUserInfoList(info sysReq.UserList, order stri
 //@return: err error
 
 func (userService *UserService) SetUserAuthority(id uint, authorityId uint) (err error) {
-	assignErr := global.GVA_DB.Where("sys_user_id = ? AND sys_authority_authority_id = ?", id, authorityId).First(&system.SysUserAuthority{}).Error
+	assignErr := global.DB.Where("sys_user_id = ? AND sys_authority_authority_id = ?", id, authorityId).First(&system.SysUserAuthority{}).Error
 	if errors.Is(assignErr, gorm.ErrRecordNotFound) {
 		return errors.New("该用户无此角色")
 	}
-	err = global.GVA_DB.Where("id = ?", id).First(&system.SysUser{}).Update("authority_id", authorityId).Error
+	err = global.DB.Where("id = ?", id).First(&system.SysUser{}).Update("authority_id", authorityId).Error
 	return err
 }
 
@@ -174,7 +174,7 @@ func (userService *UserService) SetUserAuthority(id uint, authorityId uint) (err
 //@return: err error
 
 func (userService *UserService) SetUserAuthorities(id uint, authorityIds []uint) (err error) {
-	return global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+	return global.DB.Transaction(func(tx *gorm.DB) error {
 		TxErr := tx.Delete(&[]system.SysUserAuthority{}, "sys_user_id = ?", id).Error
 		if TxErr != nil {
 			return TxErr
@@ -206,11 +206,11 @@ func (userService *UserService) SetUserAuthorities(id uint, authorityIds []uint)
 
 func (userService *UserService) DeleteUser(id int) (err error) {
 	var user system.SysUser
-	err = global.GVA_DB.Where("id = ?", id).Delete(&user).Error
+	err = global.DB.Where("id = ?", id).Delete(&user).Error
 	if err != nil {
 		return err
 	}
-	err = global.GVA_DB.Delete(&[]system.SysUserAuthority{}, "sys_user_id = ?", id).Error
+	err = global.DB.Delete(&[]system.SysUserAuthority{}, "sys_user_id = ?", id).Error
 	return err
 }
 
@@ -221,7 +221,7 @@ func (userService *UserService) DeleteUser(id int) (err error) {
 //@return: err error, user model.SysUser
 
 func (userService *UserService) SetUserInfo(req system.SysUser) error {
-	return global.GVA_DB.Model(&system.SysUser{}).
+	return global.DB.Model(&system.SysUser{}).
 		Select("updated_at", "nick_name", "header_img", "phone", "email", "sideMode", "enable").
 		Where("id=?", req.ID).
 		Updates(map[string]interface{}{
@@ -242,7 +242,7 @@ func (userService *UserService) SetUserInfo(req system.SysUser) error {
 //@return: err error, user model.SysUser
 
 func (userService *UserService) SetSelfInfo(req system.SysUser) error {
-	return global.GVA_DB.Model(&system.SysUser{}).
+	return global.DB.Model(&system.SysUser{}).
 		Where("id=?", req.ID).
 		Updates(req).Error
 }
@@ -256,7 +256,7 @@ func (userService *UserService) SetSelfInfo(req system.SysUser) error {
 
 func (userService *UserService) GetUserInfo(uuid uuid.UUID) (user system.SysUser, err error) {
 	var reqUser system.SysUser
-	err = global.GVA_DB.Preload("Authorities").Preload("Authority").First(&reqUser, "uuid = ?", uuid).Error
+	err = global.DB.Preload("Authorities").Preload("Authority").First(&reqUser, "uuid = ?", uuid).Error
 	if err != nil {
 		return reqUser, err
 	}
@@ -272,7 +272,7 @@ func (userService *UserService) GetUserInfo(uuid uuid.UUID) (user system.SysUser
 
 func (userService *UserService) FindUserById(id int) (user *system.SysUser, err error) {
 	var u system.SysUser
-	err = global.GVA_DB.Where("`id` = ?", id).First(&u).Error
+	err = global.DB.Where("`id` = ?", id).First(&u).Error
 	return &u, err
 }
 
@@ -284,7 +284,7 @@ func (userService *UserService) FindUserById(id int) (user *system.SysUser, err 
 
 func (userService *UserService) FindUserByUuid(uuid string) (user *system.SysUser, err error) {
 	var u system.SysUser
-	if err = global.GVA_DB.Where("`uuid` = ?", uuid).First(&u).Error; err != nil {
+	if err = global.DB.Where("`uuid` = ?", uuid).First(&u).Error; err != nil {
 		return &u, errors.New("用户不存在")
 	}
 	return &u, nil
@@ -297,6 +297,6 @@ func (userService *UserService) FindUserByUuid(uuid string) (user *system.SysUse
 //@return: err error
 
 func (userService *UserService) ResetPassword(ID uint) (err error) {
-	err = global.GVA_DB.Model(&system.SysUser{}).Where("id = ?", ID).Update("password", utils.BcryptHash("123456")).Error
+	err = global.DB.Model(&system.SysUser{}).Where("id = ?", ID).Update("password", utils.BcryptHash("123456")).Error
 	return err
 }

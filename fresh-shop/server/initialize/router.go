@@ -28,18 +28,18 @@ func Routers() *gin.Engine {
 	// Router.Static("/static", "./dist/assets")   // dist里面的静态资源
 	// Router.StaticFile("/", "./dist/index.html") // 前端网页入口页面
 
-	Router.StaticFS(global.GVA_CONFIG.Local.StorePath, http.Dir(global.GVA_CONFIG.Local.StorePath)) // 为用户头像和文件提供静态地址
+	Router.StaticFS(global.Config.Local.StorePath, http.Dir(global.Config.Local.StorePath)) // 为用户头像和文件提供静态地址
 	// Router.Use(middleware.LoadTls())  // 如果需要使用https 请打开此中间件 然后前往 core/server.go 将启动模式 更变为 Router.RunTLS("端口","你的cre/pem文件","你的key文件")
 	// 跨域，如需跨域可以打开下面的注释
 	// Router.Use(middleware.Cors()) // 直接放行全部跨域请求
 	// Router.Use(middleware.CorsByRules()) // 按照配置的规则放行跨域请求
-	//global.GVA_LOG.Info("use middleware cors")
-	docs.SwaggerInfo.BasePath = global.GVA_CONFIG.System.RouterPrefix
-	Router.GET(global.GVA_CONFIG.System.RouterPrefix+"/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	global.GVA_LOG.Info("register swagger handler")
+	//global.Log.Info("use middleware cors")
+	docs.SwaggerInfo.BasePath = global.Config.System.RouterPrefix
+	Router.GET(global.Config.System.RouterPrefix+"/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	global.Log.Info("register swagger handler")
 	// 方便统一添加路由组前缀 多服务器上线使用
 
-	PublicGroup := Router.Group(global.GVA_CONFIG.System.RouterPrefix)
+	PublicGroup := Router.Group(global.Config.System.RouterPrefix)
 	{
 		// 健康监测
 		PublicGroup.GET("/health", func(c *gin.Context) {
@@ -50,7 +50,7 @@ func Routers() *gin.Engine {
 		systemRouter.InitBaseRouter(PublicGroup) // 注册基础功能路由 不做鉴权
 		systemRouter.InitInitRouter(PublicGroup) // 自动初始化相关
 	}
-	PrivateGroup := Router.Group(global.GVA_CONFIG.System.RouterPrefix)
+	PrivateGroup := Router.Group(global.Config.System.RouterPrefix)
 	PrivateGroup.Use(middleware.JWTAuth()).Use(middleware.CasbinHandler())
 	{
 		systemRouter.InitApiRouter(PrivateGroup)                 // 注册功能api路由
@@ -71,7 +71,11 @@ func Routers() *gin.Engine {
 		exampleRouter.InitFileUploadAndDownloadRouter(PrivateGroup) // 文件上传下载功能路由
 
 	}
+	{
+		accountRouter := router.RouterGroupApp.Account
+		accountRouter.InitAccountGroupRouter(PrivateGroup)
+	}
 
-	global.GVA_LOG.Info("router register success")
+	global.Log.Info("router register success")
 	return Router
 }

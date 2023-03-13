@@ -54,16 +54,16 @@ func JWTAuth() gin.HandlerFunc {
 		//	c.Abort()
 		//}
 		if claims.ExpiresAt-time.Now().Unix() < claims.BufferTime {
-			dr, _ := utils.ParseDuration(global.GVA_CONFIG.JWT.ExpiresTime)
+			dr, _ := utils.ParseDuration(global.Config.JWT.ExpiresTime)
 			claims.ExpiresAt = time.Now().Add(dr).Unix()
 			newToken, _ := j.CreateTokenByOldToken(token, *claims)
 			newClaims, _ := j.ParseToken(newToken)
 			c.Header("new-token", newToken)
 			c.Header("new-expires-at", strconv.FormatInt(newClaims.ExpiresAt, 10))
-			if global.GVA_CONFIG.System.UseMultipoint {
+			if global.Config.System.UseMultipoint {
 				RedisJwtToken, err := jwtService.GetRedisJWT(newClaims.Username)
 				if err != nil {
-					global.GVA_LOG.Error("get redis jwt failed", zap.Error(err))
+					global.Log.Error("get redis jwt failed", zap.Error(err))
 				} else { // 当之前的取成功时才进行拉黑操作
 					_ = jwtService.JsonInBlacklist(system.JwtBlacklist{Jwt: RedisJwtToken})
 				}
