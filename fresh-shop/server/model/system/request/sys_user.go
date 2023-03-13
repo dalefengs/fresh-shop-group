@@ -1,6 +1,7 @@
 package request
 
 import (
+	"fresh-shop/server/model/common/request"
 	"fresh-shop/server/model/system"
 )
 
@@ -53,4 +54,14 @@ type ChangeUserInfo struct {
 	SideMode     string                `json:"sideMode"  gorm:"comment:用户侧边主题"`                                                      // 用户侧边主题
 	Enable       int                   `json:"enable" gorm:"comment:冻结用户"`                                                           //冻结用户
 	Authorities  []system.SysAuthority `json:"-" gorm:"many2many:sys_user_authority;"`
+}
+
+type UserList struct {
+	request.PageInfo
+	Username       string `json:"username"`
+	NickName       string `json:"nickName"`
+	InvitationCode string `json:"invitationCode"`
+	Phone          string `json:"phone"`
+	OrderKey       string `json:"orderKey"` // 排序
+	Desc           bool   `json:"desc"`     // 排序方式:升序false(默认)|降序true
 }

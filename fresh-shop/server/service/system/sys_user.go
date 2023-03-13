@@ -3,10 +3,10 @@ package system
 import (
 	"errors"
 	"fmt"
+	sysReq "fresh-shop/server/model/system/request"
 	"time"
 
 	"fresh-shop/server/global"
-	"fresh-shop/server/model/common/request"
 	"fresh-shop/server/model/system"
 	"fresh-shop/server/utils"
 	uuid "github.com/satori/go.uuid"
@@ -48,8 +48,9 @@ func (userService *UserService) Login(u *system.SysUser) (userInter *system.SysU
 	var user system.SysUser
 	err = global.GVA_DB.Where("username = ?", u.Username).Preload("Authorities").Preload("Authority").First(&user).Error
 	if err == nil {
+		// 验证密码
 		if ok := utils.BcryptCheck(u.Password, user.Password); !ok {
-			return nil, errors.New("密码错误")
+			return nil, errors.New("用户名不存在或者密码错误")
 		}
 		MenuServiceApp.UserAuthorityDefaultRouter(&user)
 	}
@@ -82,14 +83,41 @@ func (userService *UserService) ChangePassword(u *system.SysUser, newPassword st
 //@param: info request.PageInfo
 //@return: err error, list interface{}, total int64
 
-func (userService *UserService) GetUserInfoList(info request.PageInfo) (list interface{}, total int64, err error) {
+func (userService *UserService) GetUserInfoList(info sysReq.UserList, order string, desc bool) (list interface{}, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	db := global.GVA_DB.Model(&system.SysUser{})
 	var userList []system.SysUser
+
+	if info.Username != "" {
+		db = db.Where("username like ?", "%"+info.Username+"%")
+	}
+	if info.NickName != "" {
+		db = db.Where("nick_name like ?", "%"+info.NickName+"%")
+	}
+	if info.Phone != "" {
+		db = db.Where("phone like ?", "%"+info.Phone+"%")
+	}
+	if info.InvitationCode != "" {
+		db = db.Where("invitation_code like ?", "%"+info.InvitationCode+"%")
+	}
+
 	err = db.Count(&total).Error
 	if err != nil {
 		return
+	}
+	if order != "" {
+		var orderStr string
+		orderMap := make(map[string]bool, 1)
+		orderMap["id"] = true
+		if orderMap[order] {
+			if desc { // 如果为 desc 为 true则加上
+				orderStr = order + " desc"
+			} else {
+				orderStr = order
+			}
+		}
+		db = db.Order(orderStr)
 	}
 	err = db.Limit(limit).Offset(offset).Preload("Authorities").Preload("Authority").Find(&userList).Error
 	return userList, total, err

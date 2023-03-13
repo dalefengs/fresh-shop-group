@@ -1,24 +1,51 @@
 <template>
   <div>
-    <warning-bar title="注：右上角头像下拉可切换角色" />
+    <div class="gva-search-box">
+      <el-form ref="searchForm" :inline="true" :model="searchInfo">
+        <el-form-item label="用户名">
+          <el-input v-model="searchInfo.username" placeholder="用户名" />
+        </el-form-item>
+        <el-form-item label="昵称">
+          <el-input v-model="searchInfo.nickName" placeholder="昵称" />
+        </el-form-item>
+        <el-form-item label="手机号">
+          <el-input v-model="searchInfo.phone" placeholder="手机号" />
+        </el-form-item>
+        <el-form-item label="推荐码">
+          <el-input v-model="searchInfo.invitationCode" placeholder="推荐码" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="search" @click="getTableData">查询</el-button>
+          <el-button icon="refresh" @click="onReset">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
     <div class="gva-table-box">
       <div class="gva-btn-list">
         <el-button type="primary" icon="plus" @click="addUser">新增用户</el-button>
       </div>
       <el-table
         :data="tableData"
+        @sort-change="sortChange"
         row-key="ID"
       >
+        <el-table-column align="left" label="ID" min-width="80" prop="ID" sortable="custom" />
         <el-table-column align="left" label="头像" min-width="75">
           <template #default="scope">
             <CustomPic style="margin-top:8px" :pic-src="scope.row.headerImg" />
           </template>
         </el-table-column>
-        <el-table-column align="left" label="ID" min-width="50" prop="ID" />
-        <el-table-column align="left" label="用户名" min-width="150" prop="userName" />
-        <el-table-column align="left" label="昵称" min-width="150" prop="nickName" />
-        <el-table-column align="left" label="手机号" min-width="180" prop="phone" />
-        <el-table-column align="left" label="邮箱" min-width="180" prop="email" />
+        <el-table-column align="left" label="用户信息" min-width="250" prop="userName" style="line-height: 10px">
+          <template #default="scope">
+            <div class="table-multi-line">
+              <span class="">用户名：{{ scope.row.userName }}</span><br>
+              <span>用户昵称：{{ scope.row.nickName }}</span><br>
+              <span>手机号：{{ scope.row.phone ? scope.row.phone : '无' }}</span><br>
+              <span>邀请码：{{ scope.row.invitationCode }}</span><br>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column align="left" label="积分余额" min-width="150" prop="point" sortable="custom" />
         <el-table-column align="left" label="用户角色" min-width="200">
           <template #default="scope">
             <el-cascader
@@ -44,7 +71,15 @@
             />
           </template>
         </el-table-column>
-
+        <el-table-column align="left" label="登录信息" min-width="250" style="line-height: 10px">
+          <template #default="scope">
+            <div class="table-multi-line" v-if="scope.row.loginTime">
+              <span>登录IP：{{ scope.row.loginIp }}</span><br>
+              <span>最后登录时间：{{ scope.row.loginTime }}</span><br>
+            </div>
+            <span v-else>从未登录</span>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" min-width="250" fixed="right">
           <template #default="scope">
             <el-popover v-model="scope.row.visible" placement="top" width="160">
@@ -77,7 +112,7 @@
     </div>
     <el-dialog
       v-model="addUserDialog"
-      custom-class="user-dialog"
+      class="user-dialog"
       title="用户"
       :show-close="false"
       :close-on-press-escape="false"
@@ -97,9 +132,9 @@
           <el-form-item label="手机号" prop="phone">
             <el-input v-model="userInfo.phone" />
           </el-form-item>
-          <el-form-item label="邮箱" prop="email">
+          <!--          <el-form-item label="邮箱" prop="email">
             <el-input v-model="userInfo.email" />
-          </el-form-item>
+          </el-form-item>-->
           <el-form-item label="用户角色" prop="authorityId">
             <el-cascader
               v-model="userInfo.authorityIds"
@@ -158,11 +193,11 @@ import {
 import { getAuthorityList } from '@/api/authority'
 import CustomPic from '@/components/customPic/index.vue'
 import ChooseImg from '@/components/chooseImg/index.vue'
-import WarningBar from '@/components/warningBar/warningBar.vue'
 import { setUserInfo, resetPassword } from '@/api/user.js'
 
-import { nextTick, ref, watch } from 'vue'
+import { nextTick, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { toSQLLine } from '@/utils/stringFun'
 const path = ref(import.meta.env.VITE_BASE_API + '/')
 // 初始化相关
 const setAuthorityOptions = (AuthorityData, optionsData) => {
@@ -186,6 +221,7 @@ const setAuthorityOptions = (AuthorityData, optionsData) => {
         })
 }
 
+const searchInfo = ref({})
 const page = ref(1)
 const total = ref(0)
 const pageSize = ref(10)
@@ -203,13 +239,34 @@ const handleCurrentChange = (val) => {
 
 // 查询
 const getTableData = async() => {
-  const table = await getUserList({ page: page.value, pageSize: pageSize.value })
+  const data = {
+    ...searchInfo.value,
+    page: page.value,
+    pageSize: pageSize.value
+  }
+  const table = await getUserList(data)
   if (table.code === 0) {
     tableData.value = table.data.list
     total.value = table.data.total
     page.value = table.data.page
     pageSize.value = table.data.pageSize
   }
+}
+
+const onReset = () => {
+  searchInfo.value = {}
+}
+
+// 排序
+const sortChange = ({ prop, order }) => {
+  if (prop) {
+    if (prop === 'ID') {
+      prop = 'id'
+    }
+    searchInfo.value.orderKey = toSQLLine(prop)
+    searchInfo.value.desc = order === 'descending'
+  }
+  getTableData()
 }
 
 watch(() => tableData.value, () => {

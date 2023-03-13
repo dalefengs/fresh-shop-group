@@ -33,7 +33,7 @@
               </el-col>
             </el-row>
           </div>
-          <div>
+          <!--          <div>
             <div class="gva-top-card-left-item">
               使用教学：
               <a
@@ -50,7 +50,7 @@
                 href="https://plugin.gin-vue-admin.com/#/layout/home"
               >https://plugin.gin-vue-admin.com</a>
             </div>
-          </div>
+          </div>-->
         </div>
         <img src="@/assets/dashboard.png" class="gva-top-card-right" alt>
       </div>
@@ -90,12 +90,9 @@
           <span>数据统计</span>
         </div>
         <div class="echart-box">
-          <el-row :gutter="20">
-            <el-col :xs="24" :sm="18">
+          <el-row :gutter="24">
+            <el-col :xs="24" :sm="24">
               <echarts-line />
-            </el-col>
-            <el-col :xs="24" :sm="6">
-              <dashboard-table />
             </el-col>
           </el-row>
         </div>
@@ -106,7 +103,6 @@
 
 <script setup>
 import EchartsLine from '@/view/dashboard/dashboardCharts/echartsLine.vue'
-import DashboardTable from '@/view/dashboard/dashboardTable/dashboardTable.vue'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useWeatherInfo } from '@/view/dashboard/weather.js'
