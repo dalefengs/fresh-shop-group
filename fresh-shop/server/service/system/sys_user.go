@@ -23,13 +23,42 @@ type UserService struct{}
 
 func (userService *UserService) Register(u system.SysUser) (userInter system.SysUser, err error) {
 	var user system.SysUser
-	if !errors.Is(global.GVA_DB.Where("username = ?", u.Username).First(&user).Error, gorm.ErrRecordNotFound) { // 判断用户名是否注册
-		return userInter, errors.New("用户名已注册")
+	if u.Username == "" { // 生成用户名
+		u.Username = utils.GenerateUsername("U", 6)
+		// 判断错误是否是由 gorm.ErrRecordNotFound 引起的
+		for !errors.Is(global.GVA_DB.Where("username = ?", u.Username).First(&user).Error, gorm.ErrRecordNotFound) {
+			name := utils.GenerateUsername("U", 6)
+			global.Logger.Warnf("注册用户 --- 用户名：%s 已存在！重新生成新用户名：%s", u.Username, name)
+			u.Username = name
+		}
+		global.Logger.Infof("注册用户 --- 用户名：%s 验证通过", u.Username)
+	} else {
+		if !errors.Is(global.GVA_DB.Where("username = ?", u.Username).First(&user).Error, gorm.ErrRecordNotFound) { // 判断用户名是否注册
+			return userInter, errors.New("用户名已注册")
+		}
 	}
+
+	user = system.SysUser{}
+	u.InvitationCode = utils.GenerateInviteCode(8)
+	// 生成邀请码
+	for !errors.Is(global.GVA_DB.Where("invitation_code = ?", u.InvitationCode).First(&user).Error, gorm.ErrRecordNotFound) {
+		code := utils.GenerateInviteCode(8)
+		global.Logger.Warnf("注册用户 --- 用户名：%s, 邀请码：%s 已存在！重新生成新邀请码：%s", u.Username, u.InvitationCode, code)
+		u.InvitationCode = code
+	}
+
 	// 否则 附加uuid 密码hash加密 注册
 	u.Password = utils.BcryptHash(u.Password)
 	u.UUID = uuid.NewV4()
+
+	// TODO 生成对应币种账户信息
+
+	// 开启事务
+
+	// 生成对应币种账户信息
+
 	err = global.GVA_DB.Create(&u).Error
+	// 提交事务
 	return u, err
 }
 

@@ -32,17 +32,17 @@ func Viper(path ...string) *viper.Viper {
 					fmt.Printf("您正在使用gin模式的%s环境名称,config的路径为%s\n", gin.EnvGinMode, internal.ConfigDefaultFile)
 				case gin.ReleaseMode:
 					config = internal.ConfigReleaseFile
-					fmt.Printf("您正在使用gin模式的%s环境名称,config的路径为%s\n", gin.EnvGinMode, internal.ConfigReleaseFile)
+					fmt.Printf("您正在使用gin模式的 %s 环境名称, config的路径为 %s\n", gin.EnvGinMode, internal.ConfigReleaseFile)
 				case gin.TestMode:
 					config = internal.ConfigTestFile
-					fmt.Printf("您正在使用gin模式的%s环境名称,config的路径为%s\n", gin.EnvGinMode, internal.ConfigTestFile)
+					fmt.Printf("您正在使用gin模式的 %s 环境名称，config 的路径为 %s\n", gin.EnvGinMode, internal.ConfigTestFile)
 				}
 			} else { // internal.ConfigEnv 常量存储的环境变量不为空 将值赋值于config
 				config = configEnv
-				fmt.Printf("您正在使用%s环境变量,config的路径为%s\n", internal.ConfigEnv, config)
+				fmt.Printf("您正在使用 %s 环境变量，config的路径为：%s\n", internal.ConfigEnv, config)
 			}
 		} else { // 命令行参数不为空 将值赋值于config
-			fmt.Printf("您正在使用命令行的-c参数传递的值,config的路径为%s\n", config)
+			fmt.Printf("您正在使用命令行的 -c 参数传递的值，config 的路径为：%s\n", config)
 		}
 	} else { // 函数传递的可变参数的第一个值赋值于config
 		config = path[0]

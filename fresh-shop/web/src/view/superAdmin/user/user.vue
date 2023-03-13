@@ -348,7 +348,7 @@ const userInfo = ref({
 
 const rules = ref({
   userName: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
+    { message: '请输入用户名, 不填则随机生成', trigger: 'blur' },
     { min: 5, message: '最低5位字符', trigger: 'blur' }
   ],
   password: [
@@ -359,7 +359,7 @@ const rules = ref({
     { required: true, message: '请输入用户昵称', trigger: 'blur' }
   ],
   phone: [
-    { pattern: /^1([38][0-9]|4[014-9]|[59][0-35-9]|6[2567]|7[0-8])\d{8}$/, message: '请输入合法手机号', trigger: 'blur' },
+    { required: true, pattern: /^1([38][0-9]|4[014-9]|[59][0-35-9]|6[2567]|7[0-8])\d{8}$/, message: '请输入合法手机号', trigger: 'blur' },
   ],
   email: [
     { pattern: /^([0-9A-Za-z\-_.]+)@([0-9a-z]+\.[a-z]{2,3}(\.[a-z]{2})?)$/g, message: '请输入正确的邮箱', trigger: 'blur' },
