@@ -61,7 +61,7 @@ func (s *SystemApiApi) DeleteApi(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = utils.Verify(api.GVA_MODEL, utils.IdVerify)
+	err = utils.Verify(api.DbModel, utils.IdVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return

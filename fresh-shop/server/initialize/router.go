@@ -74,6 +74,7 @@ func Routers() *gin.Engine {
 	{
 		accountRouter := router.RouterGroupApp.Account
 		accountRouter.InitAccountGroupRouter(PrivateGroup)
+		accountRouter.InitAccountRouter(PrivateGroup)
 	}
 
 	global.Log.Info("router register success")

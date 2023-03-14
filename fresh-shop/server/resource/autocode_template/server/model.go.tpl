@@ -8,7 +8,7 @@ import (
 
 // {{.StructName}} 结构体
 type {{.StructName}} struct {
-      global.GVA_MODEL {{- range .Fields}}
+      global.DbModel {{- range .Fields}}
             {{- if eq .FieldType "enum" }}
       {{.FieldName}}  string `json:"{{.FieldJson}}" form:"{{.FieldJson}}" gorm:"column:{{.ColumnName}};type:enum({{.DataTypeLong}});comment:{{.Comment}};"`
             {{- else if ne .FieldType "string" }}

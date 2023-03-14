@@ -56,5 +56,5 @@ func RegisterTables() {
 		os.Exit(0)
 	}
 	global.Log.Info("register table success")
-	freshShopMysql.AutoMigrate(account.AccountGroup{}, account.AccountGroup{})
+	freshShopMysql.AutoMigrate(account.AccountGroup{}, account.Account{})
 }

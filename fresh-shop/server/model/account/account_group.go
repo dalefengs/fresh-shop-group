@@ -7,7 +7,7 @@ import (
 
 // AccountGroup 结构体
 type AccountGroup struct {
-	global.GVA_MODEL
+	global.DbModel
 	NameEn string   `json:"nameEn" form:"nameEn" gorm:"column:name_en;comment:币中英文名;size:20;"`
 	NameCn string   `json:"nameCn" form:"nameCn" gorm:"column:name_cn;comment:币种中文名;size:20;"`
 	Places *float64 `json:"places" form:"places" gorm:"column:places;comment:小数点位数;"`

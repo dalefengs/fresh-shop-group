@@ -61,7 +61,7 @@ func (e *CustomerApi) DeleteExaCustomer(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = utils.Verify(customer.GVA_MODEL, utils.IdVerify)
+	err = utils.Verify(customer.DbModel, utils.IdVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
@@ -91,7 +91,7 @@ func (e *CustomerApi) UpdateExaCustomer(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = utils.Verify(customer.GVA_MODEL, utils.IdVerify)
+	err = utils.Verify(customer.DbModel, utils.IdVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
@@ -126,7 +126,7 @@ func (e *CustomerApi) GetExaCustomer(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = utils.Verify(customer.GVA_MODEL, utils.IdVerify)
+	err = utils.Verify(customer.DbModel, utils.IdVerify)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
