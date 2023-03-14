@@ -16,6 +16,7 @@ func (s *AccountGroupRouter) InitAccountGroupRouter(Router *gin.RouterGroup) {
 	var userAccountGroupApi = v1.ApiGroupApp.AccountApiGroup.AccountGroupApi
 	{
 		userAccountGroupRouter.POST("createAccountGroup", userAccountGroupApi.CreateAccountGroup)             // 新建AccountGroup
+		userAccountGroupRouter.POST("syncAccountGroup", userAccountGroupApi.SyncAccountGroup)                 // 同步 AccountGroup
 		userAccountGroupRouter.DELETE("deleteAccountGroup", userAccountGroupApi.DeleteAccountGroup)           // 删除AccountGroup
 		userAccountGroupRouter.DELETE("deleteAccountGroupByIds", userAccountGroupApi.DeleteAccountGroupByIds) // 批量删除AccountGroup
 		userAccountGroupRouter.PUT("updateAccountGroup", userAccountGroupApi.UpdateAccountGroup)              // 更新AccountGroup

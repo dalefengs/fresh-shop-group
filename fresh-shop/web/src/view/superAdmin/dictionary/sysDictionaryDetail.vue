@@ -76,7 +76,7 @@
       </div>
     </div>
 
-    <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" title="弹窗操作">
+    <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" title="变更操作">
       <el-form ref="dialogForm" :model="formData" :rules="rules" label-width="110px">
         <el-form-item label="展示值" prop="label">
           <el-input

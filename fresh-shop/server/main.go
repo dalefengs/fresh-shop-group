@@ -30,11 +30,12 @@ func main() {
 	global.DB = initialize.Gorm() // gorm连接数据库
 	initialize.Timer()
 	initialize.DBList()
-	if global.DB != nil {
-		initialize.RegisterTables() // 初始化表
-		// 程序结束前关闭数据库链接
-		db, _ := global.DB.DB()
-		defer db.Close()
-	}
+	// 自动迁移数据表 本平台不使用
+	//if global.DB != nil {
+	//	initialize.RegisterTables() // 初始化表
+	//	// 程序结束前关闭数据库链接
+	//	db, _ := global.DB.DB()
+	//	defer db.Close()
+	//}
 	core.RunWindowsServer()
 }

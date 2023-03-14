@@ -27,6 +27,7 @@ func Gorm() *gorm.DB {
 	}
 }
 
+// RegisterTables 迁移表
 func RegisterTables() {
 	freshShopMysql := global.GetGlobalDBByDBName("freshShopMysql")
 	db := global.DB

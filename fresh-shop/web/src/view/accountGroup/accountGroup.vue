@@ -33,7 +33,7 @@
         row-key="ID"
         @selection-change="handleSelectionChange"
       >
-        <el-table-column align="left" label="编号" prop="id" width="120" />
+        <el-table-column align="left" label="编号" prop="ID" width="120" />
         <el-table-column align="left" label="英文名" prop="nameEn" width="120" />
         <el-table-column align="left" label="中文名" prop="nameCn" width="120" />
         <el-table-column align="left" label="小数位数" prop="places" width="120" />
@@ -50,6 +50,7 @@
         <el-table-column align="left" label="操作">
           <template #default="scope">
             <el-button type="primary" link icon="edit" class="table-button" @click="updateAccountGroupFunc(scope.row)">变更</el-button>
+            <el-button type="primary" link icon="edit" :disabled="scope.row.sync === 1" class="table-button" @click="syncAccountGroupOption(scope.row)">同步账户</el-button>
             <el-button type="primary" link icon="delete" @click="deleteRow(scope.row)">删除</el-button>
           </template>
         </el-table-column>
@@ -66,16 +67,16 @@
         />
       </div>
     </div>
-    <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" title="弹窗操作">
+    <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" title="变更操作">
       <el-form ref="elFormRef" :model="formData" label-position="right" :rules="rule" label-width="80px">
-        <el-form-item label="英文名:" prop="nameEn">
-          <el-input v-model="formData.nameEn" :clearable="true" placeholder="请输入" />
-        </el-form-item>
         <el-form-item label="中文名:" prop="nameCn">
           <el-input v-model="formData.nameCn" :clearable="true" placeholder="请输入" />
         </el-form-item>
+        <el-form-item label="英文名:" prop="nameEn">
+          <el-input v-model="formData.nameEn" :clearable="true" placeholder="请输入" />
+        </el-form-item>
         <el-form-item label="小数位数:" prop="places">
-          <el-input-number v-model="formData.places" style="width:100%" :precision="2" :clearable="true" />
+          <el-input-number v-model="formData.places" style="width:100%" :clearable="true" />
         </el-form-item>
         <el-form-item label="状态:" prop="status">
           <el-select v-model="formData.status" placeholder="请选择" style="width:100%" :clearable="true">
@@ -110,7 +111,8 @@ import {
   deleteAccountGroup,
   updateAccountGroup,
   findAccountGroup,
-  getAccountGroupList
+  getAccountGroupList,
+  syncAccountGroup
 } from '@/api/accountGroup'
 
 // 全量引入格式化工具 请按需保留
@@ -124,7 +126,7 @@ const account_syncOptions = ref([])
 const formData = ref({
   nameEn: '',
   nameCn: '',
-  places: 0,
+  places: 4,
   status: undefined,
 })
 
@@ -228,6 +230,17 @@ const deleteRow = (row) => {
   })
 }
 
+// 删除行
+const syncAccountGroupOption = (row) => {
+  ElMessageBox.confirm('确定要同步账户吗?', '提示', {
+    confirmButtonText: '开始同步',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    syncAccountGroupFunc(row)
+  })
+}
+
 // 行为控制标记（弹窗内部需要增还是改）
 const type = ref('')
 
@@ -252,6 +265,18 @@ const deleteAccountGroupFunc = async(row) => {
     if (tableData.value.length === 1 && page.value > 1) {
       page.value--
     }
+    getTableData()
+  }
+}
+
+//  同步账户
+const syncAccountGroupFunc = async(row) => {
+  const res = await syncAccountGroup({ ID: row.ID })
+  if (res.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: '正在同步中，请耐心等待...'
+    })
     getTableData()
   }
 }

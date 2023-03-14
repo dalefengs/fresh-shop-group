@@ -17,6 +17,23 @@ type AccountGroupApi struct {
 
 var userAccountGroupService = service.ServiceGroupApp.AccountServiceGroup.AccountGroupService
 
+// SyncAccountGroup 同步用户账户
+func (ag *AccountGroupApi) SyncAccountGroup(c *gin.Context) {
+	var userAccountGroup account.AccountGroup
+	err := c.ShouldBindJSON(&userAccountGroup)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+
+	if err = userAccountGroupService.SyncAccountGroup(userAccountGroup); err != nil {
+		response.FailWithMessage(err.Error(), c)
+	} else {
+		response.OkWithMessage("后台同步中！", c)
+	}
+
+}
+
 // CreateAccountGroup 创建AccountGroup
 // @Tags AccountGroup
 // @Summary 创建AccountGroup
@@ -26,7 +43,7 @@ var userAccountGroupService = service.ServiceGroupApp.AccountServiceGroup.Accoun
 // @Param data body account.AccountGroup true "创建AccountGroup"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
 // @Router /userAccountGroup/createAccountGroup [post]
-func (userAccountGroupApi *AccountGroupApi) CreateAccountGroup(c *gin.Context) {
+func (ag *AccountGroupApi) CreateAccountGroup(c *gin.Context) {
 	var userAccountGroup account.AccountGroup
 	err := c.ShouldBindJSON(&userAccountGroup)
 	if err != nil {
@@ -60,7 +77,7 @@ func (userAccountGroupApi *AccountGroupApi) CreateAccountGroup(c *gin.Context) {
 // @Param data body account.AccountGroup true "删除AccountGroup"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"删除成功"}"
 // @Router /userAccountGroup/deleteAccountGroup [delete]
-func (userAccountGroupApi *AccountGroupApi) DeleteAccountGroup(c *gin.Context) {
+func (ag *AccountGroupApi) DeleteAccountGroup(c *gin.Context) {
 	var userAccountGroup account.AccountGroup
 	err := c.ShouldBindJSON(&userAccountGroup)
 	if err != nil {
@@ -84,7 +101,7 @@ func (userAccountGroupApi *AccountGroupApi) DeleteAccountGroup(c *gin.Context) {
 // @Param data body request.IdsReq true "批量删除AccountGroup"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"批量删除成功"}"
 // @Router /userAccountGroup/deleteAccountGroupByIds [delete]
-func (userAccountGroupApi *AccountGroupApi) DeleteAccountGroupByIds(c *gin.Context) {
+func (ag *AccountGroupApi) DeleteAccountGroupByIds(c *gin.Context) {
 	var IDS request.IdsReq
 	err := c.ShouldBindJSON(&IDS)
 	if err != nil {
@@ -108,7 +125,7 @@ func (userAccountGroupApi *AccountGroupApi) DeleteAccountGroupByIds(c *gin.Conte
 // @Param data body account.AccountGroup true "更新AccountGroup"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"更新成功"}"
 // @Router /userAccountGroup/updateAccountGroup [put]
-func (userAccountGroupApi *AccountGroupApi) UpdateAccountGroup(c *gin.Context) {
+func (ag *AccountGroupApi) UpdateAccountGroup(c *gin.Context) {
 	var userAccountGroup account.AccountGroup
 	err := c.ShouldBindJSON(&userAccountGroup)
 	if err != nil {
@@ -142,7 +159,7 @@ func (userAccountGroupApi *AccountGroupApi) UpdateAccountGroup(c *gin.Context) {
 // @Param data query account.AccountGroup true "用id查询AccountGroup"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"查询成功"}"
 // @Router /userAccountGroup/findAccountGroup [get]
-func (userAccountGroupApi *AccountGroupApi) FindAccountGroup(c *gin.Context) {
+func (ag *AccountGroupApi) FindAccountGroup(c *gin.Context) {
 	var userAccountGroup account.AccountGroup
 	err := c.ShouldBindQuery(&userAccountGroup)
 	if err != nil {
@@ -166,7 +183,7 @@ func (userAccountGroupApi *AccountGroupApi) FindAccountGroup(c *gin.Context) {
 // @Param data query accountReq.AccountGroupSearch true "分页获取AccountGroup列表"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
 // @Router /userAccountGroup/getAccountGroupList [get]
-func (userAccountGroupApi *AccountGroupApi) GetAccountGroupList(c *gin.Context) {
+func (ag *AccountGroupApi) GetAccountGroupList(c *gin.Context) {
 	var pageInfo accountReq.AccountGroupSearch
 	err := c.ShouldBindQuery(&pageInfo)
 	if err != nil {

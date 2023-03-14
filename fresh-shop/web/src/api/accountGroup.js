@@ -32,6 +32,15 @@ export const deleteAccountGroup = (data) => {
   })
 }
 
+// 同步账户
+export const syncAccountGroup = (data) => {
+  return service({
+    url: '/userAccountGroup/syncAccountGroup',
+    method: 'POST',
+    data
+  })
+}
+
 // @Tags AccountGroup
 // @Summary 删除AccountGroup
 // @Security ApiKeyAuth

@@ -8,11 +8,6 @@
         <el-form-item label="手机号">
           <el-input v-model="searchInfo.phone" placeholder="手机号" />
         </el-form-item>
-        <el-form-item label="账户状态" prop="status">
-          <el-select v-model="searchInfo.status" clearable placeholder="请选择状态" @clear="()=>{searchInfo.status=undefined}">
-            <el-option v-for="(item,key) in statusOptions" :key="key" :label="item.label" :value="item.value" />
-          </el-select>
-        </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="search" @click="onSubmit">查询</el-button>
           <el-button icon="refresh" @click="onReset">重置</el-button>
@@ -20,19 +15,9 @@
       </el-form>
     </div>
     <div class="gva-table-box">
-      <div class="gva-btn-list">
-        <el-button type="primary" icon="plus" @click="openDialog">新增</el-button>
-        <el-popover v-model:visible="deleteVisible" placement="top" width="160">
-          <p>确定要删除吗？</p>
-          <div style="text-align: right; margin-top: 8px;">
-            <el-button type="primary" link @click="deleteVisible = false">取消</el-button>
-            <el-button type="primary" @click="onDelete">确定</el-button>
-          </div>
-          <template #reference>
-            <el-button icon="delete" style="margin-left: 10px;" :disabled="!multipleSelection.length" @click="deleteVisible = true">删除</el-button>
-          </template>
-        </el-popover>
-      </div>
+      <el-tabs v-model="groupId" class="demo-tabs" @tab-change="tabsChange">
+        <el-tab-pane v-for="(item) in accountGroupList" :label="item.nameCn" :name="item.ID" :key="item.ID"/>
+      </el-tabs>
       <el-table
         ref="multipleTable"
         style="width: 100%"
@@ -42,8 +27,14 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column align="left" label="用户id" prop="userId" width="120" />
-        <el-table-column align="left" label="币种id" prop="groupId" width="120" />
+        <el-table-column align="left" label="用户信息" prop="user" width="200">
+          <template #default="scope">
+            <div class="table-multi-line">
+              <span>用户名：{{ scope.row.user.userName }}</span><br>
+              <span>手机号：{{ scope.row.user.phone }}</span><br>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column align="left" label="可用余额" prop="amount" width="120" />
         <el-table-column align="left" label="冻结余额" prop="freezeAmount" width="120" />
         <el-table-column align="left" label="锁仓金额" prop="lockAmount" width="120" />
@@ -51,7 +42,7 @@
         <el-table-column align="left" label="累计出账数额" prop="outAmount" width="120" />
         <el-table-column align="left" label="账户状态" prop="status" width="120">
           <template #default="scope">
-            {{ filterDict(scope.row.status,statusOptions) }}
+            {{ filterDict(scope.row.status, statusOptions) }}
           </template>
         </el-table-column>
         <el-table-column align="left" label="日期" width="180">
@@ -59,8 +50,8 @@
         </el-table-column>
         <el-table-column align="left" label="操作">
           <template #default="scope">
-            <el-button type="primary" link icon="edit" class="table-button" @click="updateAccountFunc(scope.row)">变更</el-button>
-            <el-button type="primary" link icon="delete" @click="deleteRow(scope.row)">删除</el-button>
+            <el-button type="primary" link icon="edit" class="table-button" @click="updateAccountFunc(scope.row)">变更
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -76,29 +67,8 @@
         />
       </div>
     </div>
-    <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" title="弹窗操作">
+    <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" title="变更操作">
       <el-form ref="elFormRef" :model="formData" label-position="right" :rules="rule" label-width="80px">
-        <el-form-item label="用户id:" prop="userId">
-          <el-input v-model.number="formData.userId" :clearable="true" placeholder="请输入" />
-        </el-form-item>
-        <el-form-item label="币种id:" prop="groupId">
-          <el-input v-model.number="formData.groupId" :clearable="true" placeholder="请输入" />
-        </el-form-item>
-        <el-form-item label="可用余额:" prop="amount">
-          <el-input-number v-model="formData.amount" style="width:100%" :precision="2" :clearable="true" />
-        </el-form-item>
-        <el-form-item label="冻结余额:" prop="freezeAmount">
-          <el-input-number v-model="formData.freezeAmount" style="width:100%" :precision="2" :clearable="true" />
-        </el-form-item>
-        <el-form-item label="锁仓金额:" prop="lockAmount">
-          <el-input-number v-model="formData.lockAmount" style="width:100%" :precision="2" :clearable="true" />
-        </el-form-item>
-        <el-form-item label="累计入账数额:" prop="inAmount">
-          <el-input-number v-model="formData.inAmount" style="width:100%" :precision="2" :clearable="true" />
-        </el-form-item>
-        <el-form-item label="累计出账数额:" prop="outAmount">
-          <el-input-number v-model="formData.outAmount" style="width:100%" :precision="2" :clearable="true" />
-        </el-form-item>
         <el-form-item label="账户状态" prop="status">
           <el-select v-model="formData.status" placeholder="请选择" style="width:100%" :clearable="true">
             <el-option v-for="(item,key) in statusOptions" :key="key" :label="item.label" :value="item.value" />
@@ -117,24 +87,23 @@
 
 <script>
 export default {
-  name: 'Account'
+  name: 'Account',
 }
 </script>
 
 <script setup>
 import {
   createAccount,
-  deleteAccount,
-  deleteAccountByIds,
   updateAccount,
   findAccount,
-  getAccountList
+  getAccountList,
 } from '@/api/account'
+import { getAccountGroupList } from '@/api/accountGroup'
 
 // 全量引入格式化工具 请按需保留
 import { getDictFunc, formatDate, filterDict } from '@/utils/format'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { ref, reactive } from 'vue'
+import { ElMessage } from 'element-plus'
+import { ref } from 'vue'
 
 // 自动化生成的字典（可能为空）以及字段
 const statusOptions = ref([])
@@ -148,10 +117,7 @@ const formData = ref({
   outAmount: 0,
   status: undefined,
 })
-
-// 验证规则
-const rule = reactive({
-})
+const groupId = ref()
 
 const elFormRef = ref()
 
@@ -161,6 +127,25 @@ const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
 const searchInfo = ref({})
+
+const accountGroupList = ref({})
+
+// 获取账户列表
+const getAccountGroupTab = async() => {
+  const res = await getAccountGroupList()
+  accountGroupList.value = res.data.list
+  if (accountGroupList.value.length === 0) {
+    ElMessage.error('获取账户配置失败')
+    return
+  }
+  groupId.value = accountGroupList.value[0].ID
+}
+getAccountGroupTab()
+
+const tabsChange = (name) => {
+  groupId.value = name
+  getTableData()
+}
 
 // 重置
 const onReset = () => {
@@ -189,7 +174,11 @@ const handleCurrentChange = (val) => {
 
 // 查询
 const getTableData = async() => {
-  const table = await getAccountList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
+  const table = await getAccountList({
+    page: page.value,
+    pageSize: pageSize.value,
+    groupId: groupId.value, ...searchInfo.value,
+  })
   if (table.code === 0) {
     tableData.value = table.data.list
     total.value = table.data.total
@@ -197,8 +186,6 @@ const getTableData = async() => {
     pageSize.value = table.data.pageSize
   }
 }
-
-getTableData()
 
 // ============== 表格控制部分结束 ===============
 
@@ -217,48 +204,6 @@ const handleSelectionChange = (val) => {
   multipleSelection.value = val
 }
 
-// 删除行
-const deleteRow = (row) => {
-  ElMessageBox.confirm('确定要删除吗?', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    deleteAccountFunc(row)
-  })
-}
-
-// 批量删除控制标记
-const deleteVisible = ref(false)
-
-// 多选删除
-const onDelete = async() => {
-  const ids = []
-  if (multipleSelection.value.length === 0) {
-    ElMessage({
-      type: 'warning',
-      message: '请选择要删除的数据'
-    })
-    return
-  }
-  multipleSelection.value &&
-        multipleSelection.value.map(item => {
-          ids.push(item.ID)
-        })
-  const res = await deleteAccountByIds({ ids })
-  if (res.code === 0) {
-    ElMessage({
-      type: 'success',
-      message: '删除成功'
-    })
-    if (tableData.value.length === ids.length && page.value > 1) {
-      page.value--
-    }
-    deleteVisible.value = false
-    getTableData()
-  }
-}
-
 // 行为控制标记（弹窗内部需要增还是改）
 const type = ref('')
 
@@ -272,29 +217,8 @@ const updateAccountFunc = async(row) => {
   }
 }
 
-// 删除行
-const deleteAccountFunc = async(row) => {
-  const res = await deleteAccount({ ID: row.ID })
-  if (res.code === 0) {
-    ElMessage({
-      type: 'success',
-      message: '删除成功'
-    })
-    if (tableData.value.length === 1 && page.value > 1) {
-      page.value--
-    }
-    getTableData()
-  }
-}
-
 // 弹窗控制标记
 const dialogFormVisible = ref(false)
-
-// 打开弹窗
-const openDialog = () => {
-  type.value = 'create'
-  dialogFormVisible.value = true
-}
 
 // 关闭弹窗
 const closeDialog = () => {
@@ -312,29 +236,29 @@ const closeDialog = () => {
 }
 // 弹窗确定
 const enterDialog = async() => {
-     elFormRef.value?.validate(async(valid) => {
-       if (!valid) return
-       let res
-       switch (type.value) {
-         case 'create':
-           res = await createAccount(formData.value)
-           break
-         case 'update':
-           res = await updateAccount(formData.value)
-           break
-         default:
-           res = await createAccount(formData.value)
-           break
-       }
-       if (res.code === 0) {
-         ElMessage({
-           type: 'success',
-           message: '创建/更改成功'
-         })
-         closeDialog()
-         getTableData()
-       }
-     })
+  elFormRef.value?.validate(async(valid) => {
+    if (!valid) return
+    let res
+    switch (type.value) {
+      case 'create':
+        res = await createAccount(formData.value)
+        break
+      case 'update':
+        res = await updateAccount(formData.value)
+        break
+      default:
+        res = await createAccount(formData.value)
+        break
+    }
+    if (res.code === 0) {
+      ElMessage({
+        type: 'success',
+        message: '创建/更改成功',
+      })
+      closeDialog()
+      getTableData()
+    }
+  })
 }
 </script>
 
