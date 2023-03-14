@@ -202,3 +202,20 @@ func (ag *AccountGroupApi) GetAccountGroupList(c *gin.Context) {
 		}, "获取成功", c)
 	}
 }
+
+// GetAccountGroupListAll 获取所有 AccountGroup 列表
+// @Tags AccountGroup
+// @Summary 获取所有 AccountGroup 列表
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /userAccountGroup/getAccountGroupListAll [get]
+func (ag *AccountGroupApi) GetAccountGroupListAll(c *gin.Context) {
+	if list, err := userAccountGroupService.GetAccountGroupInfoListAll(); err != nil {
+		global.Log.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+	} else {
+		response.OkWithDetailed(list, "获取成功", c)
+	}
+}

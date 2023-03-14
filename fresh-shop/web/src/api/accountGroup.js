@@ -104,3 +104,18 @@ export const getAccountGroupList = (params) => {
     params
   })
 }
+
+// @Tags AccountGroup
+// @Summary 获取全部 AccountGroup 列表
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /userAccountGroup/getAccountGroupListAll [get]
+export const getAccountGroupListAll = (params) => {
+  return service({
+    url: '/userAccountGroup/getAccountGroupListAll',
+    method: 'get',
+    params
+  })
+}

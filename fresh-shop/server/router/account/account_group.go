@@ -22,7 +22,8 @@ func (s *AccountGroupRouter) InitAccountGroupRouter(Router *gin.RouterGroup) {
 		userAccountGroupRouter.PUT("updateAccountGroup", userAccountGroupApi.UpdateAccountGroup)              // 更新AccountGroup
 	}
 	{
-		userAccountGroupRouterWithoutRecord.GET("findAccountGroup", userAccountGroupApi.FindAccountGroup)       // 根据ID获取AccountGroup
-		userAccountGroupRouterWithoutRecord.GET("getAccountGroupList", userAccountGroupApi.GetAccountGroupList) // 获取AccountGroup列表
+		userAccountGroupRouterWithoutRecord.GET("findAccountGroup", userAccountGroupApi.FindAccountGroup)             // 根据ID获取AccountGroup
+		userAccountGroupRouterWithoutRecord.GET("getAccountGroupList", userAccountGroupApi.GetAccountGroupList)       // 获取AccountGroup列表
+		userAccountGroupRouterWithoutRecord.GET("getAccountGroupListAll", userAccountGroupApi.GetAccountGroupListAll) // 获取AccountGroup列表
 	}
 }
