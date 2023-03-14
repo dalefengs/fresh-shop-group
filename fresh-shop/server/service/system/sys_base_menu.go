@@ -10,7 +10,7 @@ import (
 
 type BaseMenuService struct{}
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: DeleteBaseMenu
 //@description: 删除基础路由
 //@param: id float64
@@ -41,7 +41,7 @@ func (baseMenuService *BaseMenuService) DeleteBaseMenu(id int) (err error) {
 	return err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: UpdateBaseMenu
 //@description: 更新路由
 //@param: menu model.SysBaseMenu
@@ -113,7 +113,7 @@ func (baseMenuService *BaseMenuService) UpdateBaseMenu(menu system.SysBaseMenu) 
 	return err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: GetBaseMenuById
 //@description: 返回当前选中menu
 //@param: id float64

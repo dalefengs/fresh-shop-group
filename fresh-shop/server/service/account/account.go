@@ -11,42 +11,42 @@ type AccountService struct {
 }
 
 // CreateAccount 创建Account记录
-// Author [piexlmax](https://github.com/piexlmax)
+// Author [piexlmax](https://github.com/likfees)
 func (accountService *AccountService) CreateAccount(account account.Account) (err error) {
 	err = global.DB.Create(&account).Error
 	return err
 }
 
 // DeleteAccount 删除Account记录
-// Author [piexlmax](https://github.com/piexlmax)
+// Author [piexlmax](https://github.com/likfees)
 func (accountService *AccountService) DeleteAccount(account account.Account) (err error) {
 	err = global.DB.Delete(&account).Error
 	return err
 }
 
 // DeleteAccountByIds 批量删除Account记录
-// Author [piexlmax](https://github.com/piexlmax)
+// Author [piexlmax](https://github.com/likfees)
 func (accountService *AccountService) DeleteAccountByIds(ids request.IdsReq) (err error) {
 	err = global.DB.Delete(&[]account.Account{}, "id in ?", ids.Ids).Error
 	return err
 }
 
 // UpdateAccount 更新Account记录
-// Author [piexlmax](https://github.com/piexlmax)
+// Author [piexlmax](https://github.com/likfees)
 func (accountService *AccountService) UpdateAccount(account account.Account) (err error) {
 	err = global.DB.Save(&account).Error
 	return err
 }
 
 // GetAccount 根据id获取Account记录
-// Author [piexlmax](https://github.com/piexlmax)
+// Author [piexlmax](https://github.com/likfees)
 func (accountService *AccountService) GetAccount(id uint) (account account.Account, err error) {
 	err = global.DB.Where("id = ?", id).First(&account).Error
 	return
 }
 
 // GetAccountInfoList 分页获取Account记录
-// Author [piexlmax](https://github.com/piexlmax)
+// Author [piexlmax](https://github.com/likfees)
 func (accountService *AccountService) GetAccountInfoList(info accountReq.AccountSearch) (list []account.Account, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
@@ -71,6 +71,9 @@ func (accountService *AccountService) GetAccountInfoList(info accountReq.Account
 		db = db.Where("User.phone like ?", "%"+info.Phone+"%")
 	}
 	err = db.Limit(limit).Offset(offset).Find(&accounts).Error
-	global.SugarLog.Info(accounts[0].User)
+	err = db.Count(&total).Error
+	if err != nil {
+		return
+	}
 	return accounts, total, err
 }

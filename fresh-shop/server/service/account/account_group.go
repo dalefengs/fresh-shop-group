@@ -14,7 +14,7 @@ type AccountGroupService struct {
 }
 
 // CreateAccountGroup 创建AccountGroup记录
-// Author [piexlmax](https://github.com/piexlmax)
+// Author [piexlmax](https://github.com/likfees)
 func (userAccountGroupService *AccountGroupService) CreateAccountGroup(userAccountGroup account.AccountGroup) (err error) {
 	var accountGroup account.AccountGroup
 	if !errors.Is(global.DB.Where("name_en = ?", userAccountGroup.NameEn).First(&accountGroup).Error, gorm.ErrRecordNotFound) {
@@ -77,35 +77,35 @@ func SyncUserAccount(groupId uint) {
 }
 
 // DeleteAccountGroup 删除AccountGroup记录
-// Author [piexlmax](https://github.com/piexlmax)
+// Author [piexlmax](https://github.com/likfees)
 func (userAccountGroupService *AccountGroupService) DeleteAccountGroup(userAccountGroup account.AccountGroup) (err error) {
 	err = global.DB.Delete(&userAccountGroup).Error
 	return err
 }
 
 // DeleteAccountGroupByIds 批量删除AccountGroup记录
-// Author [piexlmax](https://github.com/piexlmax)
+// Author [piexlmax](https://github.com/likfees)
 func (userAccountGroupService *AccountGroupService) DeleteAccountGroupByIds(ids request.IdsReq) (err error) {
 	err = global.DB.Delete(&[]account.AccountGroup{}, "id in ?", ids.Ids).Error
 	return err
 }
 
 // UpdateAccountGroup 更新AccountGroup记录
-// Author [piexlmax](https://github.com/piexlmax)
+// Author [piexlmax](https://github.com/likfees)
 func (userAccountGroupService *AccountGroupService) UpdateAccountGroup(userAccountGroup account.AccountGroup) (err error) {
 	err = global.DB.Save(&userAccountGroup).Error
 	return err
 }
 
 // GetAccountGroup 根据id获取AccountGroup记录
-// Author [piexlmax](https://github.com/piexlmax)
+// Author [piexlmax](https://github.com/likfees)
 func (userAccountGroupService *AccountGroupService) GetAccountGroup(id uint) (userAccountGroup account.AccountGroup, err error) {
 	err = global.DB.Where("id = ?", id).First(&userAccountGroup).Error
 	return
 }
 
 // GetAccountGroupInfoList 分页获取AccountGroup记录
-// Author [piexlmax](https://github.com/piexlmax)
+// Author [piexlmax](https://github.com/likfees)
 func (userAccountGroupService *AccountGroupService) GetAccountGroupInfoList(info accountReq.AccountGroupSearch) (list []account.AccountGroup, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
@@ -132,6 +132,14 @@ func (userAccountGroupService *AccountGroupService) GetAccountGroupInfoList(info
 
 	err = db.Limit(limit).Offset(offset).Find(&userAccountGroups).Error
 	return userAccountGroups, total, err
+}
+
+// GetAccountGroupInfoListAll 获取所有AccountGroup记录
+// Author [piexlmax](https://github.com/likfees)
+func (userAccountGroupService *AccountGroupService) GetAccountGroupInfoListAll() (list []account.AccountGroup, err error) {
+	var userAccountGroups []account.AccountGroup
+	err = global.DB.Model(&account.AccountGroup{}).Find(&userAccountGroups).Error
+	return userAccountGroups, err
 }
 
 // SyncAccountGroup 同步用户账户

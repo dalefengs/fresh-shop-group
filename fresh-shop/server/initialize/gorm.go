@@ -27,7 +27,6 @@ func Gorm() *gorm.DB {
 	}
 }
 
-// RegisterTables 迁移表
 func RegisterTables() {
 	freshShopMysql := global.GetGlobalDBByDBName("freshShopMysql")
 	db := global.DB
@@ -50,7 +49,7 @@ func RegisterTables() {
 		example.ExaFile{},
 		example.ExaCustomer{},
 		example.ExaFileChunk{},
-		example.ExaFileUploadAndDownload{},
+		example.ExaFileUploadAndDownload{}, account.SysRecharge{},
 	)
 	if err != nil {
 		global.Log.Error("register table failed", zap.Error(err))

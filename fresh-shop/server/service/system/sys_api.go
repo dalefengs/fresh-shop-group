@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: CreateApi
 //@description: 新增基础api
 //@param: api model.SysApi
@@ -27,7 +27,7 @@ func (apiService *ApiService) CreateApi(api system.SysApi) (err error) {
 	return global.DB.Create(&api).Error
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: DeleteApi
 //@description: 删除基础api
 //@param: api model.SysApi
@@ -55,7 +55,7 @@ func (apiService *ApiService) DeleteApi(api system.SysApi) (err error) {
 	return nil
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: GetAPIInfoList
 //@description: 分页获取数据,
 //@param: api model.SysApi, info request.PageInfo, order string, desc bool
@@ -118,7 +118,7 @@ func (apiService *ApiService) GetAPIInfoList(api system.SysApi, info request.Pag
 	return apiList, total, err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: GetAllApis
 //@description: 获取所有的api
 //@return:  apis []model.SysApi, err error
@@ -128,7 +128,7 @@ func (apiService *ApiService) GetAllApis() (apis []system.SysApi, err error) {
 	return
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: GetApiById
 //@description: 根据id获取api
 //@param: id float64
@@ -139,7 +139,7 @@ func (apiService *ApiService) GetApiById(id int) (api system.SysApi, err error) 
 	return
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: UpdateApi
 //@description: 根据id更新api
 //@param: api model.SysApi
@@ -166,7 +166,7 @@ func (apiService *ApiService) UpdateApi(api system.SysApi) (err error) {
 	return err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: DeleteApis
 //@description: 删除选中API
 //@param: apis []model.SysApi

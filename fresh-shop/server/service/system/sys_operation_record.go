@@ -21,7 +21,7 @@ func (operationRecordService *OperationRecordService) CreateSysOperationRecord(s
 }
 
 //@author: [granty1](https://github.com/granty1)
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: DeleteSysOperationRecordByIds
 //@description: 批量删除记录
 //@param: ids request.IdsReq
@@ -55,7 +55,7 @@ func (operationRecordService *OperationRecordService) GetSysOperationRecord(id u
 }
 
 //@author: [granty1](https://github.com/granty1)
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: GetSysOperationRecordInfoList
 //@description: 分页获取操作记录列表
 //@param: info systemReq.SysOperationRecordSearch

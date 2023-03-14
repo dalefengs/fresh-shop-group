@@ -3,6 +3,7 @@ package system
 import (
 	"errors"
 	"fmt"
+	"fresh-shop/server/model/account"
 	sysReq "fresh-shop/server/model/system/request"
 	"time"
 
@@ -13,7 +14,7 @@ import (
 	"gorm.io/gorm"
 )
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: Register
 //@description: 用户注册
 //@param: u model.SysUser
@@ -22,6 +23,14 @@ import (
 type UserService struct{}
 
 func (userService *UserService) Register(u system.SysUser) (userInter system.SysUser, err error) {
+	// 获取账户列表
+	var groupList []account.AccountGroup
+	err = global.DB.Find(&groupList).Error
+	if err != nil {
+		global.SugarLog.Errorf("注册用户 --- 用户名：%s,账户配置获取失败,err: %s", u.Username, err.Error())
+		return u, errors.New("账户配置获取失败")
+	}
+
 	var user system.SysUser
 	if u.Username == "" { // 生成用户名
 		u.Username = utils.GenerateUsername("U", 6)
@@ -51,18 +60,33 @@ func (userService *UserService) Register(u system.SysUser) (userInter system.Sys
 	u.Password = utils.BcryptHash(u.Password)
 	u.UUID = uuid.NewV4()
 
-	// TODO 生成对应币种账户信息
-
-	// 开启事务
-
 	// 生成对应币种账户信息
+	// 开启事务
+	err = global.DB.Transaction(func(tx *gorm.DB) error {
+		// 创建用户
+		err = tx.Create(&u).Error
+		var groupData []account.Account
+		// 生成对应币种账户信息
+		for _, group := range groupList {
+			groupId := group.ID
+			groupData = append(groupData, account.Account{
+				GroupId: &groupId,
+				UserId:  &u.ID,
+			})
+		}
+		txErr := tx.Create(groupData).Error
+		if txErr != nil {
+			global.SugarLog.Errorf("注册用户 --- 用户名：%s, 创建账户配置失败, 插入数据: %#v ,err: %s", u.Username, groupData, txErr.Error())
+			return txErr
+		}
+		// 提交事务
+		return nil
+	})
 
-	err = global.DB.Create(&u).Error
-	// 提交事务
 	return u, err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@author: [SliverHorn](https://github.com/SliverHorn)
 //@function: Login
 //@description: 用户登录
@@ -86,7 +110,7 @@ func (userService *UserService) Login(u *system.SysUser) (userInter *system.SysU
 	return &user, err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: ChangePassword
 //@description: 修改用户密码
 //@param: u *model.SysUser, newPassword string
@@ -106,7 +130,7 @@ func (userService *UserService) ChangePassword(u *system.SysUser, newPassword st
 
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: GetUserInfoList
 //@description: 分页获取数据
 //@param: info request.PageInfo
@@ -152,7 +176,7 @@ func (userService *UserService) GetUserInfoList(info sysReq.UserList, order stri
 	return userList, total, err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: SetUserAuthority
 //@description: 设置一个用户的权限
 //@param: uuid uuid.UUID, authorityId string
@@ -167,7 +191,7 @@ func (userService *UserService) SetUserAuthority(id uint, authorityId uint) (err
 	return err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: SetUserAuthorities
 //@description: 设置一个用户的权限
 //@param: id uint, authorityIds []string
@@ -198,7 +222,7 @@ func (userService *UserService) SetUserAuthorities(id uint, authorityIds []uint)
 	})
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: DeleteUser
 //@description: 删除用户
 //@param: id float64
@@ -214,7 +238,7 @@ func (userService *UserService) DeleteUser(id int) (err error) {
 	return err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: SetUserInfo
 //@description: 设置用户信息
 //@param: reqUser model.SysUser
@@ -235,7 +259,7 @@ func (userService *UserService) SetUserInfo(req system.SysUser) error {
 		}).Error
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: SetUserInfo
 //@description: 设置用户信息
 //@param: reqUser model.SysUser
@@ -247,7 +271,7 @@ func (userService *UserService) SetSelfInfo(req system.SysUser) error {
 		Updates(req).Error
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@author: [SliverHorn](https://github.com/SliverHorn)
 //@function: GetUserInfo
 //@description: 获取用户信息
@@ -290,7 +314,7 @@ func (userService *UserService) FindUserByUuid(uuid string) (user *system.SysUse
 	return &u, nil
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: resetPassword
 //@description: 修改用户密码
 //@param: ID uint

@@ -10,7 +10,7 @@ import (
 
 type FileUploadAndDownloadService struct{}
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: FindOrCreateFile
 //@description: 上传文件时检测当前文件属性，如果没有文件则创建，有则返回文件的当前切片
 //@param: fileMd5 string, fileName string, chunkTotal int
@@ -32,7 +32,7 @@ func (e *FileUploadAndDownloadService) FindOrCreateFile(fileMd5 string, fileName
 	return cfile, err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: CreateFileChunk
 //@description: 创建文件切片记录
 //@param: id uint, fileChunkPath string, fileChunkNumber int
@@ -47,7 +47,7 @@ func (e *FileUploadAndDownloadService) CreateFileChunk(id uint, fileChunkPath st
 	return err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: DeleteFileChunk
 //@description: 删除文件切片记录
 //@param: fileMd5 string, fileName string, filePath string

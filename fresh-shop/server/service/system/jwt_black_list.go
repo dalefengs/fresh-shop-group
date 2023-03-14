@@ -12,7 +12,7 @@ import (
 
 type JwtService struct{}
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: JsonInBlacklist
 //@description: 拉黑jwt
 //@param: jwtList model.JwtBlacklist
@@ -27,7 +27,7 @@ func (jwtService *JwtService) JsonInBlacklist(jwtList system.JwtBlacklist) (err 
 	return
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: IsBlacklist
 //@description: 判断JWT是否在黑名单内部
 //@param: jwt string
@@ -41,7 +41,7 @@ func (jwtService *JwtService) IsBlacklist(jwt string) bool {
 	// return !isNotFound
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: GetRedisJWT
 //@description: 从redis取jwt
 //@param: userName string
@@ -52,7 +52,7 @@ func (jwtService *JwtService) GetRedisJWT(userName string) (redisJWT string, err
 	return redisJWT, err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
+//@author: [piexlmax](https://github.com/likfees)
 //@function: SetRedisJWT
 //@description: jwt存入redis并设置过期时间
 //@param: jwt string, userName string
