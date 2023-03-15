@@ -32,7 +32,7 @@
         row-key="ID"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column align="left" label="日期" width="180">
+        <el-table-column align="left" label="创建日期" width="180">
           <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
 
@@ -76,7 +76,7 @@
       </div>
     </div>
 
-    <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" title="变更操作">
+    <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" title="操作">
       <el-form ref="dialogForm" :model="formData" :rules="rules" label-width="110px">
         <el-form-item label="展示值" prop="label">
           <el-input

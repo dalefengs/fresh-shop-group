@@ -16,7 +16,7 @@
     </div>
     <div class="gva-table-box">
       <el-tabs v-model="groupId" class="demo-tabs" @tab-change="tabsChange">
-        <el-tab-pane v-for="(item) in accountGroupList" :label="item.nameCn" :name="item.ID" :key="item.ID"/>
+        <el-tab-pane v-for="(item) in accountGroupList" :key="item.ID" :label="item.nameCn" :name="item.ID" />
       </el-tabs>
       <el-table
         ref="multipleTable"
@@ -45,7 +45,7 @@
             {{ filterDict(scope.row.status, statusOptions) }}
           </template>
         </el-table-column>
-        <el-table-column align="left" label="日期" width="180">
+        <el-table-column align="left" label="创建日期" width="180">
           <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
         <el-table-column align="left" label="操作">
@@ -67,7 +67,7 @@
         />
       </div>
     </div>
-    <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" title="变更操作">
+    <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" :title="type === 'create' ? '新增操作' : '修改操作'">
       <el-form ref="elFormRef" :model="formData" label-position="right" :rules="rule" label-width="80px">
         <el-form-item label="账户状态" prop="status">
           <el-select v-model="formData.status" placeholder="请选择" style="width:100%" :clearable="true">

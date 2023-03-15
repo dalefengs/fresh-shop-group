@@ -1,4 +1,3 @@
-// 自动生成模板SysDictionaryDetail
 package system
 
 import (

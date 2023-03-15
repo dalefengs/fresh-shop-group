@@ -67,7 +67,7 @@
         />
       </div>
     </div>
-    <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" title="变更操作">
+    <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" :title="type === 'create' ? '新增操作' : '修改操作'">
       <el-form ref="elFormRef" :model="formData" label-position="right" :rules="rule" label-width="80px">
         <el-form-item label="中文名:" prop="nameCn">
           <el-input v-model="formData.nameCn" :clearable="true" placeholder="请输入" />

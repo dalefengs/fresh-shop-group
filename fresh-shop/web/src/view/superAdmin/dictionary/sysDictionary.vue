@@ -52,7 +52,7 @@
         row-key="ID"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column align="left" label="日期" width="180">
+        <el-table-column align="left" label="创建日期" width="180">
           <template #default="scope">{{
             formatDate(scope.row.CreatedAt)
           }}</template>
@@ -62,14 +62,14 @@
           align="left"
           label="字典名（中）"
           prop="name"
-          width="160"
+          width="200"
         />
 
         <el-table-column
           align="left"
           label="字典名（英）"
           prop="type"
-          width="120"
+          width="200"
         />
 
         <el-table-column align="left" label="状态" prop="status" width="120">
@@ -145,13 +145,13 @@
     <el-dialog
       v-model="dialogFormVisible"
       :before-close="closeDialog"
-      title="变更操作"
+      title="操作"
     >
       <el-form
         ref="dialogForm"
         :model="formData"
         :rules="rules"
-        label-width="110px"
+        label-width="110px !important"
       >
         <el-form-item label="字典名（中）" prop="name">
           <el-input
