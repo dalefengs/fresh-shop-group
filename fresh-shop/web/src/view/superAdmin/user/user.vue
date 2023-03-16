@@ -195,7 +195,7 @@ import CustomPic from '@/components/customPic/index.vue'
 import ChooseImg from '@/components/chooseImg/index.vue'
 import { setUserInfo, resetPassword } from '@/api/user.js'
 
-import { nextTick, reactive, ref, watch } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { toSQLLine } from '@/utils/stringFun'
 const path = ref(import.meta.env.VITE_BASE_API + '/')
