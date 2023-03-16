@@ -24,12 +24,12 @@
       >
         <el-table-column type="selection" width="55" />
         <el-table-column align="left" label="编号" prop="ID" width="80" />
-        <el-table-column align="left" label="分类名" prop="title" width="120" />
         <el-table-column align="left" label="图片" prop="imgUrl" width="180">
           <template #default="scope">
             <img :src="(scope.row.imgUrl && scope.row.imgUrl.slice(0, 4) !== 'http') ? path + scope.row.imgUrl:scope.row.imgUrl" style="width: 100px;height: 100px" alt="">
           </template>
         </el-table-column>
+        <el-table-column align="left" label="分类名" prop="title" width="120" />
         <el-table-column align="left" label="是否首页" prop="isFirst" width="120">
           <template #default="scope">
             {{ filterDict(scope.row.isFirst,whetherOptions) }}
@@ -128,8 +128,7 @@ import ChooseImg from '@/components/chooseImg/index.vue'
 import { getDictFunc, formatDate, filterDict } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive, nextTick, watch } from 'vue'
-import { getBrandListAll } from '@/api/brand'
-import { createBrandCategory } from '@/api/brandCategory'
+import { getBrandListAll, createBrandCategory } from '@/api/brand'
 
 const path = ref(import.meta.env.VITE_BASE_API + '/')
 // 自动化生成的字典（可能为空）以及字段
