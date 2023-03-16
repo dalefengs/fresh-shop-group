@@ -31,16 +31,21 @@
         row-key="ID"
       >
         <el-table-column align="left" label="编号" prop="ID" width="120" />
-        <el-table-column align="left" label="用户信息" prop="username" width="120">
+        <el-table-column align="left" label="用户信息" prop="username" width="220">
           <template #default="scope">
             <div class="table-multi-line">
               <span>用户名：{{ scope.row.username }}</span> <br>
-<!--              <span>手机号：{{ scope.row.user.phone }}</span>-->
+              <span>手机号：{{ scope.row.user.phone }}</span>
             </div>
           </template>
         </el-table-column>
-        <el-table-column align="left" label="账户类型" prop="coinType" width="120" />
+        <el-table-column align="left" label="账户类型" prop="groupId" width="120" >
+          <template #default="scope">
+            {{ groupComputed(scope.row.groupId) }}
+          </template>
+        </el-table-column>
         <el-table-column align="left" label="增减数额" prop="amount" width="120" />
+        <el-table-column align="left" label="当前余额" prop="balance" width="120" />
         <el-table-column align="left" label="操作员" prop="adminName" width="120" />
         <el-table-column align="left" label="充值日期" width="280">
           <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
@@ -64,8 +69,8 @@
         <el-form-item label="用户名:" prop="username">
           <el-input v-model="formData.username" :clearable="true" placeholder="请输入" />
         </el-form-item>
-        <el-form-item label="账户类型" prop="coinType">
-          <el-select v-model="formData.coinType" placeholder="请选择账户类型" style="width:100%" :clearable="true">
+        <el-form-item label="账户类型" prop="groupId">
+          <el-select v-model="formData.groupId" placeholder="请选择账户类型" style="width:100%" :clearable="true">
             <el-option v-for="(item, key) in groupOptions" :key="key" :label="item.nameCn" :value="item.ID" />
           </el-select>
         </el-form-item>
@@ -94,21 +99,21 @@ export default {
 
 <script setup>
 import {
-  updateSysRecharge,
-  getSysRechargeList
+  getSysRechargeList,
+  createSysRecharge,
 } from '@/api/sysRecharge'
 
 // 全量引入格式化工具 请按需保留
 import { formatDate } from '@/utils/format'
 import { ElMessage } from 'element-plus'
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { getAccountGroupListAll } from '@/api/accountGroup'
 
 // 自动化生成的字典（可能为空）以及字段
 const formData = ref({
   userId: 0,
   username: '',
-  coinType: 0,
+  groupId: '',
   adminId: 0,
   adminName: '',
   remarks: '',
@@ -145,6 +150,16 @@ const getGroupOptions = async() => {
   groupOptions.value = res.data
 }
 getGroupOptions()
+
+const groupComputed = (groupId) => {
+  for (const key in groupOptions.value) {
+    console.log()
+    if (groupOptions.value[key].ID === groupId) {
+      return groupOptions.value[key].nameCn
+    }
+  }
+  return ''
+}
 
 // 重置
 const onReset = () => {
@@ -211,7 +226,7 @@ const closeDialog = () => {
   formData.value = {
     userId: 0,
     username: '',
-    coinType: null,
+    groupId: null,
     remarks: '',
     amount: 0,
   }
@@ -220,7 +235,7 @@ const closeDialog = () => {
 const enterDialog = async() => {
      elFormRef.value?.validate(async(valid) => {
        if (!valid) return
-       const res = await updateSysRecharge(formData.value)
+       const res = await createSysRecharge(formData.value)
        if (res.code === 0) {
          ElMessage({
            type: 'success',

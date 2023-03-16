@@ -33,18 +33,20 @@ func (sysRechargeApi *SysRechargeApi) CreateSysRecharge(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	verify := utils.Rules{
-		"Amount": {utils.NotEmpty()},
-	}
-	if err := utils.Verify(sysRecharge, verify); err != nil {
+	claims, err := utils.GetClaims(c)
+	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	if err := sysRechargeService.CreateSysRecharge(sysRecharge); err != nil {
+	if *sysRecharge.Amount == 0 {
+		response.FailWithMessage("请输入正确的金额", c)
+		return
+	}
+	if err := sysRechargeService.CreateSysRecharge(sysRecharge, claims); err != nil {
 		global.Log.Error("创建失败!", zap.Error(err))
-		response.FailWithMessage("创建失败", c)
+		response.FailWithMessage(err.Error(), c)
 	} else {
-		response.OkWithMessage("创建成功", c)
+		response.OkWithMessage("操作成功", c)
 	}
 }
 

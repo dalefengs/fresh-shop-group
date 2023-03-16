@@ -12,7 +12,7 @@ type UserFinance struct {
 	Username    string           `json:"username" form:"username" gorm:"column:username;comment:用户名;size:191;"`
 	TypeId      *int             `json:"typeId" form:"typeId" gorm:"column:type_id;comment:流水类型id;"`
 	OptionType  *int             `json:"optionType" form:"optionType" gorm:"column:option_type;comment:操作类型(0余额 1冻结 2锁仓);"`
-	IsFee       string           `json:"isFee" form:"isFee" gorm:"column:is_fee;type:enum(''否','是');comment:是否手续费(0否 1是);"`
+	IsFee       *int             `json:"isFee" form:"isFee" gorm:"column:is_fee;comment:是否手续费(0否 1是);"`
 	FeeAmount   *float64         `json:"feeAmount" form:"feeAmount" gorm:"column:fee_amount;comment:手续费;size:14;"`
 	Amount      *float64         `json:"amount" form:"amount" gorm:"column:amount;comment:变动数额;size:14;"`
 	Balance     *float64         `json:"balance" form:"balance" gorm:"column:balance;comment:变动后账户余额;size:14;"`

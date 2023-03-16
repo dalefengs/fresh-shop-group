@@ -6,9 +6,10 @@ import (
 	"time"
 )
 
-type SysRechargeSearch struct{
-    account.SysRecharge
-    StartCreatedAt *time.Time `json:"startCreatedAt" form:"startCreatedAt"`
-    EndCreatedAt   *time.Time `json:"endCreatedAt" form:"endCreatedAt"`
-    request.PageInfo
+type SysRechargeSearch struct {
+	account.SysRecharge
+	request.UserSearch
+	StartCreatedAt *time.Time `json:"startCreatedAt" form:"startCreatedAt"`
+	EndCreatedAt   *time.Time `json:"endCreatedAt" form:"endCreatedAt"`
+	request.PageInfo
 }
