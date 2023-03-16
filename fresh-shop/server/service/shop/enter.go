@@ -4,4 +4,5 @@ type ServiceGroup struct {
 	CategoryService
 	BrandService
 	BrandCategoryService
+	TagsService
 }

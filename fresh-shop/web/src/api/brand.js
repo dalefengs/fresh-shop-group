@@ -110,3 +110,19 @@ export const getBrandListAll = () => {
     method: 'get',
   })
 }
+
+// @Tags BrandCategory
+// @Summary 创建BrandCategory
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body model.BrandCategory true "创建BrandCategory"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /brandCategory/createBrandCategory [post]
+export const createBrandCategory = (data) => {
+  return service({
+    url: '/brandCategory/createBrandCategory',
+    method: 'post',
+    data
+  })
+}
