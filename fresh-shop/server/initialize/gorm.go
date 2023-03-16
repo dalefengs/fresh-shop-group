@@ -9,6 +9,7 @@ import (
 
 	"fresh-shop/server/model/account"
 	"fresh-shop/server/model/business"
+	"fresh-shop/server/model/shop"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -50,7 +51,7 @@ func RegisterTables() {
 		example.ExaFile{},
 		example.ExaCustomer{},
 		example.ExaFileChunk{},
-		example.ExaFileUploadAndDownload{}, account.SysRecharge{}, account.UserFinanceType{}, account.UserFinance{}, business.Banner{},
+		example.ExaFileUploadAndDownload{}, account.SysRecharge{}, account.UserFinanceType{}, account.UserFinance{}, business.Banner{}, shop.Category{}, shop.Brand{}, shop.BrandCategory{},
 	)
 	if err != nil {
 		global.Log.Error("register table failed", zap.Error(err))

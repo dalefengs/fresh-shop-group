@@ -83,6 +83,12 @@ func Routers() *gin.Engine {
 		businessRouter := router.RouterGroupApp.Business
 		businessRouter.InitBannerRouter(PrivateGroup)
 	}
+	{
+		shopRouter := router.RouterGroupApp.Shop
+		shopRouter.InitCategoryRouter(PrivateGroup)
+		shopRouter.InitBrandRouter(PrivateGroup)
+		shopRouter.InitBrandCategoryRouter(PrivateGroup)
+	}
 
 	global.Log.Info("router register success")
 	return Router

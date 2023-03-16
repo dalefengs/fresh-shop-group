@@ -3,6 +3,16 @@
     <div class="gva-table-box">
       <div class="gva-btn-list">
         <el-button type="primary" icon="plus" @click="openDialog">新增</el-button>
+        <el-popover v-model:visible="deleteVisible" placement="top" width="160">
+          <p>确定要删除吗？</p>
+          <div style="text-align: right; margin-top: 8px;">
+            <el-button type="primary" link @click="deleteVisible = false">取消</el-button>
+            <el-button type="primary" @click="onDelete">确定</el-button>
+          </div>
+          <template #reference>
+            <el-button icon="delete" style="margin-left: 10px;" :disabled="!multipleSelection.length" @click="deleteVisible = true">删除</el-button>
+          </template>
+        </el-popover>
       </div>
       <el-table
         ref="multipleTable"
@@ -10,26 +20,22 @@
         tooltip-effect="dark"
         :data="tableData"
         row-key="ID"
+        @selection-change="handleSelectionChange"
       >
-        <el-table-column align="left" label="编号" prop="ID" width="80" />
+        <el-table-column type="selection" width="55" />
         <el-table-column align="left" label="图片" prop="imgUrl" width="280">
           <template #default="scope">
-            <img :src="(scope.row.imgUrl && scope.row.imgUrl.slice(0, 4) !== 'http') ? path + scope.row.imgUrl:scope.row.imgUrl" style="width: 250px" alt="">
+            <img :src="(scope.row.logo && scope.row.logo.slice(0, 4) !== 'http') ? path + scope.row.logo:scope.row.logo" style="width: 100px;height: 100px" alt="">
           </template>
         </el-table-column>
-        <el-table-column align="left" label="跳转类型" prop="type" width="220">
-          <template #default="scope">
-            {{ filterDict(scope.row.type, banner_typeOptions) }}
-          </template>
-        </el-table-column>
-        <el-table-column align="left" label="跳转地址" prop="toPath" width="220" />
+        <el-table-column align="left" label="名称" prop="name" width="120" />
+        <el-table-column align="left" label="排序" prop="soft" width="120" />
         <el-table-column align="left" label="创建日期" width="180">
           <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
         <el-table-column align="left" label="操作">
           <template #default="scope">
-            <el-button type="primary" link icon="edit" class="table-button" @click="updateBannerFunc(scope.row)">变更
-            </el-button>
+            <el-button type="primary" link icon="edit" class="table-button" @click="updateBrandFunc(scope.row)">变更</el-button>
             <el-button type="primary" link icon="delete" @click="deleteRow(scope.row)">删除</el-button>
           </template>
         </el-table-column>
@@ -46,31 +52,24 @@
         />
       </div>
     </div>
-    <el-dialog
-      v-model="dialogFormVisible"
-      :before-close="closeDialog"
-      class="upload-img-dialog"
-      :title="type === 'create' ? '新增操作' : '修改操作'"
-    >
+    <el-dialog v-model="dialogFormVisible" class="upload-img-dialog" :before-close="closeDialog" :title="type === 'create' ? '新增操作' : '修改操作'">
       <el-form ref="elFormRef" :model="formData" label-position="right" :rules="rule" label-width="80px">
-        <el-form-item label="图片" label-width="80px">
+        <el-form-item label="名称:" prop="name">
+          <el-input v-model="formData.name" :clearable="true" placeholder="请输入" />
+        </el-form-item>
+        <el-form-item label="LOGO" label-width="80px">
           <div style="display:inline-block" @click="openImgUrlChange">
             <img
-              v-if="formData.imgUrl"
+              v-if="formData.logo"
               alt="头像"
               class="header-img-box"
-              :src="(formData.imgUrl && formData.imgUrl.slice(0, 4) !== 'http') ? path + formData.imgUrl:formData.imgUrl"
+              :src="(formData.logo && formData.logo.slice(0, 4) !== 'http') ? path + formData.logo : formData.logo"
             >
             <div v-else class="header-img-box">从媒体库选择</div>
           </div>
         </el-form-item>
-        <el-form-item label="跳转类型:" prop="type">
-          <el-select v-model="formData.type" placeholder="请选择" style="width:100%" :clearable="true">
-            <el-option v-for="(item,key) in banner_typeOptions" :key="key" :label="item.label" :value="item.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="跳转地址:" prop="toPath">
-          <el-input v-model="formData.toPath" :clearable="true" placeholder="请输入" />
+        <el-form-item label="排序:" prop="soft">
+          <el-input v-model.number="formData.soft" :clearable="true" placeholder="请输入" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -80,42 +79,44 @@
         </div>
       </template>
     </el-dialog>
-    <ChooseImg ref="chooseImg" :target="formData" :target-key="`imgUrl`" />
+    <ChooseImg ref="chooseImg" :target="formData" :target-key="`logo`" />
   </div>
 </template>
 
 <script>
 export default {
-  name: 'Banner',
+  name: 'Brand'
 }
 </script>
 
 <script setup>
 import {
-  createBanner,
-  deleteBanner,
-  updateBanner,
-  findBanner,
-  getBannerList,
-} from '@/api/banner'
+  createBrand,
+  deleteBrand,
+  deleteBrandByIds,
+  updateBrand,
+  findBrand,
+  getBrandList
+} from '@/api/brand'
+import { formatDate } from '@/utils/format'
 import ChooseImg from '@/components/chooseImg/index.vue'
 
 // 全量引入格式化工具 请按需保留
-import { getDictFunc, formatDate, filterDict } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
 
 const path = ref(import.meta.env.VITE_BASE_API + '/')
+
 // 自动化生成的字典（可能为空）以及字段
-const banner_typeOptions = ref([])
 const formData = ref({
-  imgUrl: '',
-  toPath: '',
-  type: undefined,
+  name: '',
+  logo: '',
+  soft: 50,
 })
 
 // 验证规则
-const rule = reactive({})
+const rule = reactive({
+})
 
 const elFormRef = ref()
 
@@ -130,7 +131,6 @@ const chooseImg = ref(null)
 const openImgUrlChange = () => {
   chooseImg.value.open()
 }
-
 // 分页
 const handleSizeChange = (val) => {
   pageSize.value = val
@@ -145,7 +145,7 @@ const handleCurrentChange = (val) => {
 
 // 查询
 const getTableData = async() => {
-  const table = await getBannerList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
+  const table = await getBrandList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
   if (table.code === 0) {
     tableData.value = table.data.list
     total.value = table.data.total
@@ -160,43 +160,80 @@ getTableData()
 
 // 获取需要的字典 可能为空 按需保留
 const setOptions = async() => {
-  banner_typeOptions.value = await getDictFunc('banner_type')
 }
 
 // 获取需要的字典 可能为空 按需保留
 setOptions()
+
+// 多选数据
+const multipleSelection = ref([])
+// 多选
+const handleSelectionChange = (val) => {
+  multipleSelection.value = val
+}
 
 // 删除行
 const deleteRow = (row) => {
   ElMessageBox.confirm('确定要删除吗?', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
-    type: 'warning',
+    type: 'warning'
   }).then(() => {
-    deleteBannerFunc(row)
+    deleteBrandFunc(row)
   })
+}
+
+// 批量删除控制标记
+const deleteVisible = ref(false)
+
+// 多选删除
+const onDelete = async() => {
+  const ids = []
+  if (multipleSelection.value.length === 0) {
+    ElMessage({
+      type: 'warning',
+      message: '请选择要删除的数据'
+    })
+    return
+  }
+  multipleSelection.value &&
+        multipleSelection.value.map(item => {
+          ids.push(item.ID)
+        })
+  const res = await deleteBrandByIds({ ids })
+  if (res.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: '删除成功'
+    })
+    if (tableData.value.length === ids.length && page.value > 1) {
+      page.value--
+    }
+    deleteVisible.value = false
+    getTableData()
+  }
 }
 
 // 行为控制标记（弹窗内部需要增还是改）
 const type = ref('')
 
 // 更新行
-const updateBannerFunc = async(row) => {
-  const res = await findBanner({ ID: row.ID })
+const updateBrandFunc = async(row) => {
+  const res = await findBrand({ ID: row.ID })
   type.value = 'update'
   if (res.code === 0) {
-    formData.value = res.data.rebanner
+    formData.value = res.data.rebrand
     dialogFormVisible.value = true
   }
 }
 
 // 删除行
-const deleteBannerFunc = async(row) => {
-  const res = await deleteBanner({ ID: row.ID })
+const deleteBrandFunc = async(row) => {
+  const res = await deleteBrand({ ID: row.ID })
   if (res.code === 0) {
     ElMessage({
       type: 'success',
-      message: '删除成功',
+      message: '删除成功'
     })
     if (tableData.value.length === 1 && page.value > 1) {
       page.value--
@@ -218,36 +255,36 @@ const openDialog = () => {
 const closeDialog = () => {
   dialogFormVisible.value = false
   formData.value = {
-    imgUrl: '',
-    toPath: '',
-    type: undefined,
+    name: '',
+    logo: '',
+    soft: 50,
   }
 }
 // 弹窗确定
 const enterDialog = async() => {
-  elFormRef.value?.validate(async(valid) => {
-    if (!valid) return
-    let res
-    switch (type.value) {
-      case 'create':
-        res = await createBanner(formData.value)
-        break
-      case 'update':
-        res = await updateBanner(formData.value)
-        break
-      default:
-        res = await createBanner(formData.value)
-        break
-    }
-    if (res.code === 0) {
-      ElMessage({
-        type: 'success',
-        message: '操作成功',
-      })
-      closeDialog()
-      getTableData()
-    }
-  })
+     elFormRef.value?.validate(async(valid) => {
+       if (!valid) return
+       let res
+       switch (type.value) {
+         case 'create':
+           res = await createBrand(formData.value)
+           break
+         case 'update':
+           res = await updateBrand(formData.value)
+           break
+         default:
+           res = await createBrand(formData.value)
+           break
+       }
+       if (res.code === 0) {
+         ElMessage({
+           type: 'success',
+           message: '操作成功'
+         })
+         closeDialog()
+         getTableData()
+       }
+     })
 }
 </script>
 

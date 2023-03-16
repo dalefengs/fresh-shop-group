@@ -91,9 +91,7 @@
         {{- end}}
         >
         <el-table-column type="selection" width="55" />
-        <el-table-column align="left" label="创建日期" width="180">
-            <template #default="scope">{{ "{{ formatDate(scope.row.CreatedAt) }}" }}</template>
-        </el-table-column>
+        <el-table-column align="left" label="编号" prop="ID" width="90" />
         {{- range .Fields}}
         {{- if .DictType}}
         <el-table-column {{- if .Sort}} sortable{{- end}} align="left" label="{{.FieldDesc}}" prop="{{.FieldJson}}" width="120">
@@ -113,6 +111,9 @@
         <el-table-column {{- if .Sort}} sortable{{- end}} align="left" label="{{.FieldDesc}}" prop="{{.FieldJson}}" width="120" />
         {{- end }}
         {{- end }}
+        <el-table-column align="left" label="创建日期" width="180">
+            <template #default="scope">{{ "{{ formatDate(scope.row.CreatedAt) }}" }}</template>
+        </el-table-column>
         <el-table-column align="left" label="操作">
             <template #default="scope">
             <el-button type="primary" link icon="edit" class="table-button" @click="update{{.StructName}}Func(scope.row)">变更</el-button>
@@ -125,7 +126,7 @@
             layout="total, sizes, prev, pager, next, jumper"
             :current-page="page"
             :page-size="pageSize"
-            :page-sizes="[10, 30, 50, 100]"
+            :page-sizes="[10, 20, 30, 50, 100]"
             :total="total"
             @current-change="handleCurrentChange"
             @size-change="handleSizeChange"
@@ -437,7 +438,7 @@ const enterDialog = async () => {
               if (res.code === 0) {
                 ElMessage({
                   type: 'success',
-                  message: '创建/更改成功'
+                  message: '操作成功'
                 })
                 closeDialog()
                 getTableData()

@@ -137,7 +137,7 @@ const save = async() => {
            if (res.code === 0) {
              ElMessage({
                type: 'success',
-               message: '创建/更改成功'
+               message: '操作成功'
              })
            }
        })
