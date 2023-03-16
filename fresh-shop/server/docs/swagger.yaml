@@ -2609,7 +2609,7 @@ paths:
       consumes:
       - multipart/form-data
       parameters:
-      - description: an example for breakpoint resume, 断点续传示例
+      - description: an file for breakpoint resume, 断点续传示例
         in: formData
         name: file
         required: true

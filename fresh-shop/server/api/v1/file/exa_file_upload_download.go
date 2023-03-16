@@ -1,11 +1,11 @@
-package example
+package file
 
 import (
 	"fresh-shop/server/global"
 	"fresh-shop/server/model/common/request"
 	"fresh-shop/server/model/common/response"
-	"fresh-shop/server/model/example"
-	exampleRes "fresh-shop/server/model/example/response"
+	"fresh-shop/server/model/file"
+	exampleRes "fresh-shop/server/model/file/response"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -22,7 +22,7 @@ type FileUploadAndDownloadApi struct{}
 // @Success   200   {object}  response.Response{data=exampleRes.ExaFileResponse,msg=string}  "上传文件示例,返回包括文件详情"
 // @Router    /fileUploadAndDownload/upload [post]
 func (b *FileUploadAndDownloadApi) UploadFile(c *gin.Context) {
-	var file example.ExaFileUploadAndDownload
+	var f file.ExaFileUploadAndDownload
 	noSave := c.DefaultQuery("noSave", "0")
 	_, header, err := c.Request.FormFile("file")
 	if err != nil {
@@ -30,24 +30,24 @@ func (b *FileUploadAndDownloadApi) UploadFile(c *gin.Context) {
 		response.FailWithMessage("接收文件失败", c)
 		return
 	}
-	file, err = fileUploadAndDownloadService.UploadFile(header, noSave) // 文件上传后拿到文件路径
+	f, err = fileUploadAndDownloadService.UploadFile(header, noSave) // 文件上传后拿到文件路径
 	if err != nil {
 		global.Log.Error("修改数据库链接失败!", zap.Error(err))
 		response.FailWithMessage("修改数据库链接失败", c)
 		return
 	}
-	response.OkWithDetailed(exampleRes.ExaFileResponse{File: file}, "上传成功", c)
+	response.OkWithDetailed(exampleRes.ExaFileResponse{File: f}, "上传成功", c)
 }
 
 // EditFileName 编辑文件名或者备注
 func (b *FileUploadAndDownloadApi) EditFileName(c *gin.Context) {
-	var file example.ExaFileUploadAndDownload
-	err := c.ShouldBindJSON(&file)
+	var f file.ExaFileUploadAndDownload
+	err := c.ShouldBindJSON(&f)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = fileUploadAndDownloadService.EditFileName(file)
+	err = fileUploadAndDownloadService.EditFileName(f)
 	if err != nil {
 		global.Log.Error("编辑失败!", zap.Error(err))
 		response.FailWithMessage("编辑失败", c)
@@ -61,17 +61,17 @@ func (b *FileUploadAndDownloadApi) EditFileName(c *gin.Context) {
 // @Summary   删除文件
 // @Security  ApiKeyAuth
 // @Produce   application/json
-// @Param     data  body      example.ExaFileUploadAndDownload  true  "传入文件里面id即可"
+// @Param     data  body      file.ExaFileUploadAndDownload  true  "传入文件里面id即可"
 // @Success   200   {object}  response.Response{msg=string}     "删除文件"
 // @Router    /fileUploadAndDownload/deleteFile [post]
 func (b *FileUploadAndDownloadApi) DeleteFile(c *gin.Context) {
-	var file example.ExaFileUploadAndDownload
-	err := c.ShouldBindJSON(&file)
+	var f file.ExaFileUploadAndDownload
+	err := c.ShouldBindJSON(&f)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	if err := fileUploadAndDownloadService.DeleteFile(file); err != nil {
+	if err := fileUploadAndDownloadService.DeleteFile(f); err != nil {
 		global.Log.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
 		return

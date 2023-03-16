@@ -1,4 +1,4 @@
-package example
+package file
 
 import (
 	"fmt"
@@ -6,11 +6,11 @@ import (
 	"mime/multipart"
 	"strconv"
 
-	"fresh-shop/server/model/example"
+	"fresh-shop/server/model/file"
 
 	"fresh-shop/server/global"
 	"fresh-shop/server/model/common/response"
-	exampleRes "fresh-shop/server/model/example/response"
+	exampleRes "fresh-shop/server/model/file/response"
 	"fresh-shop/server/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -22,7 +22,7 @@ import (
 // @Security  ApiKeyAuth
 // @accept    multipart/form-data
 // @Produce   application/json
-// @Param     file  formData  file                           true  "an example for breakpoint resume, 断点续传示例"
+// @Param     file  formData  file                           true  "an file for breakpoint resume, 断点续传示例"
 // @Success   200   {object}  response.Response{msg=string}  "断点续传到服务器"
 // @Router    /fileUploadAndDownload/breakpointContinue [post]
 func (b *FileUploadAndDownloadApi) BreakpointContinue(c *gin.Context) {
@@ -129,7 +129,7 @@ func (b *FileUploadAndDownloadApi) BreakpointContinueFinish(c *gin.Context) {
 // @Success   200   {object}  response.Response{msg=string}  "删除切片"
 // @Router    /fileUploadAndDownload/removeChunk [post]
 func (b *FileUploadAndDownloadApi) RemoveChunk(c *gin.Context) {
-	var file example.ExaFile
+	var file file.ExaFile
 	err := c.ShouldBindJSON(&file)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)

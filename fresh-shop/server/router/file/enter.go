@@ -1,6 +1,5 @@
-package example
+package file
 
 type RouterGroup struct {
-	CustomerRouter
 	FileUploadAndDownloadRouter
 }

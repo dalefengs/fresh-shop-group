@@ -2,7 +2,7 @@ package initialize
 
 import (
 	"context"
-	"fresh-shop/server/model/example"
+	"fresh-shop/server/model/file"
 	sysModel "fresh-shop/server/model/system"
 	"fresh-shop/server/service/system"
 	adapter "github.com/casbin/gorm-adapter/v3"
@@ -51,10 +51,9 @@ func (e *ensureTables) MigrateTable(ctx context.Context) (context.Context, error
 
 		adapter.CasbinRule{},
 
-		example.ExaFile{},
-		example.ExaCustomer{},
-		example.ExaFileChunk{},
-		example.ExaFileUploadAndDownload{},
+		file.ExaFile{},
+		file.ExaFileChunk{},
+		file.ExaFileUploadAndDownload{},
 	}
 	for _, t := range tables {
 		_ = db.AutoMigrate(&t)
@@ -86,10 +85,9 @@ func (e *ensureTables) TableCreated(ctx context.Context) bool {
 
 		adapter.CasbinRule{},
 
-		example.ExaFile{},
-		example.ExaCustomer{},
-		example.ExaFileChunk{},
-		example.ExaFileUploadAndDownload{},
+		file.ExaFile{},
+		file.ExaFileChunk{},
+		file.ExaFileUploadAndDownload{},
 	}
 	yes := true
 	for _, t := range tables {

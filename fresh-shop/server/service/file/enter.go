@@ -1,6 +1,5 @@
-package example
+package file
 
 type ServiceGroup struct {
-	CustomerService
 	FileUploadAndDownloadService
 }

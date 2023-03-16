@@ -1,10 +1,10 @@
-package example
+package file
 
 import (
 	"errors"
 
 	"fresh-shop/server/global"
-	"fresh-shop/server/model/example"
+	"fresh-shop/server/model/file"
 	"gorm.io/gorm"
 )
 
@@ -16,18 +16,18 @@ type FileUploadAndDownloadService struct{}
 //@param: fileMd5 string, fileName string, chunkTotal int
 //@return: file model.ExaFile, err error
 
-func (e *FileUploadAndDownloadService) FindOrCreateFile(fileMd5 string, fileName string, chunkTotal int) (file example.ExaFile, err error) {
-	var cfile example.ExaFile
+func (e *FileUploadAndDownloadService) FindOrCreateFile(fileMd5 string, fileName string, chunkTotal int) (f file.ExaFile, err error) {
+	var cfile file.ExaFile
 	cfile.FileMd5 = fileMd5
 	cfile.FileName = fileName
 	cfile.ChunkTotal = chunkTotal
 
-	if errors.Is(global.DB.Where("file_md5 = ? AND is_finish = ?", fileMd5, true).First(&file).Error, gorm.ErrRecordNotFound) {
-		err = global.DB.Where("file_md5 = ? AND file_name = ?", fileMd5, fileName).Preload("ExaFileChunk").FirstOrCreate(&file, cfile).Error
-		return file, err
+	if errors.Is(global.DB.Where("file_md5 = ? AND is_finish = ?", fileMd5, true).First(&f).Error, gorm.ErrRecordNotFound) {
+		err = global.DB.Where("file_md5 = ? AND file_name = ?", fileMd5, fileName).Preload("ExaFileChunk").FirstOrCreate(&f, cfile).Error
+		return f, err
 	}
 	cfile.IsFinish = true
-	cfile.FilePath = file.FilePath
+	cfile.FilePath = f.FilePath
 	err = global.DB.Create(&cfile).Error
 	return cfile, err
 }
@@ -39,7 +39,7 @@ func (e *FileUploadAndDownloadService) FindOrCreateFile(fileMd5 string, fileName
 //@return: error
 
 func (e *FileUploadAndDownloadService) CreateFileChunk(id uint, fileChunkPath string, fileChunkNumber int) error {
-	var chunk example.ExaFileChunk
+	var chunk file.ExaFileChunk
 	chunk.FileChunkPath = fileChunkPath
 	chunk.ExaFileID = id
 	chunk.FileChunkNumber = fileChunkNumber
@@ -54,8 +54,8 @@ func (e *FileUploadAndDownloadService) CreateFileChunk(id uint, fileChunkPath st
 //@return: error
 
 func (e *FileUploadAndDownloadService) DeleteFileChunk(fileMd5 string, filePath string) error {
-	var chunks []example.ExaFileChunk
-	var file example.ExaFile
+	var chunks []file.ExaFileChunk
+	var file file.ExaFile
 	err := global.DB.Where("file_md5 = ? ", fileMd5).First(&file).
 		Updates(map[string]interface{}{
 			"IsFinish":  true,

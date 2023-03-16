@@ -1754,7 +1754,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/example.ExaCustomer"
+                            "$ref": "#/definitions/file.ExaCustomer"
                         }
                     }
                 ],
@@ -1802,7 +1802,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/example.ExaCustomer"
+                            "$ref": "#/definitions/file.ExaCustomer"
                         }
                     }
                 ],
@@ -1850,7 +1850,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/example.ExaCustomer"
+                            "$ref": "#/definitions/file.ExaCustomer"
                         }
                     }
                 ],
@@ -2054,7 +2054,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/example.ExcelInfo"
+                            "$ref": "#/definitions/file.ExcelInfo"
                         }
                     }
                 ],
@@ -2172,7 +2172,7 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "file",
-                        "description": "an example for breakpoint resume, 断点续传示例",
+                        "description": "an file for breakpoint resume, 断点续传示例",
                         "name": "file",
                         "in": "formData",
                         "required": true
@@ -2221,7 +2221,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/example.ExaFileUploadAndDownload"
+                            "$ref": "#/definitions/file.ExaFileUploadAndDownload"
                         }
                     }
                 ],
@@ -5440,7 +5440,7 @@ var doc = `{
                 }
             }
         },
-        "example.ExaCustomer": {
+        "file.ExaCustomer": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -5477,7 +5477,7 @@ var doc = `{
                 }
             }
         },
-        "example.ExaFile": {
+        "file.ExaFile": {
             "type": "object",
             "properties": {
                 "chunkTotal": {
@@ -5490,7 +5490,7 @@ var doc = `{
                 "exaFileChunk": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/example.ExaFileChunk"
+                        "$ref": "#/definitions/file.ExaFileChunk"
                     }
                 },
                 "fileMd5": {
@@ -5515,7 +5515,7 @@ var doc = `{
                 }
             }
         },
-        "example.ExaFileChunk": {
+        "file.ExaFileChunk": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -5541,7 +5541,7 @@ var doc = `{
                 }
             }
         },
-        "example.ExaFileUploadAndDownload": {
+        "file.ExaFileUploadAndDownload": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -5574,7 +5574,7 @@ var doc = `{
                 }
             }
         },
-        "example.ExcelInfo": {
+        "file.ExcelInfo": {
             "type": "object",
             "properties": {
                 "fileName": {
@@ -5922,7 +5922,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "customer": {
-                    "$ref": "#/definitions/example.ExaCustomer"
+                    "$ref": "#/definitions/file.ExaCustomer"
                 }
             }
         },
@@ -5930,7 +5930,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "file": {
-                    "$ref": "#/definitions/example.ExaFileUploadAndDownload"
+                    "$ref": "#/definitions/file.ExaFileUploadAndDownload"
                 }
             }
         },
@@ -5946,7 +5946,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "file": {
-                    "$ref": "#/definitions/example.ExaFile"
+                    "$ref": "#/definitions/file.ExaFile"
                 }
             }
         },

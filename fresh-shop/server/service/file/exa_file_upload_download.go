@@ -1,4 +1,4 @@
-package example
+package file
 
 import (
 	"errors"
@@ -7,7 +7,7 @@ import (
 
 	"fresh-shop/server/global"
 	"fresh-shop/server/model/common/request"
-	"fresh-shop/server/model/example"
+	"fresh-shop/server/model/file"
 	"fresh-shop/server/utils/upload"
 )
 
@@ -17,7 +17,7 @@ import (
 //@param: file model.ExaFileUploadAndDownload
 //@return: error
 
-func (e *FileUploadAndDownloadService) Upload(file example.ExaFileUploadAndDownload) error {
+func (e *FileUploadAndDownloadService) Upload(file file.ExaFileUploadAndDownload) error {
 	return global.DB.Create(&file).Error
 }
 
@@ -27,10 +27,10 @@ func (e *FileUploadAndDownloadService) Upload(file example.ExaFileUploadAndDownl
 //@param: id uint
 //@return: model.ExaFileUploadAndDownload, error
 
-func (e *FileUploadAndDownloadService) FindFile(id uint) (example.ExaFileUploadAndDownload, error) {
-	var file example.ExaFileUploadAndDownload
-	err := global.DB.Where("id = ?", id).First(&file).Error
-	return file, err
+func (e *FileUploadAndDownloadService) FindFile(id uint) (file.ExaFileUploadAndDownload, error) {
+	var f file.ExaFileUploadAndDownload
+	err := global.DB.Where("id = ?", id).First(&f).Error
+	return f, err
 }
 
 //@author: [piexlmax](https://github.com/likfees)
@@ -39,9 +39,9 @@ func (e *FileUploadAndDownloadService) FindFile(id uint) (example.ExaFileUploadA
 //@param: file model.ExaFileUploadAndDownload
 //@return: err error
 
-func (e *FileUploadAndDownloadService) DeleteFile(file example.ExaFileUploadAndDownload) (err error) {
-	var fileFromDb example.ExaFileUploadAndDownload
-	fileFromDb, err = e.FindFile(file.ID)
+func (e *FileUploadAndDownloadService) DeleteFile(f file.ExaFileUploadAndDownload) (err error) {
+	var fileFromDb file.ExaFileUploadAndDownload
+	fileFromDb, err = e.FindFile(f.ID)
 	if err != nil {
 		return
 	}
@@ -49,14 +49,14 @@ func (e *FileUploadAndDownloadService) DeleteFile(file example.ExaFileUploadAndD
 	if err = oss.DeleteFile(fileFromDb.Key); err != nil {
 		return errors.New("文件删除失败")
 	}
-	err = global.DB.Where("id = ?", file.ID).Unscoped().Delete(&file).Error
+	err = global.DB.Where("id = ?", f.ID).Unscoped().Delete(&f).Error
 	return err
 }
 
 // EditFileName 编辑文件名或者备注
-func (e *FileUploadAndDownloadService) EditFileName(file example.ExaFileUploadAndDownload) (err error) {
-	var fileFromDb example.ExaFileUploadAndDownload
-	return global.DB.Where("id = ?", file.ID).First(&fileFromDb).Update("name", file.Name).Error
+func (e *FileUploadAndDownloadService) EditFileName(f file.ExaFileUploadAndDownload) (err error) {
+	var fileFromDb file.ExaFileUploadAndDownload
+	return global.DB.Where("id = ?", f.ID).First(&fileFromDb).Update("name", f.Name).Error
 }
 
 //@author: [piexlmax](https://github.com/likfees)
@@ -69,8 +69,8 @@ func (e *FileUploadAndDownloadService) GetFileRecordInfoList(info request.PageIn
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	keyword := info.Keyword
-	db := global.DB.Model(&example.ExaFileUploadAndDownload{})
-	var fileLists []example.ExaFileUploadAndDownload
+	db := global.DB.Model(&file.ExaFileUploadAndDownload{})
+	var fileLists []file.ExaFileUploadAndDownload
 	if len(keyword) > 0 {
 		db = db.Where("name LIKE ?", "%"+keyword+"%")
 	}
@@ -88,7 +88,7 @@ func (e *FileUploadAndDownloadService) GetFileRecordInfoList(info request.PageIn
 //@param: header *multipart.FileHeader, noSave string
 //@return: file model.ExaFileUploadAndDownload, err error
 
-func (e *FileUploadAndDownloadService) UploadFile(header *multipart.FileHeader, noSave string) (file example.ExaFileUploadAndDownload, err error) {
+func (e *FileUploadAndDownloadService) UploadFile(header *multipart.FileHeader, noSave string) (f file.ExaFileUploadAndDownload, err error) {
 	oss := upload.NewOss()
 	filePath, key, uploadErr := oss.UploadFile(header)
 	if uploadErr != nil {
@@ -96,7 +96,7 @@ func (e *FileUploadAndDownloadService) UploadFile(header *multipart.FileHeader, 
 	}
 	if noSave == "0" {
 		s := strings.Split(header.Filename, ".")
-		f := example.ExaFileUploadAndDownload{
+		f := file.ExaFileUploadAndDownload{
 			Url:  filePath,
 			Name: header.Filename,
 			Tag:  s[len(s)-1],

@@ -1,4 +1,4 @@
-package example
+package file
 
 import (
 	"fresh-shop/server/global"

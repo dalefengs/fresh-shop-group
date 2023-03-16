@@ -567,7 +567,7 @@ func injectionCode(structName string, bf *strings.Builder) error {
 }
 
 func (autoCodeService *AutoCodeService) CreateAutoCode(s *system.SysAutoCode) error {
-	if s.PackageName == "autocode" || s.PackageName == "system" || s.PackageName == "example" || s.PackageName == "" {
+	if s.PackageName == "autocode" || s.PackageName == "system" || s.PackageName == "file" || s.PackageName == "" {
 		return errors.New("不能使用已保留的package name")
 	}
 	if !errors.Is(global.DB.Where("package_name = ?", s.PackageName).First(&system.SysAutoCode{}).Error, gorm.ErrRecordNotFound) {

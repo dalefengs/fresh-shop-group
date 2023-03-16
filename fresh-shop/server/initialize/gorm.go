@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"fresh-shop/server/global"
-	"fresh-shop/server/model/example"
+	"fresh-shop/server/model/file"
 	"fresh-shop/server/model/system"
 
 	"fresh-shop/server/model/account"
@@ -48,10 +48,9 @@ func RegisterTables() {
 		system.SysAuthorityBtn{},
 		system.SysAutoCode{},
 
-		example.ExaFile{},
-		example.ExaCustomer{},
-		example.ExaFileChunk{},
-		example.ExaFileUploadAndDownload{}, account.SysRecharge{}, account.UserFinanceType{}, account.UserFinance{}, business.Banner{}, shop.Category{}, shop.Brand{}, shop.BrandCategory{}, shop.Tags{},
+		file.ExaFile{},
+		file.ExaFileChunk{},
+		file.ExaFileUploadAndDownload{}, account.SysRecharge{}, account.UserFinanceType{}, account.UserFinance{}, business.Banner{}, shop.Category{}, shop.Brand{}, shop.BrandCategory{}, shop.Tags{},
 	)
 	if err != nil {
 		global.Log.Error("register table failed", zap.Error(err))

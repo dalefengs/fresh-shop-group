@@ -2,7 +2,7 @@ package ast
 
 import (
 	"fresh-shop/server/global"
-	"fresh-shop/server/model/example"
+	"fresh-shop/server/model/file"
 	"testing"
 )
 
@@ -14,5 +14,5 @@ func TestAddRegisterTablesAst(t *testing.T) {
 
 func Register() {
 	test := global.GetGlobalDBByDBName("test")
-	test.AutoMigrate(example.ExaFile{})
+	test.AutoMigrate(file.ExaFile{})
 }
