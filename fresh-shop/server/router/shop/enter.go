@@ -5,4 +5,7 @@ type RouterGroup struct {
 	BrandRouter
 	BrandCategoryRouter
 	TagsRouter
+	GoodsRouter
+	GoodsSpecRouter
+	GoodsSpecValueRouter
 }
