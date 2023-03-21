@@ -33,6 +33,20 @@ func (goodsApi *GoodsApi) CreateGoods(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
+	if goods.GoodsInfo.Name == "" {
+		response.FailWithMessage("请填写商品名称", c)
+		return
+	}
+	if *goods.GoodsInfo.Price <= 0 {
+		response.FailWithMessage("请填写合法的价格", c)
+		return
+	}
+	// 基本的字段验证
+	if goods.Desc.Details == "" {
+		response.FailWithMessage("请填写商品详情", c)
+		return
+	}
+
 	if err := goodsService.CreateGoods(goods); err != nil {
 		global.Log.Error("创建失败!", zap.Error(err))
 		response.FailWithMessage(err.Error(), c)

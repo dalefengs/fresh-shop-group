@@ -7,6 +7,20 @@
             <el-form-item label="商品名称:" prop="name">
               <el-input v-model="formData.name" :clearable="true" placeholder="请输入" />
             </el-form-item>
+            <el-form-item label="商品图片:" prop="img">
+              <ImageList ::file-list="goodsImages" @on-success="goodsImagesSuccessHandle" @update:fileList="updateFileListHandle" />
+            </el-form-item>
+            <el-form-item label="所属区域:" prop="goodsArea">
+              <el-select v-model="formData.goodsArea" placeholder="请选择" :clearable="false">
+                <el-option v-for="(item,key) in goodsAreaOptions" :key="key" :label="item.label" :value="item.value" />
+              </el-select>
+            </el-form-item>
+            <!-- 积分商品只能是单规格， 普通商品才有多规格 -->
+            <el-form-item v-if="formData.goodsArea === 0" label="规格类型:" prop="specType">
+              <el-radio-group v-model="formData.specType" class="ml-4">
+                <el-radio v-for="(item,key) in specTypeOptions" :key="key" :label="item.value" size="large">{{ item.label }}</el-radio>
+              </el-radio-group>
+            </el-form-item>
             <el-form-item label="分类:" prop="categoryId">
               <el-select v-model="formData.categoryId" filterable placeholder="Select">
                 <el-option
@@ -27,24 +41,14 @@
                 />
               </el-select>
             </el-form-item>
-            <el-form-item label="所属区域:" prop="goodsArea">
-              <el-select v-model="formData.goodsArea" placeholder="请选择" :clearable="false">
-                <el-option v-for="(item,key) in goodsAreaOptions" :key="key" :label="item.label" :value="item.value" />
-              </el-select>
-            </el-form-item>
-            <el-form-item label="规格类型:" prop="specType">
-              <el-select v-model="formData.specType" placeholder="请选择" :clearable="false">
-                <el-option v-for="(item,key) in specTypeOptions" :key="key" :label="item.label" :value="item.value" />
-              </el-select>
-            </el-form-item>
-            <el-form-item label="商品单位:" prop="unit">
-              <el-input v-model="formData.unit" :clearable="true" placeholder="请输入" />
-            </el-form-item>
-            <el-form-item label="商品价格:" prop="price">
+            <el-form-item :label="formData.goodsArea === 1 ? '购买所需积分' : '商品价格:' " prop="price">
               <el-input-number v-model="formData.price" :precision="2" :clearable="true" />
             </el-form-item>
             <el-form-item label="最低购买数量:" prop="minCount">
               <el-input v-model.number="formData.minCount" :clearable="true" placeholder="请输入" />
+            </el-form-item>
+            <el-form-item label="商品单位:" prop="unit">
+              <el-input v-model="formData.unit" :clearable="true" placeholder="请输入" />
             </el-form-item>
             <el-form-item label="商品重量(g):" prop="weight">
               <el-input v-model.number="formData.weight" :clearable="true" placeholder="请输入" />
@@ -75,9 +79,13 @@
                 <el-radio v-for="(item,key) in whetherOptions" :key="key" :label="item.value" size="large">{{ item.label }}</el-radio>
               </el-radio-group>
             </el-form-item>
+            <el-form-item label="商品详情:" prop="detail">
+              <Editor ref="detailEditorRef" :content="goodsDesc.details" @update:content="handleUpdateDetail" />
+            </el-form-item>
           </el-tab-pane>
           <!--    商品多规格      -->
-          <el-tab-pane label="商品规格" name="2">
+          <!-- 积分商品只能是单规格， 普通商品才有多规格 -->
+          <el-tab-pane v-if="formData.specType === 1 && formData.goodsArea === 0" label="商品规格" name="2">
             <el-form-item label="商品规格" prop="isNew">
               <el-card class="box-card" shadow="never" style="width: 100%;">
                 <div v-for="(s, specId) in spec" :key="specId">
@@ -94,7 +102,7 @@
                       </div>
                     </div>
                   </div>
-                  <div class="input-row">
+                  <!--                  <div class="input-row">
                     <div style="width: 58px; padding-top: 8px">
                       <span>上传图片</span>
                     </div>
@@ -106,7 +114,7 @@
                         </el-radio-group>
                       </div>
                     </div>
-                  </div>
+                  </div>-->
                   <!-- 规格值 -->
                   <div class="input-row">
                     <div style="width: 58px; padding-top: 8px">
@@ -189,10 +197,12 @@ import { ref, reactive } from 'vue'
 import { CircleClose } from '@element-plus/icons-vue'
 import { getCategoryListAll } from '@/api/category'
 import { getBrandListAll } from '@/api/brand'
+import Editor from '@/components/quillEditor/editor.vue'
+import ImageList from '@/components/upload/imageList.vue'
 
 const route = useRoute()
 const router = useRouter()
-const tabsIndex = ref('2')
+const tabsIndex = ref('1')
 const id = ref(0)
 
 const type = ref('')
@@ -208,8 +218,8 @@ const formData = ref({
   name: '测试',
   categoryId: 1,
   brandId: 1,
-  goodsArea: 1,
-  specType: 1,
+  goodsArea: 0,
+  specType: 0,
   unit: '件',
   price: 100,
   minCount: 1,
@@ -221,6 +231,14 @@ const formData = ref({
   isHot: 0,
   isNew: 0,
 })
+// 商品详情
+const goodsDesc = ref({
+  notice: '',
+  details: ''
+})
+
+// 商品图片
+const goodsImages = ref([])
 
 // 验证规则
 const rule = reactive({
@@ -490,18 +508,35 @@ const tabsChange = (index, e) => {
   console.log('tabIndex,', index)
 }
 
+const goodsImagesSuccessHandle = (url, name) => {
+  goodsImages.value.push({
+    url, name,
+  })
+}
+
+// 更新图片文件列表
+const updateFileListHandle = (files) => {
+  goodsImages.value = []
+  files.forEach(item => {
+    goodsImages.value.push({
+      url: item.url,
+      name: item.name,
+    })
+  })
+}
+
+const detailEditorRef = ref(null)
 // 保存按钮
 const save = async() => {
-  elFormRef.value?.validate(async(valid, m) => {
+  // 如果是积分商品 必定是单规格
+  if (formData.value.goodsArea === 1) {
+    formData.value.specType = 0
+  }
+  elFormRef.value?.validate(async(valid) => {
     if (!valid) {
-      ElMessage.error('必填项未填写完成，请检查')
+      ElMessage.error('您有必填项未填写完成，请检查')
       return
     }
-    let res
-    console.log('formData', formData.value)
-    console.log('spec', spec.value)
-    console.log('specItem', specItem.value)
-    console.log('specValue', specValue.value)
     const specData = []
     for (const sId in spec.value) {
       specData.push(spec.value[sId])
@@ -518,8 +553,11 @@ const save = async() => {
       goodsInfo: formData.value,
       spec: specData,
       specItem: specItemData,
-      specValue: specValue.value
+      specValue: specValue.value,
+      desc: goodsDesc.value,
+      images: goodsImages.value
     }
+    let res
     switch (type.value) {
       case 'create':
         res = await createGoods(data)
@@ -538,6 +576,11 @@ const save = async() => {
       })
     }
   })
+}
+
+// 接收子组件更新字段信息
+const handleUpdateDetail = (val) => {
+  goodsDesc.value.details = val
 }
 
 // 返回按钮

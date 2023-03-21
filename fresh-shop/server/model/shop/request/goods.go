@@ -19,7 +19,7 @@ type GoodsSearch struct {
 type GoodsSubmitFrom struct {
 	GoodsInfo shop.Goods            `json:"goodsInfo" form:"goodsInfo"`
 	Desc      shop.GoodsDescription `json:"desc" form:"desc"`
-	Images    shop.GoodsImage       `json:"images" form:"images"`
+	Images    []shop.GoodsImage     `json:"images" form:"images"`
 	Spec      []goodsSepc           `json:"spec" form:"spec"`
 	SpecItem  []specItem            `json:"specItem" form:"specItem"`
 	SpecValue map[string]specValue  `json:"specValue" form:"specValue"` // value_id => specItem
