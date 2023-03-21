@@ -7,7 +7,7 @@
         </el-form-item>
         <el-form-item label="所属区域" prop="goodsArea">
           <el-select v-model="searchInfo.goodsArea" clearable placeholder="请选择" @clear="()=>{searchInfo.goodsArea=undefined}">
-            <el-option v-for="(item,key) in goods_areaOptions" :key="key" :label="item.label" :value="item.value" />
+            <el-option v-for="(item,key) in goodsAreaOptions" :key="key" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="创建时间">
@@ -45,47 +45,59 @@
         @sort-change="sortChange"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column align="left" label="编号" prop="ID" width="90" />
-        <el-table-column align="left" label="商品名称" prop="name" width="120" />
-        <el-table-column align="left" label="分类id" prop="categoryId" width="120" />
-        <el-table-column align="left" label="品牌Id" prop="brandId" width="120" />
-        <el-table-column align="left" label="所属区域" prop="goodsArea" width="120">
+        <el-table-column align="left" label="商品图片" prop="images" width="100">
           <template #default="scope">
-            {{ filterDict(scope.row.goodsArea,goods_areaOptions) }}
+            <img v-if="scope.row.images[0]" :src="scope.row.images[0].url" title="点击查看大图" style="width: 100%" alt="" @click="handlePictureCardPreview(scope.row.images[0].url)">
+            <span v-else>暂无图片</span>
           </template>
         </el-table-column>
-        <el-table-column align="left" label="规格类型" prop="specType" width="120">
+        <el-table-column align="left" label="基本信息" prop="name" width="220">
           <template #default="scope">
-            {{ filterDict(scope.row.specType,spec_typeOptions) }}
+            <div class="table-multi-line">
+              <span>编号：{{ scope.row.ID }}</span><br>
+              <span>商品名称：{{ scope.row.name }}</span><br>
+              <span>所属分类：{{ scope.row.category.title }}</span><br>
+              <span>所属品牌：{{ scope.row.brand.name }}</span><br>
+            </div>
           </template>
         </el-table-column>
-        <el-table-column align="left" label="商品单位" prop="unit" width="120" />
-        <el-table-column sortable align="left" label="商品价格" prop="price" width="120" />
-        <el-table-column align="left" label="最低购买数量" prop="minCount" width="120" />
-        <el-table-column align="left" label="商品重量（g）" prop="weight" width="120" />
-        <el-table-column sortable align="left" label="库存" prop="store" width="120" />
-        <el-table-column sortable align="left" label="总销量" prop="sale" width="120" />
-        <el-table-column align="left" label="排序" prop="soft" width="120" />
-        <el-table-column align="left" label="状态(0 下架 1上架 )" prop="status" width="120">
-          <template #default="scope">{{ formatBoolean(scope.row.status) }}</template>
-        </el-table-column>
-        <el-table-column sortable align="left" label="是否首页(0否 1是)" prop="isFrist" width="120">
+        <el-table-column align="left" label="商品类型" prop="goodsArea" width="160">
           <template #default="scope">
-            {{ filterDict(scope.row.isFrist,whetherOptions) }}
+            <div class="table-multi-line">
+              <span>商品区域：{{ filterDict(scope.row.goodsArea, goodsAreaOptions) }}</span><br>
+              <span>规格类型：{{ filterDict(scope.row.specType,specTypeOptions) }}</span><br>
+            </div>
           </template>
         </el-table-column>
-        <el-table-column sortable align="left" label="是否热销(0否 1是)" prop="isHot" width="120">
+        <el-table-column align="left" label="详情信息" prop="name" width="300">
           <template #default="scope">
-            {{ filterDict(scope.row.isHot,whetherOptions) }}
+            <div class="table-multi-line">
+              商品价格：<span style="color: #f56c6c; font-weight: bold">{{ scope.row.price }}</span> <el-divider direction="vertical" />
+              <span>最低购买数量：{{ scope.row.minCount }} {{ scope.row.unit }}</span><br>
+              <span>库存：{{ scope.row.price }}</span><el-divider direction="vertical" />
+              <span>总销量：{{ scope.row.sale }}</span><br>
+              <span>商品单位：{{ scope.row.unit }}</span><el-divider direction="vertical" />
+              <span>商品重量：{{ scope.row.weight }}g</span><br>
+            </div>
           </template>
         </el-table-column>
-        <el-table-column sortable align="left" label="是否上新(0否 1是)" prop="isNew" width="120">
+        <el-table-column align="left" label="状态信息" prop="status" width="120">
           <template #default="scope">
-            {{ filterDict(scope.row.isNew,whetherOptions) }}
+            <div class="table-multi-line">
+              <span>状态：{{ filterDict(scope.row.status, goodsStatusOptions) }}</span><br>
+              <span>是否首页：{{ filterDict(scope.row.isFirst,whetherOptions) }}</span><br>
+              <span>是否热销：{{ filterDict(scope.row.isHot,whetherOptions) }}</span><br>
+              <span>是否上新：{{ filterDict(scope.row.isNew,whetherOptions) }}</span><br>
+            </div>
           </template>
         </el-table-column>
-        <el-table-column align="left" label="创建日期" width="180">
-          <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
+        <el-table-column align="left" label="其他">
+          <template #default="scope">
+            <div class="table-multi-line">
+              <span>排序：{{ scope.row.sort }}</span><br>
+              <span>日期：{{ formatDate(scope.row.CreatedAt) }}</span><br>
+            </div>
+          </template>
         </el-table-column>
         <el-table-column align="left" label="操作">
           <template #default="scope">
@@ -106,6 +118,9 @@
         />
       </div>
     </div>
+    <el-dialog v-model="dialogImgVisible">
+      <img style="width: 100%" :src="dialogImageUrl" alt="Preview Image">
+    </el-dialog>
   </div>
 </template>
 
@@ -123,15 +138,16 @@ import {
 } from '@/api/goods'
 
 // 全量引入格式化工具 请按需保留
-import { getDictFunc, formatDate, formatBoolean, filterDict } from '@/utils/format'
+import { getDictFunc, formatDate, filterDict } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 // 自动化生成的字典（可能为空）以及字段
-const spec_typeOptions = ref([])
+const specTypeOptions = ref([])
 const whetherOptions = ref([])
-const goods_areaOptions = ref([])
+const goodsAreaOptions = ref([])
+const goodsStatusOptions = ref([])
 
 // =========== 表格控制部分 ===========
 const page = ref(1)
@@ -191,9 +207,10 @@ getTableData()
 
 // 获取需要的字典 可能为空 按需保留
 const setOptions = async() => {
-  spec_typeOptions.value = await getDictFunc('spec_type')
+  specTypeOptions.value = await getDictFunc('spec_type')
   whetherOptions.value = await getDictFunc('whether')
-  goods_areaOptions.value = await getDictFunc('goods_area')
+  goodsAreaOptions.value = await getDictFunc('goods_area')
+  goodsStatusOptions.value = await getDictFunc('goods_status')
 }
 
 // 获取需要的字典 可能为空 按需保留
@@ -268,6 +285,14 @@ const router = useRouter()
 const openGoodsFrom = (id) => {
   console.log(id)
   router.push({ name: 'goodsFrom', query: { id: id }})
+}
+
+const dialogImageUrl = ref('')
+const dialogImgVisible = ref(false)
+const handlePictureCardPreview = (url) => {
+  console.log(url)
+  dialogImageUrl.value = url
+  dialogImgVisible.value = true
 }
 
 </script>

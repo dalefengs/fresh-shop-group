@@ -224,8 +224,8 @@ func (goodsService *GoodsService) GetGoodsInfoList(info shopReq.GoodsSearch) (li
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	// 创建db
-	db := global.DB.Model(&shop.Goods{})
 	var goodss []shop.Goods
+	db := global.DB.Model(&shop.Goods{}).Preload("Desc").Preload("Images").Preload("Category").Preload("Brand")
 	// 如果有条件搜索 下方会自动创建搜索语句
 	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
 		db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
@@ -240,22 +240,7 @@ func (goodsService *GoodsService) GetGoodsInfoList(info shopReq.GoodsSearch) (li
 	if err != nil {
 		return
 	}
-	var OrderStr string
-	orderMap := make(map[string]bool)
-	orderMap["price"] = true
-	orderMap["store"] = true
-	orderMap["sale"] = true
-	orderMap["isFrist"] = true
-	orderMap["isHot"] = true
-	orderMap["isNew"] = true
-	if orderMap[info.Sort] {
-		OrderStr = info.Sort
-		if info.Order == "descending" {
-			OrderStr = OrderStr + " desc"
-		}
-		db = db.Order(OrderStr)
-	}
-
+	db = db.Order("sort asc, created_at desc")
 	err = db.Limit(limit).Offset(offset).Find(&goodss).Error
 	return goodss, total, err
 }
