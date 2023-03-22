@@ -1,15 +1,17 @@
 package shop
 
 import (
+	"errors"
+	"fmt"
 	"fresh-shop/server/global"
 	"fresh-shop/server/model/common/request"
 	"fresh-shop/server/model/common/response"
 	"fresh-shop/server/model/shop"
 	shopReq "fresh-shop/server/model/shop/request"
 	"fresh-shop/server/service"
-	"fresh-shop/server/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"strings"
 )
 
 type GoodsApi struct {
@@ -33,17 +35,8 @@ func (goodsApi *GoodsApi) CreateGoods(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	if goods.GoodsInfo.Name == "" {
-		response.FailWithMessage("请填写商品名称", c)
-		return
-	}
-	if *goods.GoodsInfo.Price <= 0 {
-		response.FailWithMessage("请填写合法的价格", c)
-		return
-	}
-	// 基本的字段验证
-	if goods.Desc.Details == "" {
-		response.FailWithMessage("请填写商品详情", c)
+	if err := checkGoodsFrom(&goods); err != nil {
+		response.FailWithMessage(err.Error(), c)
 		return
 	}
 
@@ -52,6 +45,97 @@ func (goodsApi *GoodsApi) CreateGoods(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 	} else {
 		response.OkWithMessage("创建成功", c)
+	}
+}
+
+// 基本的字段验证
+func checkGoodsFrom(f *shopReq.GoodsSubmitFrom) error {
+	if f.GoodsInfo.Name == "" {
+		return errors.New("请填写商品名称")
+	}
+	if len(f.Images) <= 0 {
+		return errors.New("请上传商品图片")
+	}
+	if *f.GoodsInfo.Price <= 0 {
+		return errors.New("请填写合法的价格")
+	}
+	if f.GoodsInfo.GoodsArea == nil {
+		return errors.New("请选择商品区域")
+	}
+	if f.GoodsInfo.SpecType == nil {
+		return errors.New("请选择商品规格类型")
+	}
+	if f.GoodsInfo.CategoryId == nil {
+		return errors.New("请选择分类")
+	}
+	if f.GoodsInfo.BrandId == nil {
+		return errors.New("请选择品牌")
+	}
+	if f.Desc.Details == "" {
+		return errors.New("请填写商品详情")
+	}
+	// 多规格
+	if *f.GoodsInfo.SpecType == 1 {
+		for sIndex, s := range f.Spec {
+			if strings.TrimSpace(s.Name) == "" {
+				return errors.New(fmt.Sprintf("请填写第 %d 个规格名称", sIndex+1))
+			}
+			flag := false
+			for _, i := range f.SpecItem {
+				if s.SpecId == i.SpecId {
+					flag = true
+					if strings.TrimSpace(i.Name) == "" {
+						return errors.New(fmt.Sprintf("请填写第 %d 个规格的规格项名称", sIndex+1))
+					}
+				}
+			}
+			if !flag {
+				return errors.New(fmt.Sprintf("请填写第 %d 个规格的规格项不能为空", sIndex+1))
+			}
+		}
+		count := 1
+		for _, v := range f.SpecValue {
+			if v.Store == nil || *v.Store < 0 {
+				return errors.New(fmt.Sprintf("请正确填写第 %d 个规格明细库存", count))
+			}
+			if v.Price == nil || *v.Price <= 0 {
+				return errors.New(fmt.Sprintf("请正确填写第 %d 个规格明细金额", count))
+			}
+			if v.Sort == nil || *v.Sort < 0 {
+				return errors.New(fmt.Sprintf("请正确填写第 %d 个规格明细排序", count))
+			}
+			count++
+		}
+	}
+
+	return nil
+}
+
+// UpdateGoods 更新Goods
+// @Tags Goods
+// @Summary 更新Goods
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body shop.Goods true "更新Goods"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"更新成功"}"
+// @Router /goods/updateGoods [put]
+func (goodsApi *GoodsApi) UpdateGoods(c *gin.Context) {
+	var goods shopReq.GoodsSubmitFrom
+	err := c.ShouldBindJSON(&goods)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if err := checkGoodsFrom(&goods); err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if err := goodsService.UpdateGoods(goods); err != nil {
+		global.Log.Error("更新失败!", zap.Error(err))
+		response.FailWithMessage(err.Error(), c)
+	} else {
+		response.OkWithMessage("更新成功", c)
 	}
 }
 
@@ -100,45 +184,6 @@ func (goodsApi *GoodsApi) DeleteGoodsByIds(c *gin.Context) {
 		response.FailWithMessage("批量删除失败", c)
 	} else {
 		response.OkWithMessage("批量删除成功", c)
-	}
-}
-
-// UpdateGoods 更新Goods
-// @Tags Goods
-// @Summary 更新Goods
-// @Security ApiKeyAuth
-// @accept application/json
-// @Produce application/json
-// @Param data body shop.Goods true "更新Goods"
-// @Success 200 {string} string "{"success":true,"data":{},"msg":"更新成功"}"
-// @Router /goods/updateGoods [put]
-func (goodsApi *GoodsApi) UpdateGoods(c *gin.Context) {
-	var goods shop.Goods
-	err := c.ShouldBindJSON(&goods)
-	if err != nil {
-		response.FailWithMessage(err.Error(), c)
-		return
-	}
-	verify := utils.Rules{
-		"Name":       {utils.NotEmpty()},
-		"CategoryId": {utils.NotEmpty()},
-		"BrandId":    {utils.NotEmpty()},
-		"GoodsArea":  {utils.NotEmpty()},
-		"SpecType":   {utils.NotEmpty()},
-		"Unit":       {utils.NotEmpty()},
-		"Price":      {utils.NotEmpty()},
-		"MinCount":   {utils.NotEmpty()},
-		"Store":      {utils.NotEmpty()},
-	}
-	if err := utils.Verify(goods, verify); err != nil {
-		response.FailWithMessage(err.Error(), c)
-		return
-	}
-	if err := goodsService.UpdateGoods(goods); err != nil {
-		global.Log.Error("更新失败!", zap.Error(err))
-		response.FailWithMessage("更新失败", c)
-	} else {
-		response.OkWithMessage("更新成功", c)
 	}
 }
 

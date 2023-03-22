@@ -288,7 +288,7 @@ const rule = reactive({
     trigger: ['input', 'blur'],
   }],
 })
-const specCount = ref(0) // 规格输入框数量
+const specVualId = ref(0) // 规格输入框数量
 const specItemId = ref(1) // 全局规格项 id 累增
 // const spec = ref([
 //   {
@@ -374,22 +374,27 @@ const initEditGoods = () => {
 
 // 编辑商品时规格的初始化
 const initEditGoodsSpec = () => {
+  spec.value = {}
+  specItem.value = {}
+  specValue.value = {}
   // 初始化规格
-  specCount.value = formData.value.spec.length ?? 0
-  formData.value.spec.forEach(s => {
+  const formSpec = formData.value.spec
+  specVualId.value = formSpec[formSpec.length - 1].ID + 1000 ?? 0
+  specItemId.value = formSpec[formSpec.length - 1].specItem[0].ID + 1000
+  formSpec.forEach(s => {
     spec.value[s.ID] = {
       specId: s.ID + '',
       name: s.title,
-      isUploadImage: s.title
+      isUploadImage: s.isUploadImage
     }
     // 初始化规格项
     s.specItem.forEach(i => {
       if (!specItem.value[i.specId]) {
         specItem.value[i.specId] = {}
       }
-      specItem.value[i.specId][i.specId + '_' + i.ID] = {
-        specId: i.specId,
-        itemId: i.ID,
+      specItem.value[i.specId][i.ID] = {
+        specId: i.specId + '',
+        itemId: i.ID + '',
         name: i.item
       }
     })
@@ -398,14 +403,15 @@ const initEditGoodsSpec = () => {
     // 对规格明细的值进行填充
     tableData.value.forEach((t, key) => {
       formData.value.specValue.forEach(v => {
-        const itemIds = v.itemIds.replace('_', ',')
+        const itemIds = v.itemIds.replaceAll('_', ',')
         if (t.valueId === itemIds) {
           specValue.value[itemIds].price = v.price
           specValue.value[itemIds].store = v.store
-          console.log('specValue.valu', specValue.value)
+          specValue.value[itemIds].sort = v.sort
         }
       })
     })
+    console.log('specValue', specValue.value)
   })
 }
 
@@ -491,7 +497,7 @@ const blurSpecItemInput = () => {
 
 // 添加规格输入框
 const addSpecInput = () => {
-  const specId = specCount.value + 1 + ''
+  const specId = specVualId.value + 1 + ''
   // 初始化规格双向绑定数据
   spec.value[specId] = {
     specId: specId,
@@ -502,7 +508,7 @@ const addSpecInput = () => {
   // 清空规格明细
   // specValue.value = {}
   // 输入框加 1
-  specCount.value++
+  specVualId.value++
 }
 
 // 添加规格值输入框
@@ -513,7 +519,6 @@ const addSpecItemInput = (specId) => {
     specId: specId,
     itemId: itemId,
   }
-  console.log('addSpecItemInput', specId, itemId)
 }
 
 // 删除规格
@@ -533,7 +538,7 @@ const removeSpecItem = (specId, itemId) => {
 
 // 清空规格值
 const clearSpecInput = () => {
-  specCount.value = 0
+  specVualId.value = 0
   spec.value = {}
   specItem.value = {}
   cartesianProductTableData()
@@ -601,6 +606,11 @@ const save = async() => {
         specItemData.push(specItem.value[sId][itemId])
       }
     }
+    const goodsInfo = formData.value
+    goodsInfo.spec = null
+    goodsInfo.specValue = null
+    goodsInfo.images = null
+    goodsInfo.desc = null
     const data = {
       goodsInfo: formData.value,
       spec: specData,
@@ -626,6 +636,11 @@ const save = async() => {
         type: 'success',
         message: '操作成功',
       })
+      if (type.value === 'update') {
+        await init()
+      } else {
+        router.go(-1)
+      }
     }
   })
 }

@@ -2,7 +2,6 @@
   <div style="width: 100%">
     <CommonUpload ref="uploadImageRef" @on-success="uploadSuccess" style="display: none" />
     <QuillEditor ref="editorRef" v-model:content="editorContent" content-type="html" theme="snow" :options="options" />
-    <div>内容：{{ content }}</div>
   </div>
 </template>
 

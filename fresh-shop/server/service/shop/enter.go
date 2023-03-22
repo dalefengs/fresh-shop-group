@@ -6,9 +6,4 @@ type ServiceGroup struct {
 	BrandCategoryService
 	TagsService
 	GoodsService
-	GoodsDescriptionService
-	GoodsImageService
-	GoodsSpecService
-	GoodsSpecItemService
-	GoodsSpecValueService
 }

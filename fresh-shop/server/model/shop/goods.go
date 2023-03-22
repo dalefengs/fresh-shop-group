@@ -26,6 +26,7 @@ type Goods struct {
 	Desc       GoodsDescription `json:"desc"`
 	Images     []GoodsImage     `json:"images"`
 	Spec       []GoodsSpec      `json:"spec"`
+	SpecValue  []GoodsSpecValue `json:"specValue"`
 	Category   Category         `json:"category"`
 	Brand      Brand            `json:"brand"`
 }
