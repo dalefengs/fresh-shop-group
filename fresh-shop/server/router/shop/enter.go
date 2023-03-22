@@ -6,6 +6,4 @@ type RouterGroup struct {
 	BrandCategoryRouter
 	TagsRouter
 	GoodsRouter
-	GoodsSpecRouter
-	GoodsSpecValueRouter
 }

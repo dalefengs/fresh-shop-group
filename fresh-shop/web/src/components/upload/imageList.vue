@@ -21,7 +21,7 @@
 
 <script setup>
 
-import { computed, ref } from 'vue'
+import { computed, ref, watch, defineProps, defineEmits } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/pinia/modules/user'
 import { Plus } from '@element-plus/icons-vue'
@@ -44,6 +44,10 @@ const fileListModel = computed({
   set: (val) => {
   },
 })
+
+watch(() => props.fileList, () =>{
+  console.log('props.fileList', props.fileList)
+}, { deep: true })
 
 const checkFile = (file) => {
   fullscreenLoading.value = true

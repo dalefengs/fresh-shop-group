@@ -8,7 +8,7 @@
               <el-input v-model="formData.name" :clearable="true" placeholder="请输入" />
             </el-form-item>
             <el-form-item label="商品图片:" prop="img">
-              <ImageList ::file-list="goodsImages" @on-success="goodsImagesSuccessHandle" @update:fileList="updateFileListHandle" />
+              <ImageList :file-list="goodsImages" @on-success="goodsImagesSuccessHandle" @update:fileList="updateFileListHandle" />
             </el-form-item>
             <el-form-item label="所属区域:" prop="goodsArea">
               <el-select v-model="formData.goodsArea" placeholder="请选择" :clearable="false">
@@ -289,17 +289,17 @@ const rule = reactive({
   }],
 })
 const specCount = ref(0) // 规格输入框数量
-const specItemCount = ref({}) // 规格值对应输出框数量) // spec_1: 0 规格值数量
+const specItemId = ref(1) // 全局规格项 id 累增
 // const spec = ref([
 //   {
 //     specId: 1,
 //     name: '颜色',
-//     isUpload: false,
+//     isUploadImage: 0,
 //   },
 //   {
 //     specId: 2,
 //     name: '大小',
-//     isUpload: false,
+//     isUploadImage: 0,
 //   },
 // ])
 const spec = ref({})
@@ -329,6 +329,7 @@ const init = async() => {
     if (res.code === 0) {
       formData.value = res.data.regoods
       type.value = 'update'
+      initEditGoods()
     }
   } else {
     type.value = 'create'
@@ -356,6 +357,57 @@ const init = async() => {
 }
 
 init()
+
+// 编辑商品时初始化
+const initEditGoods = () => {
+  // 初始化图片
+  goodsImages.value = formData.value.images
+
+  // 初始化详情
+  goodsDesc.value.details = formData.value.desc.details
+
+  // 多规格时初始化
+  if (formData.value.specType === 1) {
+    initEditGoodsSpec()
+  }
+}
+
+// 编辑商品时规格的初始化
+const initEditGoodsSpec = () => {
+  // 初始化规格
+  specCount.value = formData.value.spec.length ?? 0
+  formData.value.spec.forEach(s => {
+    spec.value[s.ID] = {
+      specId: s.ID + '',
+      name: s.title,
+      isUploadImage: s.title
+    }
+    // 初始化规格项
+    s.specItem.forEach(i => {
+      if (!specItem.value[i.specId]) {
+        specItem.value[i.specId] = {}
+      }
+      specItem.value[i.specId][i.specId + '_' + i.ID] = {
+        specId: i.specId,
+        itemId: i.ID,
+        name: i.item
+      }
+    })
+    // 生成规格明细
+    cartesianProductTableData()
+    // 对规格明细的值进行填充
+    tableData.value.forEach((t, key) => {
+      formData.value.specValue.forEach(v => {
+        const itemIds = v.itemIds.replace('_', ',')
+        if (t.valueId === itemIds) {
+          specValue.value[itemIds].price = v.price
+          specValue.value[itemIds].store = v.store
+          console.log('specValue.valu', specValue.value)
+        }
+      })
+    })
+  })
+}
 
 // 递归绩笛卡尔积
 const cartesianProductOf = (...args) => {
@@ -445,7 +497,6 @@ const addSpecInput = () => {
     specId: specId,
     isUploadImage: 0,
   }
-  specItemCount.value[specId] = 0
   // 初始化规格值
   specItem.value[specId] = {}
   // 清空规格明细
@@ -457,13 +508,11 @@ const addSpecInput = () => {
 // 添加规格值输入框
 const addSpecItemInput = (specId) => {
   // 初始化规格值保存数据
-  const itemId = specId + '_' + (specItemCount.value[specId] + 1)
+  const itemId = (++specItemId.value) + ''
   specItem.value[specId][itemId] = {
     specId: specId,
     itemId: itemId,
   }
-  // 输入框加 1
-  specItemCount.value[specId]++
   console.log('addSpecItemInput', specId, itemId)
 }
 
@@ -478,7 +527,6 @@ const removeSpec = (specId) => {
 // 删除规格值
 const removeSpecItem = (specId, itemId) => {
   delete specItem.value[specId][itemId]
-  delete specItemCount[specId]
   cartesianProductTableData()
   ElMessage.success('删除规格值成功')
 }
@@ -486,7 +534,6 @@ const removeSpecItem = (specId, itemId) => {
 // 清空规格值
 const clearSpecInput = () => {
   specCount.value = 0
-  specItemCount.value = {}
   spec.value = {}
   specItem.value = {}
   cartesianProductTableData()
@@ -528,9 +575,16 @@ const updateFileListHandle = (files) => {
 const detailEditorRef = ref(null)
 // 保存按钮
 const save = async() => {
+  console.log('sava orgin spec', spec.value)
+  console.log('sava orgin specItem', specItem.value)
+  console.log('sava orgin specValue', specValue.value)
   // 如果是积分商品 必定是单规格
   if (formData.value.goodsArea === 1) {
     formData.value.specType = 0
+  }
+  if (goodsImages.value.length === 0) {
+    ElMessage.error('请上传商品图片')
+    return
   }
   elFormRef.value?.validate(async(valid) => {
     if (!valid) {
@@ -543,9 +597,7 @@ const save = async() => {
     }
     const specItemData = []
     for (const sId in specItem.value) {
-      console.log('specItem.value[sId]', specItem.value[sId])
       for (const itemId in specItem.value[sId]) {
-        console.log('specValue.value[itemId]', specItem.value[sId][itemId])
         specItemData.push(specItem.value[sId][itemId])
       }
     }
@@ -563,10 +615,10 @@ const save = async() => {
         res = await createGoods(data)
         break
       case 'update':
-        res = await updateGoods(formData.value)
+        res = await updateGoods(data)
         break
       default:
-        res = await createGoods(formData.value)
+        res = await createGoods(data)
         break
     }
     if (res.code === 0) {

@@ -101,7 +101,7 @@ func (goodsService *GoodsService) CreateGoods(from shopReq.GoodsSubmitFrom) (err
 		}
 
 		// 创建规格项明细
-		// keys = 1_1,2_1
+		// keys = 1,3
 		for keys, value := range from.SpecValue {
 			keyArr := strings.Split(keys, ",")
 			if len(keyArr) == 0 {
@@ -214,7 +214,30 @@ func (goodsService *GoodsService) UpdateGoods(goods shop.Goods) (err error) {
 // GetGoods 根据id获取Goods记录
 // Author [piexlmax](https://github.com/likfees)
 func (goodsService *GoodsService) GetGoods(id uint) (goods shop.Goods, err error) {
-	err = global.DB.Where("id = ?", id).First(&goods).Error
+	err = global.DB.Where("id = ?", id).
+		Preload("Desc").
+		Preload("Images").
+		Preload("Spec").
+		First(&goods).Error
+	if err != nil {
+		return goods, errors.New("获取商品详情失败")
+	}
+	if *goods.SpecType == 1 {
+		for k, s := range goods.Spec {
+			var specItem []shop.GoodsSpecItem
+			err := global.DB.Where("spec_id = ?", s.ID).Find(&specItem).Error
+			if err != nil {
+				return shop.Goods{}, errors.New("获取商品规格失败")
+			}
+			goods.Spec[k].SpecItem = specItem
+		}
+		var specValue []shop.GoodsSpecValue
+		err = global.DB.Where("goods_id = ?", goods.ID).Find(&specValue).Error
+		if err != nil {
+			return shop.Goods{}, errors.New("获取商品规格明细失败")
+		}
+		goods.SpecValue = specValue
+	}
 	return
 }
 
