@@ -6,4 +6,8 @@ type ApiGroup struct {
 	BrandCategoryApi
 	TagsApi
 	GoodsApi
+	OrderApi
+	OrderDetailsApi
+	OrderDeliveryApi
+	OrderReturnApi
 }

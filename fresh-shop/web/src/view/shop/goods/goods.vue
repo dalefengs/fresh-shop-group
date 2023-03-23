@@ -55,7 +55,9 @@
           <template #default="scope">
             <div class="table-multi-line">
               <span>编号：{{ scope.row.ID }}</span><br>
-              <span>商品名称：{{ scope.row.name }}</span><br>
+              <div style="display:inline-block;">
+                商品名称：<span style="color: #4d70ff">{{ scope.row.name }}</span><br>
+              </div>
               <span>所属分类：{{ scope.row.category.title }}</span><br>
               <span>所属品牌：{{ scope.row.brand.name }}</span><br>
             </div>
@@ -69,12 +71,12 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column align="left" label="详情信息" prop="name" width="300">
+        <el-table-column align="left" label="详情信息" prop="name" width="250">
           <template #default="scope">
             <div class="table-multi-line">
-              商品价格：<span style="color: #f56c6c; font-weight: bold">{{ scope.row.price }}</span> <el-divider direction="vertical" />
-              <span>最低购买数量：{{ scope.row.minCount }} {{ scope.row.unit }}</span><br>
-              <span>库存：{{ scope.row.price }}</span><el-divider direction="vertical" />
+              商品价格：<span style="color: #f56c6c; font-weight: bold">{{ scope.row.price }} 元</span> <el-divider direction="vertical" />
+              <span>库存：{{ scope.row.price }}</span><br>
+              <span>最低购买数量：{{ scope.row.minCount }} {{ scope.row.unit }}</span><el-divider direction="vertical" />
               <span>总销量：{{ scope.row.sale }}</span><br>
               <span>商品单位：{{ scope.row.unit }}</span><el-divider direction="vertical" />
               <span>商品重量：{{ scope.row.weight }}g</span><br>

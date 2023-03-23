@@ -118,8 +118,25 @@ func AccountUnifyDeduction(groupId int, finance account.UserFinance) error {
 func GetUserAccountInfo(userId, groupId int) (*account.Account, error) {
 	// 获取该用户的账户信息
 	var userAcount account.Account
-	if errors.Is(global.DB.Where("user_id = ? and group_id = ?", userId, groupId).First(&userAcount).Error, gorm.ErrRecordNotFound) {
+	if errors.Is(global.DB.Where("user_id = ? and group_id = ?", userId, groupId).Preload("Group").First(&userAcount).Error, gorm.ErrRecordNotFound) {
 		return nil, errors.New("账户配置不存在")
 	}
+	if *userAcount.Status == 0 {
+		return nil, errors.New("此用户账户已经禁用")
+	}
+	if *userAcount.Group.Status == 0 {
+		return nil, errors.New(userAcount.Group.NameCn + "账户已经禁用")
+	}
 	return &userAcount, nil
+}
+
+// GetUserAllAcountInfo 获取账户下所有币种详细信息
+func GetUserAllAcountInfo(userId int) ([]account.Account, error) {
+	var a []account.Account
+	err := global.DB.Where("Group.status = 1 and user_id = ?", userId).Joins("Group").Find(&a).Error
+	if err != nil {
+		global.SugarLog.Errorf("查找所有账户信息失败 user_id %d, err: %s", userId, err.Error())
+		return nil, errors.New("查找账户信息失败")
+	}
+	return a, nil
 }

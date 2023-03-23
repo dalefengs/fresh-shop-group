@@ -27,7 +27,6 @@
       <el-table
         :data="tableData"
         @sort-change="sortChange"
-        row-key="ID"
       >
         <el-table-column align="left" label="ID" min-width="80" prop="ID" sortable="custom" />
         <el-table-column align="left" label="头像" min-width="75">
@@ -45,7 +44,15 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column align="left" label="积分余额" min-width="150" prop="point" sortable="custom" />
+        <el-table-column align="left" label="账户信息" min-width="150" prop="point" sortable="custom">
+          <template #default="scope">
+            <div class="table-multi-line">
+              <div v-for="ac in scope.row.account" :key="ac.ID">
+                <span>{{ ac.group.nameCn }}：{{ ac.amount }}</span>
+              </div>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column align="left" label="用户角色" min-width="200">
           <template #default="scope">
             <el-cascader
@@ -55,18 +62,20 @@
               collapse-tags
               :props="{ multiple:true,checkStrictly: true,label:'authorityName',value:'authorityId',disabled:'disabled',emitPath:false}"
               :clearable="false"
+              :disabled="userStore.role.authorityId !== 888"
               @visible-change="(flag)=>{changeAuthority(scope.row,flag,0)}"
               @remove-tag="(removeAuth)=>{changeAuthority(scope.row,false,removeAuth)}"
             />
           </template>
         </el-table-column>
-        <el-table-column align="left" label="启用" min-width="150">
+        <el-table-column align="left" label="状态" min-width="150">
           <template #default="scope">
             <el-switch
               v-model="scope.row.enable"
               inline-prompt
               :active-value="1"
               :inactive-value="2"
+              :disabled="scope.row.isSuperAdmin"
               @change="()=>{switchEnable(scope.row)}"
             />
           </template>
@@ -82,18 +91,20 @@
         </el-table-column>
         <el-table-column label="操作" min-width="250" fixed="right">
           <template #default="scope">
-            <el-popover v-model="scope.row.visible" placement="top" width="160">
-              <p>确定要删除此用户吗</p>
-              <div style="text-align: right; margin-top: 8px;">
-                <el-button type="primary" link @click="scope.row.visible = false">取消</el-button>
-                <el-button type="primary" @click="deleteUserFunc(scope.row)">确定</el-button>
-              </div>
-              <template #reference>
-                <el-button type="primary" link icon="delete">删除</el-button>
-              </template>
-            </el-popover>
-            <el-button type="primary" link icon="edit" @click="openEdit(scope.row)">编辑</el-button>
-            <el-button type="primary" link icon="magic-stick" @click="resetPasswordFunc(scope.row)">重置密码</el-button>
+            <div v-if="!scope.row.isSuperAdmin">
+              <el-popover v-model="scope.row.visible" placement="top" width="160">
+                <p>确定要删除此用户吗</p>
+                <div style="text-align: right; margin-top: 8px;">
+                  <el-button type="primary" link @click="scope.row.visible = false">取消</el-button>
+                  <el-button type="primary" @click="deleteUserFunc(scope.row)">确定</el-button>
+                </div>
+                <template #reference>
+                  <el-button type="primary" link icon="delete">删除</el-button>
+                </template>
+              </el-popover>
+              <el-button type="primary" link icon="edit" @click="openEdit(scope.row)">编辑</el-button>
+              <el-button type="primary" link icon="magic-stick" @click="resetPasswordFunc(scope.row)">重置密码</el-button>
+            </div>
           </template>
         </el-table-column>
 
@@ -135,7 +146,7 @@
           <!--          <el-form-item label="邮箱" prop="email">
             <el-input v-model="userInfo.email" />
           </el-form-item>-->
-          <el-form-item label="用户角色" prop="authorityId">
+          <el-form-item v-if="userStore.role.authorityId === 888" label="用户角色" prop="authorityId">
             <el-cascader
               v-model="userInfo.authorityIds"
               style="width:100%"
@@ -198,6 +209,7 @@ import { setUserInfo, resetPassword } from '@/api/user.js'
 import { nextTick, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { toSQLLine } from '@/utils/stringFun'
+import { useUserStore } from '@/pinia/modules/user'
 const path = ref(import.meta.env.VITE_BASE_API + '/')
 // 初始化相关
 const setAuthorityOptions = (AuthorityData, optionsData) => {
@@ -220,6 +232,8 @@ const setAuthorityOptions = (AuthorityData, optionsData) => {
           }
         })
 }
+
+const userStore = useUserStore()
 
 const searchInfo = ref({})
 const page = ref(1)
@@ -246,6 +260,18 @@ const getTableData = async() => {
   }
   const table = await getUserList(data)
   if (table.code === 0) {
+    // 如果不是超级管理员
+    if (userStore.role.authorityId !== 888) {
+      table.data.list.forEach(item => {
+        item.authorities.forEach(a => {
+          // 判断是否是超级管理员
+          if (a.authorityId === 888) {
+            item.isSuperAdmin = true
+          }
+        })
+      })
+      console.log('table.data.list', table.data.list)
+    }
     tableData.value = table.data.list
     total.value = table.data.total
     page.value = table.data.page
@@ -342,7 +368,7 @@ const userInfo = ref({
   nickName: '',
   headerImg: '',
   authorityId: '',
-  authorityIds: [],
+  authorityIds: [1000],
   enable: 1,
 })
 

@@ -19,12 +19,16 @@ export const useUserStore = defineStore('user', () => {
     baseColor: '#fff'
   })
   const token = ref(window.localStorage.getItem('token') || '')
+  const role = ref(window.localStorage.getItem('role') || '')
   const setUserInfo = (val) => {
     userInfo.value = val
   }
 
   const setToken = (val) => {
     token.value = val
+  }
+  const setRole = (val) => {
+    role.value = val
   }
 
   const NeedInit = () => {
@@ -45,6 +49,7 @@ export const useUserStore = defineStore('user', () => {
     const res = await getUserInfo()
     if (res.code === 0) {
       setUserInfo(res.data.userInfo)
+      setRole(res.data.userInfo.authority)
     }
     return res
   }
@@ -59,6 +64,7 @@ export const useUserStore = defineStore('user', () => {
       if (res.code === 0) {
         setUserInfo(res.data.user)
         setToken(res.data.token)
+        setRole(res.data.user.authority)
         const routerStore = useRouterStore()
         await routerStore.SetAsyncRouter()
         const asyncRouters = routerStore.asyncRouters
@@ -133,6 +139,7 @@ export const useUserStore = defineStore('user', () => {
   return {
     userInfo,
     token,
+    role,
     NeedInit,
     ResetUserInfo,
     GetUserInfo,

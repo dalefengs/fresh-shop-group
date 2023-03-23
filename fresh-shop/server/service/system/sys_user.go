@@ -136,7 +136,7 @@ func (userService *UserService) ChangePassword(u *system.SysUser, newPassword st
 //@param: info request.PageInfo
 //@return: err error, list interface{}, total int64
 
-func (userService *UserService) GetUserInfoList(info sysReq.UserList, order string, desc bool) (list interface{}, total int64, err error) {
+func (userService *UserService) GetUserInfoList(info sysReq.UserList, order string, desc bool, authorityId uint) (list interface{}, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	db := global.DB.Model(&system.SysUser{})
@@ -153,6 +153,10 @@ func (userService *UserService) GetUserInfoList(info sysReq.UserList, order stri
 	}
 	if info.InvitationCode != "" {
 		db = db.Where("invitation_code like ?", "%"+info.InvitationCode+"%")
+	}
+	// 不是超级管理员， id为1的用户不显示
+	if authorityId != 888 {
+		db = db.Where("id != 1")
 	}
 
 	err = db.Count(&total).Error

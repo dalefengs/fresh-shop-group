@@ -1,6 +1,7 @@
 package system
 
 import (
+	"fresh-shop/server/service/common"
 	"strconv"
 	"time"
 
@@ -219,7 +220,16 @@ func (b *BaseApi) GetUserList(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	list, total, err := userService.GetUserInfoList(pageInfo, pageInfo.OrderKey, pageInfo.Desc)
+	authorityId := utils.GetUserAuthorityId(c)
+	list, total, err := userService.GetUserInfoList(pageInfo, pageInfo.OrderKey, pageInfo.Desc, authorityId)
+	for k, l := range list.([]system.SysUser) {
+		// 查询币种账户
+		ac, err := common.GetUserAllAcountInfo(int(l.ID))
+		if err != nil {
+			continue
+		}
+		list.([]system.SysUser)[k].Account = ac
+	}
 	if err != nil {
 		global.Log.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)

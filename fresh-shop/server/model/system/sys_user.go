@@ -28,6 +28,7 @@ type SysUser struct {
 	Enable         int            `json:"enable" gorm:"default:1;comment:用户是否被冻结 1正常 2冻结"` //用户是否被冻结 1正常 2冻结
 	LoginIp        string         `json:"loginIp" gorm:"comment:登录IP"`                     // 登录IP
 	LoginTime      *time.Time     `json:"loginTime" gorm:"comment:最后登录时间"`                 // 最后登录时间
+	Account        any            `json:"account" gorm:"-"`
 }
 
 func (SysUser) TableName() string {

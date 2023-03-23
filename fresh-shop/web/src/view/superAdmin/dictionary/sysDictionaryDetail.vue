@@ -142,9 +142,9 @@ onBeforeRouteUpdate((to) => {
 
 const formData = ref({
   label: null,
-  value: null,
+  value: 1,
   status: true,
-  sort: null
+  sort: 50
 })
 const rules = ref({
   label: [
@@ -232,9 +232,9 @@ const closeDialog = () => {
   dialogFormVisible.value = false
   formData.value = {
     label: null,
-    value: null,
+    value: 1,
     status: true,
-    sort: null,
+    sort: 50,
     sysDictionaryID: ''
   }
 }
