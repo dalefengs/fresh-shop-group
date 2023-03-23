@@ -34,7 +34,7 @@
             <CustomPic style="margin-top:8px" :pic-src="scope.row.headerImg" />
           </template>
         </el-table-column>
-        <el-table-column align="left" label="用户信息" min-width="250" prop="userName" style="line-height: 10px">
+        <el-table-column align="left" label="用户信息" min-width="220" prop="userName" style="line-height: 10px">
           <template #default="scope">
             <div class="table-multi-line">
               <span class="">用户名：{{ scope.row.userName }}</span><br>
@@ -44,7 +44,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column align="left" label="账户信息" min-width="150" prop="point" sortable="custom">
+        <el-table-column align="left" label="账户信息" min-width="130" prop="point" sortable="custom">
           <template #default="scope">
             <div class="table-multi-line">
               <div v-for="ac in scope.row.account" :key="ac.ID">
@@ -68,7 +68,7 @@
             />
           </template>
         </el-table-column>
-        <el-table-column align="left" label="状态" min-width="150">
+        <el-table-column align="left" label="状态" min-width="80">
           <template #default="scope">
             <el-switch
               v-model="scope.row.enable"
@@ -84,7 +84,7 @@
           <template #default="scope">
             <div class="table-multi-line" v-if="scope.row.loginTime">
               <span>登录IP：{{ scope.row.loginIp }}</span><br>
-              <span>最后登录时间：{{ scope.row.loginTime }}</span><br>
+              <span>最后登录时间：{{ formatDate(scope.row.loginTime) }}</span><br>
             </div>
             <span v-else>从未登录</span>
           </template>
@@ -210,6 +210,7 @@ import { nextTick, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { toSQLLine } from '@/utils/stringFun'
 import { useUserStore } from '@/pinia/modules/user'
+import { formatDate } from '@/utils/format'
 const path = ref(import.meta.env.VITE_BASE_API + '/')
 // 初始化相关
 const setAuthorityOptions = (AuthorityData, optionsData) => {

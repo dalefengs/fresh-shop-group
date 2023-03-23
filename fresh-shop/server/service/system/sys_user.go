@@ -106,6 +106,10 @@ func (userService *UserService) Login(u *system.SysUser) (userInter *system.SysU
 			return nil, errors.New("用户名不存在或者密码错误")
 		}
 		MenuServiceApp.UserAuthorityDefaultRouter(&user)
+		// 设置登录 IP 和 登录时间
+		user.LoginIp = u.LoginIp
+		user.LoginTime = time.Now()
+		global.DB.Save(&user)
 	}
 	return &user, err
 }

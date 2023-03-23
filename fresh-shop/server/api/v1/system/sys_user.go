@@ -51,7 +51,7 @@ func (b *BaseApi) Login(c *gin.Context) {
 	var oc bool = openCaptcha == 0 || openCaptcha < interfaceToInt(v)
 
 	if !oc || store.Verify(l.CaptchaId, l.Captcha, true) {
-		u := &system.SysUser{Username: l.Username, Password: l.Password}
+		u := &system.SysUser{Username: l.Username, Password: l.Password, LoginIp: key}
 		user, err := userService.Login(u)
 		if err != nil {
 			global.Log.Error("登陆失败! 用户名不存在或者密码错误!", zap.Error(err))
