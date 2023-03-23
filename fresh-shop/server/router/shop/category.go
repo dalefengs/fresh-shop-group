@@ -12,7 +12,6 @@ type CategoryRouter struct {
 // InitCategoryRouter 初始化 Category 路由信息
 func (s *CategoryRouter) InitCategoryRouter(Router *gin.RouterGroup) {
 	categoryRouter := Router.Group("category").Use(middleware.OperationRecord())
-	categoryRouterWithoutRecord := Router.Group("category")
 	var categoryApi = v1.ApiGroupApp.ShopApiGroup.CategoryApi
 	{
 		categoryRouter.POST("createCategory", categoryApi.CreateCategory)             // 新建Category
@@ -20,6 +19,12 @@ func (s *CategoryRouter) InitCategoryRouter(Router *gin.RouterGroup) {
 		categoryRouter.DELETE("deleteCategoryByIds", categoryApi.DeleteCategoryByIds) // 批量删除Category
 		categoryRouter.PUT("updateCategory", categoryApi.UpdateCategory)              // 更新Category
 	}
+}
+
+// InitCategoryPublicRouter 初始化公开的 Category 路由信息
+func (s *CategoryRouter) InitCategoryPublicRouter(Router *gin.RouterGroup) {
+	categoryRouterWithoutRecord := Router.Group("category")
+	var categoryApi = v1.ApiGroupApp.ShopApiGroup.CategoryApi
 	{
 		categoryRouterWithoutRecord.GET("findCategory", categoryApi.FindCategory)             // 根据ID获取Category
 		categoryRouterWithoutRecord.GET("getCategoryList", categoryApi.GetCategoryList)       // 获取Category列表

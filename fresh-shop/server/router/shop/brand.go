@@ -12,7 +12,6 @@ type BrandRouter struct {
 // InitBrandRouter 初始化 Brand 路由信息
 func (s *BrandRouter) InitBrandRouter(Router *gin.RouterGroup) {
 	brandRouter := Router.Group("brand").Use(middleware.OperationRecord())
-	brandRouterWithoutRecord := Router.Group("brand")
 	var brandApi = v1.ApiGroupApp.ShopApiGroup.BrandApi
 	{
 		brandRouter.POST("createBrand", brandApi.CreateBrand)             // 新建Brand
@@ -20,6 +19,12 @@ func (s *BrandRouter) InitBrandRouter(Router *gin.RouterGroup) {
 		brandRouter.DELETE("deleteBrandByIds", brandApi.DeleteBrandByIds) // 批量删除Brand
 		brandRouter.PUT("updateBrand", brandApi.UpdateBrand)              // 更新Brand
 	}
+}
+
+// InitBrandPublicRouter 初始化公开的 Brand 路由信息
+func (s *BrandRouter) InitBrandPublicRouter(Router *gin.RouterGroup) {
+	brandRouterWithoutRecord := Router.Group("brand")
+	var brandApi = v1.ApiGroupApp.ShopApiGroup.BrandApi
 	{
 		brandRouterWithoutRecord.GET("findBrand", brandApi.FindBrand)             // 根据ID获取Brand
 		brandRouterWithoutRecord.GET("getBrandList", brandApi.GetBrandList)       // 获取Brand列表

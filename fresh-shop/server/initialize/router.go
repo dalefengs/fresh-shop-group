@@ -53,20 +53,19 @@ func Routers() *gin.Engine {
 	PrivateGroup := Router.Group(global.Config.System.RouterPrefix)
 	PrivateGroup.Use(middleware.JWTAuth()).Use(middleware.CasbinHandler())
 	{
-		systemRouter.InitApiRouter(PrivateGroup)                 // 注册功能api路由
-		systemRouter.InitJwtRouter(PrivateGroup)                 // jwt相关路由
-		systemRouter.InitUserRouter(PrivateGroup)                // 注册用户路由
-		systemRouter.InitMenuRouter(PrivateGroup)                // 注册menu路由
-		systemRouter.InitSystemRouter(PrivateGroup)              // system相关路由
-		systemRouter.InitCasbinRouter(PrivateGroup)              // 权限相关路由
-		systemRouter.InitAutoCodeRouter(PrivateGroup)            // 创建自动化代码
-		systemRouter.InitAuthorityRouter(PrivateGroup)           // 注册角色路由
-		systemRouter.InitSysDictionaryRouter(PrivateGroup)       // 字典管理
-		systemRouter.InitAutoCodeHistoryRouter(PrivateGroup)     // 自动化代码历史
-		systemRouter.InitSysOperationRecordRouter(PrivateGroup)  // 操作记录
-		systemRouter.InitSysDictionaryDetailRouter(PrivateGroup) // 字典详情管理
-		systemRouter.InitAuthorityBtnRouterRouter(PrivateGroup)  // 字典详情管理
-
+		systemRouter.InitApiRouter(PrivateGroup)                    // 注册功能api路由
+		systemRouter.InitJwtRouter(PrivateGroup)                    // jwt相关路由
+		systemRouter.InitUserRouter(PrivateGroup)                   // 注册用户路由
+		systemRouter.InitMenuRouter(PrivateGroup)                   // 注册menu路由
+		systemRouter.InitSystemRouter(PrivateGroup)                 // system相关路由
+		systemRouter.InitCasbinRouter(PrivateGroup)                 // 权限相关路由
+		systemRouter.InitAutoCodeRouter(PrivateGroup)               // 创建自动化代码
+		systemRouter.InitAuthorityRouter(PrivateGroup)              // 注册角色路由
+		systemRouter.InitSysDictionaryRouter(PrivateGroup)          // 字典管理
+		systemRouter.InitAutoCodeHistoryRouter(PrivateGroup)        // 自动化代码历史
+		systemRouter.InitSysOperationRecordRouter(PrivateGroup)     // 操作记录
+		systemRouter.InitSysDictionaryDetailRouter(PrivateGroup)    // 字典详情管理
+		systemRouter.InitAuthorityBtnRouterRouter(PrivateGroup)     // 字典详情管理
 		exampleRouter.InitFileUploadAndDownloadRouter(PrivateGroup) // 文件上传下载功能路由
 
 	}
@@ -84,7 +83,15 @@ func Routers() *gin.Engine {
 		businessRouter.InitUserDeliveryRouter(PrivateGroup)
 	}
 	{
+
 		shopRouter := router.RouterGroupApp.Shop
+		// 不进行鉴别权的路由
+		{
+			shopRouter.InitGoodsPublicRouter(PublicGroup)
+			shopRouter.InitBrandPublicRouter(PublicGroup)
+			shopRouter.InitCategoryPublicRouter(PublicGroup)
+			shopRouter.InitTagsPublicRouter(PublicGroup)
+		}
 		shopRouter.InitCategoryRouter(PrivateGroup)
 		shopRouter.InitBrandRouter(PrivateGroup)
 		shopRouter.InitBrandCategoryRouter(PrivateGroup)
