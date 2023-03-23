@@ -170,7 +170,6 @@
               <div v-else class="header-img-box">从媒体库选择</div>
             </div>
           </el-form-item>
-
         </el-form>
 
       </div>
