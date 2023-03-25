@@ -29,7 +29,7 @@
           </template>
         </el-table-column>
         <el-table-column align="left" label="名称" prop="name" width="120" />
-        <el-table-column align="left" label="排序" prop="soft" width="120" />
+        <el-table-column align="left" label="排序" prop="sort" width="120" />
         <el-table-column align="left" label="创建日期" width="180">
           <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
@@ -68,8 +68,8 @@
             <div v-else class="header-img-box">从媒体库选择</div>
           </div>
         </el-form-item>
-        <el-form-item label="排序:" prop="soft">
-          <el-input v-model.number="formData.soft" :clearable="true" placeholder="请输入" />
+        <el-form-item label="排序:" prop="sort">
+          <el-input v-model.number="formData.sort" :clearable="true" placeholder="请输入" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -111,7 +111,7 @@ const path = ref(import.meta.env.VITE_BASE_API + '/')
 const formData = ref({
   name: '',
   logo: '',
-  soft: 50,
+  sort: 50,
 })
 
 // 验证规则
@@ -257,7 +257,7 @@ const closeDialog = () => {
   formData.value = {
     name: '',
     logo: '',
-    soft: 50,
+    sort: 50,
   }
 }
 // 弹窗确定

@@ -40,7 +40,17 @@ const props = defineProps({
 })
 
 const fileListModel = computed({
-  get: () => props.fileList,
+  get: () => {
+    // 深拷贝
+    const list = JSON.parse(JSON.stringify(props.fileList))
+    list.forEach((item, index) => {
+      // 如果不是 http 开头的
+      if (item.url.slice(0, 4) !== 'http') {
+        item.url = path.value + '/' + item.url
+      }
+    })
+    return list
+  },
   set: (val) => {
   },
 })
@@ -69,10 +79,6 @@ const uploadSuccess = (res) => {
   const { data } = res
   if (data.file) {
     let url = data.file.url
-    // 如果不是 http 开头的
-    if (url.slice(0, 4) !== 'http') {
-      url = path.value + '/' + url
-    }
     emit('on-success', url, data.file.name)
   }
 }
@@ -93,9 +99,6 @@ const handleRemove = (uploadFile, uploadFiles) => {
   uploadFiles.forEach(item => {
     let url = item.response.data.file.url
     // 如果不是 http 开头的
-    if (url.slice(0, 4) !== 'http') {
-      url = path.value +"/"+ url
-    }
     files.push({
       name: item.name,
       url: url

@@ -62,6 +62,6 @@ func (bannerService *BannerService) GetBannerInfoList(info businessReq.BannerSea
 		return
 	}
 
-	err = db.Limit(limit).Offset(offset).Find(&banners).Error
+	err = db.Limit(limit).Offset(offset).Order("sort asc").Find(&banners).Error
 	return banners, total, err
 }

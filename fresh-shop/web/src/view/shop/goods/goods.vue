@@ -47,7 +47,7 @@
         <el-table-column type="selection" width="55" />
         <el-table-column align="left" label="商品图片" prop="images" width="100">
           <template #default="scope">
-            <img v-if="scope.row.images[0]" :src="scope.row.images[0].url" title="点击查看大图" style="width: 100%" alt="" @click="handlePictureCardPreview(scope.row.images[0].url)">
+            <img v-if="scope.row.images[0]" :src="(scope.row.images[0].url && scope.row.images[0].url.slice(0, 4) !== 'http') ? path + scope.row.images[0].url:scope.row.images[0].url" style="width: 100%" @click="handlePictureCardPreview(scope.row.images[0].url)">
             <span v-else>暂无图片</span>
           </template>
         </el-table-column>
@@ -56,8 +56,8 @@
             <div class="table-multi-line">
               <span>编号：{{ scope.row.ID }}</span><br>
               <div style="display:inline-block;">
-                商品名称：<span style="color: #4d70ff">{{ scope.row.name }}</span><br>
-              </div>
+                商品名称：<span style="color: #4d70ff">{{ scope.row.name }}</span>
+              </div><br>
               <span>所属分类：{{ scope.row.category.title }}</span><br>
               <span>所属品牌：{{ scope.row.brand.name }}</span><br>
             </div>
@@ -74,11 +74,15 @@
         <el-table-column align="left" label="详情信息" prop="name" width="250">
           <template #default="scope">
             <div class="table-multi-line">
-              商品价格：<span style="color: #f56c6c; font-weight: bold">{{ scope.row.price }} 元</span> <el-divider direction="vertical" />
-              <span>库存：{{ scope.row.price }}</span><br>
+              <div >
+                商品价格：<span style="color: #f56c6c; font-weight: bold">{{ scope.row.costPrice }} 元</span><el-divider direction="vertical" />
+                优惠价格: <span v-if="scope.row.price > 0" style="color: #f56c6c; font-weight: bold">{{ scope.row.price }} 元</span>
+                <span v-else style="color: #f56c6c; font-weight: bold">无优惠</span>
+              </div>
+              <span>商品库存：{{ scope.row.price }}</span><el-divider direction="vertical" />
+              <span>商品单位：{{ scope.row.unit }}</span><br>
               <span>最低购买数量：{{ scope.row.minCount }} {{ scope.row.unit }}</span><el-divider direction="vertical" />
               <span>总销量：{{ scope.row.sale }}</span><br>
-              <span>商品单位：{{ scope.row.unit }}</span><el-divider direction="vertical" />
               <span>商品重量：{{ scope.row.weight }}g</span><br>
             </div>
           </template>
@@ -87,7 +91,7 @@
           <template #default="scope">
             <div class="table-multi-line">
               <span>状态：{{ filterDict(scope.row.status, goodsStatusOptions) }}</span><br>
-              <span>是否首页：{{ filterDict(scope.row.isFirst,whetherOptions) }}</span><br>
+              <!--              <span>是否首页：{{ filterDict(scope.row.isFirst,whetherOptions) }}</span><br>-->
               <span>是否热销：{{ filterDict(scope.row.isHot,whetherOptions) }}</span><br>
               <span>是否上新：{{ filterDict(scope.row.isNew,whetherOptions) }}</span><br>
             </div>
@@ -144,6 +148,8 @@ import { getDictFunc, formatDate, filterDict } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+
+const path = ref(import.meta.env.VITE_BASE_API + '/')
 
 // 自动化生成的字典（可能为空）以及字段
 const specTypeOptions = ref([])
@@ -293,6 +299,9 @@ const dialogImageUrl = ref('')
 const dialogImgVisible = ref(false)
 const handlePictureCardPreview = (url) => {
   console.log(url)
+  if (url.slice(0, 4) !== 'http') {
+    url = path.value + '/' + url
+  }
   dialogImageUrl.value = url
   dialogImgVisible.value = true
 }

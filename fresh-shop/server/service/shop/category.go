@@ -57,12 +57,15 @@ func (categoryService *CategoryService) GetCategoryInfoList(info shopReq.Categor
 	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
 		db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
 	}
+	if info.IsFirst != nil {
+		db = db.Where("is_first = ?", info.IsFirst)
+	}
 	err = db.Count(&total).Error
 	if err != nil {
 		return
 	}
 
-	err = db.Limit(limit).Offset(offset).Find(&categorys).Error
+	err = db.Limit(limit).Offset(offset).Order("sort asc").Find(&categorys).Error
 	return categorys, total, err
 }
 

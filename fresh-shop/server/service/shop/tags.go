@@ -64,9 +64,9 @@ func (tagsService *TagsService) GetTagsInfoList(info shopReq.TagsSearch) (list [
 	if err != nil {
 		return
 	}
-	var OrderStr string
+	OrderStr := "sort asc"
 	orderMap := make(map[string]bool)
-	orderMap["soft"] = true
+	orderMap["sort"] = true
 	if orderMap[info.Sort] {
 		OrderStr = info.Sort
 		if info.Order == "descending" {

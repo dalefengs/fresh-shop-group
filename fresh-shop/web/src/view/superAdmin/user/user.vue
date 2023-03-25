@@ -84,7 +84,7 @@
           <template #default="scope">
             <div class="table-multi-line" v-if="scope.row.loginTime">
               <span>登录IP：{{ scope.row.loginIp }}</span><br>
-              <span>最后登录时间：{{ formatDate(scope.row.loginTime) }}</span><br>
+              <span>最后登录时间：{{ scope.row.loginTime ? formatDate(scope.row.loginTime) : '无' }}</span><br>
             </div>
             <span v-else>从未登录</span>
           </template>

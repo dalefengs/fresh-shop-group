@@ -13,7 +13,8 @@ type Goods struct {
 	GoodsArea  *int             `json:"goodsArea" form:"goodsArea" gorm:"column:goods_area;default:0;comment:所属区域(0普通商品 1积分商城 );"`
 	SpecType   *int             `json:"specType" form:"specType" gorm:"column:spec_type;default:0;comment:规格类型(0单规格 1多规格);"`
 	Unit       string           `json:"unit" form:"unit" gorm:"column:unit;comment:商品单位(盒、件、瓶、克等);size:20;"`
-	Price      *float64         `json:"price" form:"price" gorm:"column:price;comment:商品价格;size:10;"`
+	CostPrice  *float64         `json:"costPrice" form:"costPrice" gorm:"column:cost_price;comment:商品原价;size:10;"`
+	Price      *float64         `json:"price" form:"price" gorm:"column:price;comment:优惠价格;size:10;"`
 	MinCount   *int             `json:"minCount" form:"minCount" gorm:"column:min_count;default:1;comment:最低购买数量;size:10;"`
 	Weight     *int             `json:"weight" form:"weight" gorm:"column:weight;default:0;comment:商品重量（g）;size:10;"`
 	Store      *int             `json:"store" form:"store" gorm:"column:store;default:0;comment:库存;size:10;"`

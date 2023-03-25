@@ -48,7 +48,7 @@
             />
           </template>
         </el-table-column>
-        <el-table-column align="left" label="排序" prop="soft" width="120" />
+        <el-table-column align="left" label="排序" prop="sort" width="120" />
         <el-table-column align="left" label="创建日期" width="180">
           <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
@@ -92,8 +92,8 @@
             <el-radio v-for="(item,key) in whetherOptions" :key="key" :label="item.value" size="large">{{ item.label }}</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="排序:" prop="soft">
-          <el-input v-model.number="formData.soft" :clearable="true" placeholder="请输入" />
+        <el-form-item label="排序:" prop="sort">
+          <el-input v-model.number="formData.sort" :clearable="true" placeholder="请输入" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -137,7 +137,7 @@ const formData = ref({
   pid: 0,
   title: '',
   imgUrl: '',
-  soft: 50,
+  sort: 50,
   isFirst: 0,
 })
 
@@ -353,7 +353,7 @@ const closeDialog = () => {
     pid: 0,
     title: '',
     imgUrl: '',
-    soft: 50,
+    sort: 50,
     isFirst: 0,
   }
 }

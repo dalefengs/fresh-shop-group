@@ -39,7 +39,8 @@ type specItem struct {
 }
 
 type specValue struct {
-	Price *float64 `json:"price" from:"price"`
-	Sort  *int     `json:"sort" from:"sort"`
-	Store *int     `json:"store" from:"store"`
+	Price     *float64 `json:"price" from:"price"`         // 优惠价格
+	CostPrice *float64 `json:"costPrice" from:"costPrice"` // 原价
+	Sort      *int     `json:"sort" from:"sort"`
+	Store     *int     `json:"store" from:"store"`
 }

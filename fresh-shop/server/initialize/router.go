@@ -81,17 +81,15 @@ func Routers() *gin.Engine {
 		businessRouter := router.RouterGroupApp.Business
 		businessRouter.InitBannerRouter(PrivateGroup)
 		businessRouter.InitUserDeliveryRouter(PrivateGroup)
+
+		// 不进行路由鉴权的路由
+		{
+			businessRouter.InitBannerPublicRouter(PublicGroup)
+		}
 	}
 	{
 
 		shopRouter := router.RouterGroupApp.Shop
-		// 不进行鉴别权的路由
-		{
-			shopRouter.InitGoodsPublicRouter(PublicGroup)
-			shopRouter.InitBrandPublicRouter(PublicGroup)
-			shopRouter.InitCategoryPublicRouter(PublicGroup)
-			shopRouter.InitTagsPublicRouter(PublicGroup)
-		}
 		shopRouter.InitCategoryRouter(PrivateGroup)
 		shopRouter.InitBrandRouter(PrivateGroup)
 		shopRouter.InitBrandCategoryRouter(PrivateGroup)
@@ -101,6 +99,14 @@ func Routers() *gin.Engine {
 		shopRouter.InitOrderDetailsRouter(PrivateGroup)
 		shopRouter.InitOrderDeliveryRouter(PrivateGroup)
 		shopRouter.InitOrderReturnRouter(PrivateGroup)
+
+		// 不进行鉴别权的路由
+		{
+			shopRouter.InitGoodsPublicRouter(PublicGroup)
+			shopRouter.InitBrandPublicRouter(PublicGroup)
+			shopRouter.InitCategoryPublicRouter(PublicGroup)
+			shopRouter.InitTagsPublicRouter(PublicGroup)
+		}
 	}
 
 	global.Log.Info("router register success")

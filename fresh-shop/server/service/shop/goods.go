@@ -135,12 +135,13 @@ func (goodsService *GoodsService) CreateGoods(form shopReq.GoodsSubmitFrom) (err
 			itemIdKey = strings.TrimRight(itemIdKey, "_")
 			keyName = strings.TrimRight(keyName, ",")
 			specValue = append(specValue, shop.GoodsSpecValue{
-				GoodsId: goods.ID,
-				ItemIds: itemIdKey,
-				KeyName: keyName,
-				Price:   value.Price,
-				Store:   value.Store,
-				Sort:    value.Sort,
+				GoodsId:   goods.ID,
+				ItemIds:   itemIdKey,
+				KeyName:   keyName,
+				Price:     value.Price,
+				CostPrice: value.CostPrice,
+				Store:     value.Store,
+				Sort:      value.Sort,
 			})
 		}
 		err = tx.Create(&specValue).Error
@@ -508,12 +509,13 @@ func (goodsService *GoodsService) UpdateGoods(form shopReq.GoodsSubmitFrom) (err
 					itemIdKey = strings.TrimRight(itemIdKey, "_")
 					keyName = strings.TrimRight(keyName, ",")
 					createValue = append(createValue, shop.GoodsSpecValue{
-						GoodsId: goods.ID,
-						ItemIds: itemIdKey,
-						KeyName: keyName,
-						Price:   value.Price,
-						Store:   value.Store,
-						Sort:    value.Sort,
+						GoodsId:   goods.ID,
+						ItemIds:   itemIdKey,
+						KeyName:   keyName,
+						CostPrice: value.CostPrice,
+						Price:     value.Price,
+						Store:     value.Store,
+						Sort:      value.Sort,
 					})
 				}
 			}
@@ -561,12 +563,13 @@ func (goodsService *GoodsService) UpdateGoods(form shopReq.GoodsSubmitFrom) (err
 					itemIdKey = strings.TrimRight(itemIdKey, "_")
 					keyName = strings.TrimRight(keyName, ",")
 					unionValue = append(unionValue, shop.GoodsSpecValue{
-						GoodsId: goods.ID,
-						ItemIds: itemIdKey,
-						KeyName: keyName,
-						Price:   value.Price,
-						Store:   value.Store,
-						Sort:    value.Sort,
+						GoodsId:   goods.ID,
+						ItemIds:   itemIdKey,
+						KeyName:   keyName,
+						CostPrice: value.CostPrice,
+						Price:     value.Price,
+						Store:     value.Store,
+						Sort:      value.Sort,
 					})
 				}
 			}
@@ -690,11 +693,29 @@ func (goodsService *GoodsService) GetGoodsInfoList(info shopReq.GoodsSearch) (li
 	if info.GoodsArea != nil {
 		db = db.Where("goods_area = ?", info.GoodsArea)
 	}
+	if info.BrandId != nil {
+		db = db.Where("brand_id = ?", info.BrandId)
+	}
+	if info.CategoryId != nil {
+		db = db.Where("category_id = ?", info.CategoryId)
+	}
+	if info.Status != nil {
+		db = db.Where("status = ?", info.Status)
+	}
+	if info.IsNew != nil {
+		db = db.Where("is_new = ?", info.IsNew)
+	}
+	if info.IsHot != nil {
+		db = db.Where("is_hot = ?", info.IsHot)
+	}
+	if info.IsFirst != nil {
+		db = db.Where("is_first = ?", info.IsFirst)
+	}
 	err = db.Count(&total).Error
 	if err != nil {
 		return
 	}
 	db = db.Order("sort asc, created_at desc")
-	err = db.Limit(limit).Offset(offset).Find(&goodss).Error
+	err = db.Limit(limit).Offset(offset).Order("sort asc").Find(&goodss).Error
 	return goodss, total, err
 }

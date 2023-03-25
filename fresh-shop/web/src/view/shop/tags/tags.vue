@@ -42,7 +42,7 @@
         <el-table-column type="selection" width="55" />
         <el-table-column align="left" label="编号" prop="ID" width="90" />
         <el-table-column align="left" label="标签名" prop="name" width="120" />
-        <el-table-column sortable align="left" label="排序" prop="soft" width="120" />
+        <el-table-column sortable align="left" label="排序" prop="sort" width="120" />
         <el-table-column align="left" label="创建日期" width="180">
           <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
@@ -70,8 +70,8 @@
         <el-form-item label="标签名:" prop="name">
           <el-input v-model="formData.name" :clearable="true" placeholder="请输入" />
         </el-form-item>
-        <el-form-item label="排序:" prop="soft">
-          <el-input v-model.number="formData.soft" :clearable="true" placeholder="请输入" />
+        <el-form-item label="排序:" prop="sort">
+          <el-input v-model.number="formData.sort" :clearable="true" placeholder="请输入" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -108,7 +108,7 @@ import { ref, reactive } from 'vue'
 // 自动化生成的字典（可能为空）以及字段
 const formData = ref({
   name: '',
-  soft: 50,
+  sort: 50,
 })
 
 // 验证规则
@@ -273,7 +273,7 @@ const closeDialog = () => {
   dialogFormVisible.value = false
   formData.value = {
     name: '',
-    soft: 50,
+    sort: 50,
   }
 }
 // 弹窗确定

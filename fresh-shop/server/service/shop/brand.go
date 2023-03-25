@@ -62,7 +62,7 @@ func (brandService *BrandService) GetBrandInfoList(info shopReq.BrandSearch) (li
 		return
 	}
 
-	err = db.Limit(limit).Offset(offset).Find(&brands).Error
+	err = db.Limit(limit).Offset(offset).Order("sort asc").Find(&brands).Error
 	return brands, total, err
 }
 

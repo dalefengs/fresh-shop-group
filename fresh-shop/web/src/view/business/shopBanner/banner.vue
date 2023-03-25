@@ -23,6 +23,7 @@
           </template>
         </el-table-column>
         <el-table-column align="left" label="跳转地址" prop="toPath" width="220" />
+        <el-table-column align="left" label="排序" prop="sort" width="180" />
         <el-table-column align="left" label="创建日期" width="180">
           <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
@@ -72,6 +73,9 @@
         <el-form-item label="跳转地址:" prop="toPath">
           <el-input v-model="formData.toPath" :clearable="true" placeholder="请输入" />
         </el-form-item>
+        <el-form-item label="排序:" prop="sort">
+          <el-input v-model.number="formData.sort" :clearable="true" placeholder="请输入" />
+        </el-form-item>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
@@ -111,7 +115,8 @@ const banner_typeOptions = ref([])
 const formData = ref({
   imgUrl: '',
   toPath: '',
-  type: undefined,
+  sort: 50,
+  type: 0,
 })
 
 // 验证规则
@@ -220,7 +225,8 @@ const closeDialog = () => {
   formData.value = {
     imgUrl: '',
     toPath: '',
-    type: undefined,
+    sort: 50,
+    type: 0,
   }
 }
 // 弹窗确定

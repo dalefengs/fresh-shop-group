@@ -16,11 +16,11 @@
               </el-select>
             </el-form-item>
             <!-- 积分商品只能是单规格， 普通商品才有多规格 -->
-            <el-form-item v-if="formData.goodsArea === 0" label="规格类型:" prop="specType">
+              <!--            <el-form-item v-if="formData.goodsArea === 0" label="规格类型:" prop="specType">
               <el-radio-group v-model="formData.specType" class="ml-4">
                 <el-radio v-for="(item,key) in specTypeOptions" :key="key" :label="item.value" size="large">{{ item.label }}</el-radio>
               </el-radio-group>
-            </el-form-item>
+            </el-form-item>-->
             <el-form-item label="分类:" prop="categoryId">
               <el-select v-model="formData.categoryId" filterable placeholder="Select">
                 <el-option
@@ -41,34 +41,39 @@
                 />
               </el-select>
             </el-form-item>
-            <el-form-item :label="formData.goodsArea === 1 ? '购买所需积分' : '商品价格:' " prop="price">
+            <el-form-item v-if="formData.specType === 0" :label="formData.goodsArea === 1 ? '购买所需积分' : '商品价格:' " prop="costPrice">
+              <el-input-number v-model="formData.costPrice" :precision="2" :clearable="true" />
+            </el-form-item>
+            <!--   普通商品且为多规格时      -->
+            <el-form-item v-if="formData.goodsArea === 0 && formData.specType === 0" label="优惠价" prop="price">
               <el-input-number v-model="formData.price" :precision="2" :clearable="true" />
+              <div style="margin-left: 20px">0 为不优惠</div>
             </el-form-item>
             <el-form-item label="最低购买数量:" prop="minCount">
-              <el-input v-model.number="formData.minCount" :clearable="true" placeholder="请输入" />
+              <el-input-number v-model.number="formData.minCount" :precision="0" :clearable="true" placeholder="请输入" />
             </el-form-item>
             <el-form-item label="商品单位:" prop="unit">
               <el-input v-model="formData.unit" :clearable="true" placeholder="请输入" />
             </el-form-item>
             <el-form-item label="商品重量(g):" prop="weight">
-              <el-input v-model.number="formData.weight" :clearable="true" placeholder="请输入" />
+              <el-input-number v-model.number="formData.weight" :precision="0" :clearable="true" placeholder="请输入" />
             </el-form-item>
             <el-form-item label="库存:" prop="store">
-              <el-input v-model.number="formData.store" :clearable="true" placeholder="请输入" />
+              <el-input-number v-model.number="formData.store" :precision="0" :clearable="true" placeholder="请输入" />
             </el-form-item>
             <el-form-item label="排序:" prop="sort">
-              <el-input v-model.number="formData.sort" :clearable="true" placeholder="请输入" />
+              <el-input-number v-model.number="formData.sort" :precision="0" :clearable="true" placeholder="请输入" />
             </el-form-item>
             <el-form-item label="上架状态:" prop="status">
               <el-radio-group v-model="formData.status" class="ml-4">
                 <el-radio v-for="(item,key) in goodsStatus" :key="key" :label="item.value" size="large">{{ item.label }}</el-radio>
               </el-radio-group>
             </el-form-item>
-            <el-form-item label="是否首页:" prop="isFirst">
+            <!--            <el-form-item label="是否首页:" prop="isFirst">
               <el-radio-group v-model="formData.isFirst" class="ml-4">
                 <el-radio v-for="(item,key) in whetherOptions" :key="key" :label="item.value" size="large">{{ item.label }}</el-radio>
               </el-radio-group>
-            </el-form-item>
+            </el-form-item>-->
             <el-form-item label="是否热销:" prop="isHot">
               <el-radio-group v-model="formData.isHot" class="ml-4">
                 <el-radio v-for="(item,key) in whetherOptions" :key="key" :label="item.value" size="large">{{ item.label }}</el-radio>
@@ -155,6 +160,11 @@
                 </el-table-column>
                 <el-table-column label="价格" width="180">
                   <template #default="scope">
+                    <el-input v-model.number="specValue[scope.row.valueId].costPrice" :clearable="true" placeholder="0" />
+                  </template>
+                </el-table-column>
+                <el-table-column label="优惠价" width="180">
+                  <template #default="scope">
                     <el-input v-model.number="specValue[scope.row.valueId].price" :clearable="true" placeholder="0" />
                   </template>
                 </el-table-column>
@@ -215,16 +225,17 @@ const categoryOptions = ref([])
 const brandOptions = ref([])
 
 const formData = ref({
-  name: '测试',
-  categoryId: 1,
-  brandId: 1,
+  name: '',
+  categoryId: '',
+  brandId: '',
   goodsArea: 0,
   specType: 0,
   unit: '件',
-  price: 100,
+  price: 0,
+  costPrice: 0, // 原价
   minCount: 1,
-  weight: 200,
-  store: 20,
+  weight: 0,
+  store: 0,
   sort: 50,
   status: 1,
   isFirst: 0,
@@ -272,9 +283,9 @@ const rule = reactive({
     message: '',
     trigger: ['input', 'blur'],
   }],
-  price: [{
+  costPrice: [{
     required: true,
-    message: '',
+    message: '请输入商品价格',
     trigger: ['input', 'blur'],
   }],
   minCount: [{
@@ -405,7 +416,8 @@ const initEditGoodsSpec = () => {
       formData.value.specValue.forEach(v => {
         const itemIds = v.itemIds.replaceAll('_', ',')
         if (t.valueId === itemIds) {
-          specValue.value[itemIds].price = v.price
+          specValue.value[itemIds].costPrice = v.costPrice // 原价
+          specValue.value[itemIds].price = v.price // 优惠价格
           specValue.value[itemIds].store = v.store
           specValue.value[itemIds].sort = v.sort
         }
@@ -591,6 +603,7 @@ const save = async() => {
     ElMessage.error('请上传商品图片')
     return
   }
+  console.log('goodsImages.value', goodsImages.value)
   elFormRef.value?.validate(async(valid) => {
     if (!valid) {
       ElMessage.error('您有必填项未填写完成，请检查')
@@ -639,7 +652,7 @@ const save = async() => {
       if (type.value === 'update') {
         await init()
       } else {
-        router.go(-1)
+        router.push({ name: 'goods' })
       }
     }
   })
