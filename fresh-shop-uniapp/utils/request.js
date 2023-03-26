@@ -78,7 +78,7 @@ const request = (options) => {
 				if (options.loading) {
 					toast.hide()
 				}
-				console.log('uni.request fail', err)
+				console.log(`uni.request ${options.url} fail`, err)
 				toast.error('服务器异常，请稍后重试！')
 				reject(err)
 			},

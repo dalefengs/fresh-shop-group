@@ -11,8 +11,9 @@ type GoodsSearch struct {
 	StartCreatedAt *time.Time `json:"startCreatedAt" form:"startCreatedAt"`
 	EndCreatedAt   *time.Time `json:"endCreatedAt" form:"endCreatedAt"`
 	request.PageInfo
-	Sort  string `json:"sort" form:"sort"`
-	Order string `json:"order" form:"order"`
+	TagsIds []uint `json:"tagsIds" form:"tagsIds"` // 标签 ids
+	Sort    string `json:"sort" form:"sort"`
+	Order   string `json:"order" form:"order"`
 }
 
 // GoodsSubmitFrom 提交表单数据

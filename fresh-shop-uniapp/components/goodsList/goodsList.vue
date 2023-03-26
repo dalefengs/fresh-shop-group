@@ -3,7 +3,7 @@
 		<view class="goods--box">
 			<view class="goods--item" v-for="(item, index) in lists" :key="index" @click="$emit('onGoods', item)">
 				<view class="item-cover"
-					:style="{ backgroundImage: 'url(' + (item.images[0] ? item.images[0].url : '') + ')' }" />
+					:style="{ backgroundImage: 'url(' + (item.images.length > 0 ? item.images[0].url : '') + ')' }" />
 				<view class="item-content">
 					<view class="title">{{ item.name }}</view>
 					<view class="bottom-txt">

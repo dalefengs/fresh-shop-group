@@ -78,3 +78,11 @@ func (tagsService *TagsService) GetTagsInfoList(info shopReq.TagsSearch) (list [
 	err = db.Limit(limit).Offset(offset).Find(&tagss).Error
 	return tagss, total, err
 }
+
+// GetTagsListAll 分页获取Tags记录
+// Author [piexlmax](https://github.com/likfees)
+func (tagsService *TagsService) GetTagsListAll() (list []shop.Tags, err error) {
+	var tagss []shop.Tags
+	err = global.DB.Find(&tagss).Error
+	return tagss, err
+}

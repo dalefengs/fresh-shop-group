@@ -5,12 +5,27 @@
 			"style": {
 				"navigationBarTitleText": "首页"
 			}
+		},
+		{
+			"path": "pages/search/search",
+			"style": {
+				"navigationBarTitleText": "搜索"
+			}
 		}
-	],
+	    ,{
+            "path" : "pages/goods/goods",
+            "style" :
+            {
+                "navigationBarTitleText": "商品列表",
+                "enablePullDownRefresh": false
+            }
+
+        }
+    ],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
 		"navigationStyle": "default",
-		"navigationBarTitleText": "启峰生鲜",
+		"navigationBarTitleText": "启运冻品",
 		"navigationBarBackgroundColor": "#F8F8F8",
 		"backgroundColor": "#F8F8F8"
 	},

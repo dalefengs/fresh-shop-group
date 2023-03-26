@@ -6,9 +6,9 @@
  */
 import request from "@/utils/request"
 
-export const getCategoryList = (data) => {
+export const getCategoryListAll = (data) => {
     return request({
-    url: '/category/getCategoryList',
+    url: '/category/getCategoryListAll',
     method: 'GET',
     data
   })

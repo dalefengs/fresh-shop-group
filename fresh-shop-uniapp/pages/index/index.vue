@@ -2,34 +2,34 @@
  * @Author: likfees
  * @Date: 2023-03-23 15:52:23
  * @LastEditors: likfees
- * @LastEditTime: 2023-03-25 11:09:15
+ * @LastEditTime: 2023-03-26 14:43:24
 -->
 <template>
 	<pageWrapper>
 		<u-sticky class="king-bg-white">
-			<view class="king-p-10 king-bg-white" style="height: 35px;">
+			<view class="king-p-5 king-bg-white" style="height: 35px;">
 				<u-search search-icon="scan" disabled :show-action="false" placeholder="日照香炉生紫烟" @click="searchClick">
 				</u-search>
 			</view>
 		</u-sticky>
 		<!-- 轮播图 -->
-		<view class="king-p-20">
+		<view class="king-p-10">
 			<u-swiper :list="banner" keyName="imgUrl" indicator indicatorMode="line" :height="180" circular
 				bgColor="#ffffff"></u-swiper>
 		</view>
 		<!-- 首页分类 -->
-		<view class="king-bg-white king-mx-20 king-radius10 king-py-20" style="min-height: 170px">
+		<view class="king-bg-white king-mx-10 king-radius10 king-py-10" style="min-height: 170px">
 			<u-grid :border="false" col="4">
-				<u-grid-item v-for="c in category" :key="c.ID" class="king-my-5">
+				<u-grid-item v-for="c in category" :key="c.ID" class="king-my-5" @click="toGoodsByCategory(c.ID)">
 					<u--image width="50" height="50" :src="c.imgUrl" shape="circle"></u--image>
 					<text class="grid-text king-my-10">{{ c.title }}</text>
 				</u-grid-item>
 			</u-grid>
 		</view>
-		<view class="king-m-20 king-radius10">
+		<view class="king-m-10 king-radius10">
 			<!-- 导航栏目 -->
 			<u-sticky offset-top="45">
-				<view class="king-bg-white king-pb-10 king-radius10" style="height: 50px;">
+				<view class="king-bg-white king-pb-5 king-radius10" style="height: 50px;">
 					<u-row customStyle="margin-bottom: 10px; height: 50px">
 						<u-col span="6">
 							<view class="goods-tabs" @click="changeGoodsTabs(0)">
@@ -56,7 +56,7 @@
 			</u-sticky>
 		</view>
 		<!-- 商品列表 -->
-		<view class="king-bg-white king-mx-20 king-mb-20 king-radius10">
+		<view class="king-bg-white king-mx-10 king-mb-10 king-radius10">
 			<!-- 列表 -->
 			<view>
 				<swiper :style="{ height: swiperHeight + 'px' }" :current="goodsTabsId" @change="onChangeGoodsTabs">
@@ -64,21 +64,29 @@
 					<swiper-item>
 						<scroll-view :scroll-top="hotScrollTop" scroll-y="true" @scroll="hotScrollTopHandle"
 							:style="{ height: swiperHeight + 'px' }" refresher-enabled="true" :refresher-threshold="70"
-							:refresher-triggered="hotTriggered"
-							@refresherrefresh="onRefresh">
+							:refresher-triggered="hotTriggered" @refresherrefresh="onRefresh"
+							@scrolltolower="hotScrollTolower">
 							<!-- 商品列表 -->
-							<GoodsList :lists="goodsHotArr" price-type="$"></GoodsList>
+							<GoodsList :lists="goodsHotArr" price-type="￥" @onGoods="toGoodsInfo"></GoodsList>
+							<view class="king-py-40" @click="hotScrollTolower">
+								<u-loadmore :status="hotLoadMore" loading-text="努力加载中，请喝杯茶" loadmore-text="上拉加载更多"
+									nomore-text="实在是没有了" />
+							</view>
 							<u-back-top :scroll-top="hotScrollTop" @click="toTop"></u-back-top>
 						</scroll-view>
 					</swiper-item>
 					<!-- 新品上市  -->
 					<swiper-item>
-						<scroll-view :scroll-top="newScrollTop" scroll-y="true" class="king-scroll-row"
-							@scroll="newScrollTopHandle" :style="{ height: swiperHeight + 'px' }" refresher-enabled="true"
-							:refresher-threshold="70" :refresher-triggered="newTriggered"
-							@refresherrefresh="onRefresh">
+						<scroll-view :scroll-top="newScrollTop" scroll-y="true" @scroll="newScrollTopHandle"
+							:style="{ height: swiperHeight + 'px' }" refresher-enabled="true" :refresher-threshold="70"
+							:refresher-triggered="newTriggered" @refresherrefresh="onRefresh"
+							@scrolltolower="newScrollTolower">
 							<!-- 商品列表 -->
 							<GoodsList :lists="goodsNewArr" price-type="$"></GoodsList>
+							<view class="king-py-40" @click="newScrollTolower">
+								<u-loadmore :status="newLoadMore" loading-text="努力加载中，请喝杯茶" loadmore-text="上拉加载更多"
+									nomore-text="实在是没有了" />
+							</view>
 							<u-back-top :scroll-top="newScrollTop" @click="toTop"></u-back-top>
 						</scroll-view>
 					</swiper-item>
@@ -111,6 +119,20 @@ export default {
 			newScrollTop: 0,
 			hotTriggered: false, // 下拉刷新状态
 			newTriggered: false, // 下拉刷新状态
+			hotLoadMore: 'loadmore', // 上拉加载状态
+			newLoadMore: 'loadmore', // 上拉加载状态
+			hotPage: {
+				page: 1,
+				pageSize: 12,
+				total: 0, // 总条数
+				isMore: true // 是否还有更多
+			},
+			newPage: {
+				page: 1,
+				pageSize: 12,
+				total: 0, // 总条数
+				isMore: true // 是否还有更多
+			},
 			banner: [],
 			category: [],
 			goodsHotArr: [],
@@ -129,7 +151,7 @@ export default {
 		uni.getSystemInfo({
 			success: (res) => {
 				const windowHeight = res.windowHeight;
-				this.swiperHeight = windowHeight - 180;
+				this.swiperHeight = windowHeight - 170;
 			},
 		});
 	},
@@ -137,6 +159,9 @@ export default {
 		// 搜索框点击跳转到搜索页面
 		searchClick() {
 			console.log('跳转')
+			uni.navigateTo({
+				url: '/pages/search/search'
+			})
 		},
 		// 获取轮播图
 		getBanner() {
@@ -170,13 +195,27 @@ export default {
 			this.goodsTabsId = id
 		},
 		// 获取商品列表
-		// type = 0热门 1 上新
-		async getGoodsListData(type) {
+		// type = 1加载 其他为刷新
+		async getGoodsListData(tabId, type) {
 			const data = {}
-			if(type == 0) {
+			if (type == 0) {
+				this.hotPage.page = 1
+				this.newPage.page = 1
+				this.hotPage.isMore = true
+				this.newPage.isMore = true
+				this.hotLoadMore = 'loadmore'
+				this.newLoadMore = 'loadmore'
+			}
+			if (tabId == 0) {
 				data.isHot = 1
-			} else if(type == 1) {
-				data.isNew  = 1
+				data.page = this.hotPage.page
+				data.pageSize = this.hotPage.pageSize
+				this.hotPage.page++
+			} else if (tabId == 1) {
+				data.isNew = 1
+				data.page = this.newPage.page
+				data.pageSize = this.newPage.pageSize
+				this.newPage.page++
 			} else {
 				return false
 			}
@@ -185,15 +224,38 @@ export default {
 				return false
 			}
 			res.data.list.forEach(item => {
-				if (item.images[0].url.slice(0, 4) !== 'http') {
+				if (item.images[0] && item.images[0].url.slice(0, 4) !== 'http') {
 					item.images[0].url = config.baseUrl + "/" + item.images[0].url
 				}
 			})
 			console.log(res);
-			if (type == 0) {
-				this.goodsHotArr = res.data.list
-			} else if (type == 1) {
-				this.goodsNewArr = res.data.list
+			// 进行赋值并计算是否还有下一页
+			if (tabId == 0) { // 热门商品
+				this.hotPage.total = res.data.total
+				// 如果没有更多数据，则将isMore设置为false
+				if ((this.hotPage.page - 1) * this.hotPage.pageSize >= this.hotPage.total) {
+					console.log("没有更多了");
+					this.hotPage.isMore = false
+					this.hotLoadMore = 'nomore'
+				}
+				if (type == 1) {
+					this.goodsHotArr = [...this.goodsHotArr, ...res.data.list]
+				} else {
+					this.goodsHotArr = res.data.list
+				}
+			} else if (tabId == 1) { // 新品上市
+				this.newPage.total = res.data.total
+				// 如果没有更多数据，则将isMore设置为false
+				console.log('(this.newPage.page - 1) * this.newPage.pageSize >= this.newPage.total', (this.newPage.page - 1) * this.newPage.pageSize, this.newPage.total);
+				if ((this.newPage.page - 1) * this.newPage.pageSize >= this.newPage.total) {
+					this.newPage.isMore = false
+					this.newLoadMore = 'nomore'
+				}
+				if (type == 1) {
+					this.goodsNewArr = [...this.goodsNewArr, ...res.data.list]
+				} else {
+					this.goodsNewArr = res.data.list
+				}
 			} else {
 				return false
 			}
@@ -217,14 +279,14 @@ export default {
 		// 下拉刷新
 		// type = 1热门 2 上新
 		async onRefresh() {
-			if(this.goodsTabsId == 0) {
+			if (this.goodsTabsId == 0) {
 				this.hotTriggered = true;
-			}else if(this.goodsTabsId == 1) {
+			} else if (this.goodsTabsId == 1) {
 				this.newTriggered = true;
- 			} else {
+			} else {
 				return
 			}
-			const b = await this.getGoodsListData(this.goodsTabsId)
+			const b = await this.getGoodsListData(this.goodsTabsId, 0)
 			if (b) {
 				this.$message.success("刷新成功")
 			} else {
@@ -232,7 +294,49 @@ export default {
 			}
 			this.hotTriggered = false;
 			this.newTriggered = false;
-		}
+		},
+		async hotScrollTolower(e) {
+			// 如果是在加载中就不执行或没有更多时
+			if (this.hotLoadMore == 'loading' || !this.hotPage.isMore) {
+				return
+			}
+			// 设置状态为加载中
+			this.hotLoadMore = 'loading'
+			await this.getGoodsListData(this.goodsTabsId, 1)
+			// 如果还有更多
+			if (this.hotPage.isMore) {
+				this.hotLoadMore = 'loadmore'
+			} else {
+				this.hotLoadMore = 'nomore'
+			}
+		},
+		async newScrollTolower(e) {
+			// 如果是在加载中就不执行或没有更多时
+			if (this.newLoadMore == 'loading' || !this.newPage.isMore) {
+				return
+			}
+			// 设置状态为加载中
+			this.newLoadMore = 'loading'
+			await this.getGoodsListData(this.goodsTabsId, 1)
+			// 如果还有更多
+			if (this.newPage.isMore) {
+				this.newLoadMore = 'loadmore'
+			} else {
+				this.newLoadMore = 'nomore'
+			}
+		},
+		// 跳转商品列表
+		toGoodsByCategory(categoryId) {
+			uni.navigateTo({
+				url: `/pages/goods/goods?categoryId=` + categoryId
+			})
+		},
+		// 跳转商品详情
+		toGoodsInfo(goods) {
+			uni.navigateTo({
+				url: `/pages/goods/goodsInfo?id=` + goods.ID
+			})
+		},
 	},
 }
 </script>

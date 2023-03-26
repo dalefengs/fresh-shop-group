@@ -26,7 +26,8 @@ func (s *TagsRouter) InitTagsPublicRouter(Router *gin.RouterGroup) {
 	tagsRouterWithoutRecord := Router.Group("tags")
 	var tagsApi = v1.ApiGroupApp.ShopApiGroup.TagsApi
 	{
-		tagsRouterWithoutRecord.GET("findTags", tagsApi.FindTags)       // 根据ID获取Tags
-		tagsRouterWithoutRecord.GET("getTagsList", tagsApi.GetTagsList) // 获取Tags列表
+		tagsRouterWithoutRecord.GET("findTags", tagsApi.FindTags)             // 根据ID获取Tags
+		tagsRouterWithoutRecord.GET("getTagsList", tagsApi.GetTagsList)       // 获取Tags列表
+		tagsRouterWithoutRecord.GET("getTagsListAll", tagsApi.GetTagsListAll) // 获取所有 Tags列表
 	}
 }
