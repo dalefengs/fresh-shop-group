@@ -36,7 +36,7 @@ func RunWindowsServer() {
 	global.Log.Info("server run success on ", zap.String("address", address))
 
 	fmt.Printf(`
-	欢迎使用 启运冷鲜
+	欢迎使用 启运冻品
 	当前版本:v2.5.5
 	默认自动化文档地址:http://127.0.0.1%s/swagger/index.html
 	默认前端文件运行地址:http://127.0.0.1:8080
