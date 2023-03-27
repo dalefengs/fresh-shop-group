@@ -5,7 +5,8 @@
 			<view class="search-panel-base king-px-10">
 				<view class="left">
 					<image :src="searchIcon" class="search-icon"></image>
-					<input class="search-input" v-model="keyword" type="text" confirm-type="search" @confirm="searchConfirm"  placeholder="请输入商品名称" />
+					<input class="search-input" v-model="keyword" type="text" confirm-type="search" @confirm="searchConfirm"
+						placeholder="请输入商品名称" />
 					<image v-if="keyword" :src="delIcon" class="search-del-icon" @click="clearKeyword"></image>
 				</view>
 				<view class="right">
@@ -17,16 +18,19 @@
 		<view>
 			<scroll-view v-if="goodsArr.length > 0" :scroll-top="scrollTop" scroll-y="true" @scroll="scrollTopHandle"
 				:style="{ height: scrollViewHeight + 'px' }" refresher-enabled="true" :refresher-threshold="70"
-				:refresher-triggered="triggered" @refresherrefresh="onRefresh" @scrolltolower="scrollTolower">
+				:refresher-triggered="triggered" @refresherrefresh="onRefresh" @scrolltolower="scrollTolower"
+				:scroll-anchoring="true">
 				<!-- 商品列表 -->
 				<GoodsList :lists="goodsArr" price-type="￥"></GoodsList>
 				<view class="king-py-40" @click="scrollTolower">
 					<u-loadmore :status="loadMore" loading-text="努力加载中，请喝杯茶" loadmore-text="上拉加载更多" nomore-text="实在是没有了" />
 				</view>
-				<u-back-top :scroll-top="scrollTop" @click="toTop"></u-back-top>
 			</scroll-view>
 			<u-empty v-else :style="{ height: scrollViewHeight / 1.6 + 'px' }" width="220" height="220" textSize="16"
 				text="暂无商品" mode="data" icon="http://cdn.uviewui.com/uview/empty/data.png" />
+				<!-- 返回顶部 -->
+			<u-back-top :scroll-top="scrollTop" @click="toTop"></u-back-top>
+
 		</view>
 	</pageWrapper>
 </template>
@@ -80,6 +84,7 @@ export default {
 			},
 			triggered: false, // 下拉刷新状态
 			loadMore: 'loadmore', // 上拉加载状态
+			scrollTimer: false, // 定时器id
 		};
 	},
 	onLoad(option) {
@@ -252,7 +257,14 @@ export default {
 		},
 		// 热门列表滑动距离
 		scrollTopHandle(e) {
-			this.scrollTop = e.detail.scrollTop
+			if (this.scrollTimer) {
+				clearTimeout(this.scrollTimer)
+			}
+			// 解决赋值小程序会发生抖动
+			this.scrollTimer = setTimeout(() => {
+				this.scrollTop = e.detail.scrollTop.toFixed(0)
+				console.log('q', this.scrollTop);
+			}, 500)
 
 		},
 		// 返回列表的顶部 

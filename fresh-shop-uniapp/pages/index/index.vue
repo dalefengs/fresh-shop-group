@@ -2,7 +2,7 @@
  * @Author: likfees
  * @Date: 2023-03-23 15:52:23
  * @LastEditors: likfees
- * @LastEditTime: 2023-03-26 14:43:24
+ * @LastEditTime: 2023-03-27 11:09:18
 -->
 <template>
 	<pageWrapper>
@@ -65,14 +65,13 @@
 						<scroll-view :scroll-top="hotScrollTop" scroll-y="true" @scroll="hotScrollTopHandle"
 							:style="{ height: swiperHeight + 'px' }" refresher-enabled="true" :refresher-threshold="70"
 							:refresher-triggered="hotTriggered" @refresherrefresh="onRefresh"
-							@scrolltolower="hotScrollTolower">
+							@scrolltolower="hotScrollTolower" :scroll-anchoring="true">
 							<!-- 商品列表 -->
 							<GoodsList :lists="goodsHotArr" price-type="￥" @onGoods="toGoodsInfo"></GoodsList>
 							<view class="king-py-40" @click="hotScrollTolower">
 								<u-loadmore :status="hotLoadMore" loading-text="努力加载中，请喝杯茶" loadmore-text="上拉加载更多"
 									nomore-text="实在是没有了" />
 							</view>
-							<u-back-top :scroll-top="hotScrollTop" @click="toTop"></u-back-top>
 						</scroll-view>
 					</swiper-item>
 					<!-- 新品上市  -->
@@ -80,20 +79,18 @@
 						<scroll-view :scroll-top="newScrollTop" scroll-y="true" @scroll="newScrollTopHandle"
 							:style="{ height: swiperHeight + 'px' }" refresher-enabled="true" :refresher-threshold="70"
 							:refresher-triggered="newTriggered" @refresherrefresh="onRefresh"
-							@scrolltolower="newScrollTolower">
+							@scrolltolower="newScrollTolower" :scroll-anchoring="true">
 							<!-- 商品列表 -->
 							<GoodsList :lists="goodsNewArr" price-type="$"></GoodsList>
 							<view class="king-py-40" @click="newScrollTolower">
 								<u-loadmore :status="newLoadMore" loading-text="努力加载中，请喝杯茶" loadmore-text="上拉加载更多"
 									nomore-text="实在是没有了" />
 							</view>
-							<u-back-top :scroll-top="newScrollTop" @click="toTop"></u-back-top>
 						</scroll-view>
 					</swiper-item>
 				</swiper>
 			</view>
 		</view>
-
 		<Tabbar />
 	</pageWrapper>
 </template>
@@ -113,8 +110,7 @@ export default {
 	data() {
 		return {
 			goodsTabsId: 0, // 商品标签切换
-			swiperHeight: 0, // 商品栏目整体高度 页面大小
-			goodsListHeight: 0, // 子栏栏目商品
+			swiperHeight: 1000, // 商品栏目整体高度 页面大小
 			hotScrollTop: 0,
 			newScrollTop: 0,
 			hotTriggered: false, // 下拉刷新状态
@@ -263,13 +259,12 @@ export default {
 		},
 		// 热门列表滑动距离
 		hotScrollTopHandle(e) {
-			this.hotScrollTop = e.detail.scrollTop
-
+			// 会出现抖动
+			//this.hotScrollTop = e.detail.scrollTop.toFixed(0)
 		},
 		// 上新列表滑动距离
 		newScrollTopHandle(e) {
-			this.newScrollTop = e.detail.scrollTop
-
+			//this.newScrollTop = e.detail.scrollTop.toFixed(0)
 		},
 		// 返回列表的顶部 
 		toTop() {
