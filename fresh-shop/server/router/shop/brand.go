@@ -26,8 +26,9 @@ func (s *BrandRouter) InitBrandPublicRouter(Router *gin.RouterGroup) {
 	brandRouterWithoutRecord := Router.Group("brand")
 	var brandApi = v1.ApiGroupApp.ShopApiGroup.BrandApi
 	{
-		brandRouterWithoutRecord.GET("findBrand", brandApi.FindBrand)             // 根据ID获取Brand
-		brandRouterWithoutRecord.GET("getBrandList", brandApi.GetBrandList)       // 获取Brand列表
-		brandRouterWithoutRecord.GET("getBrandListAll", brandApi.GetBrandListAll) // 获取所有Brand列表
+		brandRouterWithoutRecord.GET("findBrand", brandApi.FindBrand)                               // 根据ID获取Brand
+		brandRouterWithoutRecord.GET("getBrandList", brandApi.GetBrandList)                         // 获取Brand列表
+		brandRouterWithoutRecord.GET("getBrandListByCategoryId", brandApi.GetBrandListByCategoryId) // 获取Brand列表
+		brandRouterWithoutRecord.GET("getBrandListAll", brandApi.GetBrandListAll)                   // 获取所有Brand列表
 	}
 }

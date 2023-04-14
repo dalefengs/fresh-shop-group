@@ -66,6 +66,29 @@ func (brandService *BrandService) GetBrandInfoList(info shopReq.BrandSearch) (li
 	return brands, total, err
 }
 
+// GetBrandListByCategoryId 分页获取Brand记录
+// Author [piexlmax](https://github.com/likfees)
+func (brandService *BrandService) GetBrandListByCategoryId(info shopReq.BrandSearch) (list []shop.Brand, err error) {
+	var brandIds []int64
+	if info.CategoryId > 0 {
+		global.DB.Model(&shop.BrandCategory{}).Where("category_id = ?", info.CategoryId).Pluck("brand_id", &brandIds)
+	}
+
+	// 创建db
+	db := global.DB.Model(&shop.Brand{})
+	if info.CategoryId > 0 && len(brandIds) == 0 {
+		return
+	} else if info.CategoryId > 0 && len(brandIds) > 0 {
+		db = db.Where("id in (?)", brandIds)
+	}
+	var brands []shop.Brand
+	if err != nil {
+		return
+	}
+	err = db.Order("sort asc").Find(&brands).Error
+	return brands, err
+}
+
 // GetBrandInfoListAll 获取所有Brand列表
 // Author [piexlmax](https://github.com/likfees)
 func (brandService *BrandService) GetBrandInfoListAll() (list []shop.Brand, err error) {

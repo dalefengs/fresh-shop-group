@@ -2,7 +2,7 @@
  * @Author: likfees
  * @Date: 2023-03-23 15:52:23
  * @LastEditors: likfees
- * @LastEditTime: 2023-03-27 11:09:18
+ * @LastEditTime: 2023-04-13 14:33:52
 -->
 <template>
 	<pageWrapper>
@@ -91,7 +91,7 @@
 				</swiper>
 			</view>
 		</view>
-		<Tabbar />
+		<Tabbar :tabsId="0" />
 	</pageWrapper>
 </template>
 

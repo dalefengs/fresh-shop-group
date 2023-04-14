@@ -2,7 +2,7 @@
  * @Author: likfees
  * @Date: 2023-03-23 22:41:48
  * @LastEditors: likfees
- * @LastEditTime: 2023-03-24 13:44:48
+ * @LastEditTime: 2023-04-13 21:51:49
  */
 
 
@@ -155,11 +155,8 @@ const loading = (msg) => {
 
 const hide = () => {
     const t = getApp().globalData.toast
-    if (t) {
-        t.hide()
-    } else {
-        uni.hideLoading();
-    }
+    uni.hideLoading();
+    t.hide()
 }
 
 const show = (options) => {

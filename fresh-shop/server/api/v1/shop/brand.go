@@ -165,6 +165,30 @@ func (brandApi *BrandApi) GetBrandList(c *gin.Context) {
 	}
 }
 
+// GetBrandListByCategoryId 分页获取Brand列表
+// @Tags Brand
+// @Summary 分页获取Brand列表
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query shopReq.BrandSearch true "分页获取Brand列表"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /brand/getBrandListByCategoryId [get]
+func (brandApi *BrandApi) GetBrandListByCategoryId(c *gin.Context) {
+	var pageInfo shopReq.BrandSearch
+	err := c.ShouldBindQuery(&pageInfo)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if list, err := brandService.GetBrandListByCategoryId(pageInfo); err != nil {
+		global.Log.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+	} else {
+		response.OkWithDetailed(list, "获取成功", c)
+	}
+}
+
 // GetBrandListAll 获取所有Brand列表
 // @Tags Brand
 // @Summary 获取所有Brand列表

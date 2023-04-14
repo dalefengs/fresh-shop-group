@@ -13,3 +13,11 @@ export const getBrandListAll = (data) => {
         data
     })
 }
+
+export const getBrandListByCategoryId = (data) => {
+    return request({
+        url: '/brand/getBrandListByCategoryId',
+        method: 'GET',
+        data
+    })
+}

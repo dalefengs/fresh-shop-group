@@ -21,6 +21,24 @@
             }
 
         }
+        ,{
+            "path" : "pages/category/category",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "商品分类",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+        ,{
+            "path" : "pages/my/my",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "个人中心",
+                "enablePullDownRefresh": false
+            }
+            
+        }
     ],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",

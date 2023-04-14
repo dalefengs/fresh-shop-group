@@ -1,6 +1,6 @@
 <template>
 	<view>
-		<view class="goods--box">
+		<view class="goods--box" v-if="!vertical">
 			<view class="goods--item" v-for="(item, index) in lists" :key="index" @click="$emit('onGoods', item)">
 				<view class="item-cover"
 					:style="{ backgroundImage: 'url(' + (item.images.length > 0 ? item.images[0].url : '') + ')' }" />
@@ -9,9 +9,34 @@
 					<view class="bottom-txt">
 						<view>
 							<text class="price">{{ priceType }}{{ item.costPrice || '0' }}</text>
-							<text v-if="item.price < item.costPrice" class="del-price">{{ priceType }}{{ item.price || '0' }}</text>
+							<text v-if="item.price < item.costPrice" class="del-price">{{ priceType }}{{ item.price || '0'
+							}}</text>
 						</view>
 						<view class="sale-num"><text>已售 {{ item.sale }}</text></view>
+					</view>
+				</view>
+			</view>
+		</view>
+		<view class="goodsv--box" v-else>
+			<view class="goodsv--item" v-for="(item, index) in lists" :key="index" @click="$emit('onGoods', item)">
+				<view class="item-cover"
+					:style="{ backgroundImage: 'url(' + (item.images.length > 0 ? item.images[0].url : '') + ')' }" />
+				<view class="item-content">
+					<text class="title">{{ item.name }}</text>
+					<view class="bottom-txt">
+						<view>
+							<text class="price">{{ priceType }}{{ item.costPrice || '0' }}</text>
+							<text class="unit">/{{ item.unit }}</text>
+							<text v-if="item.price < item.costPrice" class="del-price">{{ priceType }}{{ item.price || '0'
+							}}</text>
+						</view>
+						<view class="sale-num">
+							<text>{{ item.store > 0 ? '有货' : '无货' }}</text>
+						</view>
+						<view class="sale-num"><text>已售 {{ item.sale }}</text></view>
+						<view class="add-cart-button">
+							<u-icon name="shopping-cart" color="#ffffff" size="24"></u-icon>
+						</view>
 					</view>
 				</view>
 			</view>
@@ -32,6 +57,10 @@ export default {
 			type: String,
 			required: false,
 			default: "￥"
+		},
+		vertical: {
+			type: Boolean,
+			default: false
 		}
 	},
 	mounted() {
@@ -59,6 +88,15 @@ $radius: 20rpx;
 	-webkit-line-clamp: 2;
 }
 
+.ellipsis-2-v {
+	max-width: 80%;
+	display: -webkit-box;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+}
+
 .bottom-txt {
 	display: flex;
 	justify-content: space-between;
@@ -72,6 +110,11 @@ $radius: 20rpx;
 		text {
 			font-size: 24rpx;
 		}
+	}
+
+	.unit {
+		color: #666;
+		font-size: 24rpx;
 	}
 
 	.del-price {
@@ -116,11 +159,74 @@ $radius: 20rpx;
 			&>.title {
 				font-size: 28rpx;
 				line-height: 40rpx;
-				height: 80rpx;
+				height: 90rpx;
 				color: #333;
 				@extend .ellipsis-2;
 			}
 
 		}
 	}
-}</style>
+}
+
+
+.goodsv--box {
+	display: flex;
+	flex-wrap: wrap;
+	padding: $padding/3;
+
+	.goodsv--item {
+		background: white;
+		width: calc(100% - #{$margin*2});
+		background: white;
+		border-radius: $radius;
+		overflow: hidden;
+		margin: $margin;
+		display: flex;
+		padding: 8px 1px;
+
+		.item-cover {
+			width: 70px;
+			height: 70px;
+			background-position: center;
+			background-size: cover;
+			display: inline-block;
+			border-radius: 8px;
+			margin-top: 10px;
+			margin-left: 10px;
+		}
+
+		.item-content {
+			display: inline-block;
+			padding: 8px 10px 8px 5px;
+			flex: 1;
+			&>.title {
+				font-size: 28rpx;
+				line-height: 40rpx;
+				height: 80rpx;
+				color: #333;
+				@extend .ellipsis-2-v;
+			}
+
+			.bottom-txt {
+				justify-content: normal;
+				margin-top: 8px;
+				.sale-num {
+					margin-left: 6px;
+				}
+			}
+
+
+		}
+	}
+}
+
+.add-cart-button {
+	border-radius: 100%;
+	background: #2979ff;
+	color: white;
+	position: absolute;
+	right: 20px;
+	cursor: pointer;
+	padding: 2px 2px 2px 1px;
+}
+</style>
