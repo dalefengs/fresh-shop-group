@@ -4,6 +4,7 @@ import (
 	"fresh-shop/server/api/v1/account"
 	"fresh-shop/server/api/v1/business"
 	"fresh-shop/server/api/v1/file"
+	"fresh-shop/server/api/v1/login"
 	"fresh-shop/server/api/v1/shop"
 	"fresh-shop/server/api/v1/system"
 )
@@ -14,6 +15,7 @@ type ApiGroup struct {
 	AccountApiGroup  account.ApiGroup
 	BusinessApiGroup business.ApiGroup
 	ShopApiGroup     shop.ApiGroup
+	LoginApiGroup    login.ApiGroup
 }
 
 var ApiGroupApp = new(ApiGroup)

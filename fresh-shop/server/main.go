@@ -30,6 +30,7 @@ func main() {
 	global.DB = initialize.Gorm() // gorm连接数据库
 	initialize.Timer()
 	initialize.DBList()
+	initialize.Wechat()
 	// 自动迁移数据表 本平台不使用
 	//if global.DB != nil {
 	//	initialize.RegisterTables() // 初始化表

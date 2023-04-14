@@ -1,6 +1,6 @@
 <template>
 	<pageWrapper>
-		<view class="header" v-bind:class="{ 'status': isH5Plus }">
+		<view class="header" v-bind:class="{ 'status': isH5Plus }" v-if="isLogin">
 			<view class="userinfo">
 				<view class="face">
 					<image :src="userinfo.face"></image>
@@ -13,6 +13,16 @@
 			<view class="setting">
 				<image src="../../static/my/setting.png"></image>
 			</view>
+		</view>
+		<!-- 未登录  -->
+		<view v-else class="header" v-bind:class="{ 'status': isH5Plus }">
+			<view class="userinfo" @click="showLogin">
+				<view class="face">
+					<image src="../../static/my/face.png"></image>
+				</view>
+				<view class="login-btn">登录 / 注册</view>
+			</view>
+
 		</view>
 		<view class="orders">
 			<view class="box">
@@ -39,14 +49,18 @@
 				<image class="to" src="../../static/my/to.png"></image>
 			</view>
 		</view>
+
+		<loginPop :show="showLoginDialog" @close="hideLogin" />
 		<Tabbar :tabsId="3" />
 	</pageWrapper>
 </template>
 <script>
 import Tabbar from '@/components/tabbar/tabbar.vue'
+import loginPop from '@/components/loginPop/loginPop.vue'
 export default {
 	components: {
 		Tabbar,
+		loginPop
 	},
 	data() {
 		return {
@@ -57,6 +71,8 @@ export default {
 			isH5Plus: false,
 			//#endif
 			userinfo: {},
+			isLogin: false,
+			showLoginDialog: true,
 			orderTypeLise: [
 				//name-标题 icon-图标 badge-角标
 				{ name: '待付款', icon: 'fukr.png', badge: 1 },
@@ -83,10 +99,18 @@ export default {
 		init() {
 			//用户信息
 			this.userinfo = {
-				face: '../../static/my/face.jpeg',
+				face: '../../static/my/face.png',
 				username: "VIP会员10240",
 				integral: "1435"
 			}
+		},
+		// 显示登录框
+		showLogin() {
+			this.showLoginDialog = true
+		},
+		// 隐藏登录框
+		hideLogin() {
+			this.showLoginDialog = false
 		},
 		//用户点击订单类型
 		toOrderType(index) {
@@ -101,10 +125,6 @@ export default {
 </script>
 
 <style lang="scss">
-page {
-	//background-color: #fff
-}
-
 .header {
 	&.status {
 		padding-top: var(--status-bar-height);
@@ -120,6 +140,13 @@ page {
 	.userinfo {
 		width: 90%;
 		display: flex;
+
+		.login-btn {
+			font-size: 19px;
+			margin: 15px 20px;
+			color: #fff;
+			cursor: pointer;
+		}
 
 		.face {
 			flex-shrink: 0;
