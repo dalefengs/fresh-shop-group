@@ -1,7 +1,7 @@
 package global
 
 import (
-	miniConfig "github.com/silenceper/wechat/v2/miniprogram/config"
+	"github.com/silenceper/wechat/v2/miniprogram"
 	"sync"
 
 	"fresh-shop/server/utils/timer"
@@ -30,7 +30,7 @@ var (
 	SugarLog           *zap.SugaredLogger
 	BlackCache         local_cache.Cache
 	lock               sync.RWMutex
-	MiniCfg            *miniConfig.Config // 微信小程序配置
+	MiniProgram        *miniprogram.MiniProgram // 微信小程序
 )
 
 // GetGlobalDBByDBName 通过名称获取db list中的db

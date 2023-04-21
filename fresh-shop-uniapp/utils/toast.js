@@ -2,7 +2,7 @@
  * @Author: likfees
  * @Date: 2023-03-23 22:41:48
  * @LastEditors: likfees
- * @LastEditTime: 2023-04-13 21:51:49
+ * @LastEditTime: 2023-04-14 21:43:03
  */
 
 
@@ -154,9 +154,12 @@ const loading = (msg) => {
 
 
 const hide = () => {
-    const t = getApp().globalData.toast
-    uni.hideLoading();
-    t.hide()
+    try {
+        const t = getApp().globalData.toast
+        uni.hideLoading();
+        t.hide()
+    } catch (e) { }
+
 }
 
 const show = (options) => {
@@ -169,7 +172,7 @@ const show = (options) => {
             }
         })
     })
-    
+
 }
 
 

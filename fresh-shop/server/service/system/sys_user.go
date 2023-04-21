@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"fresh-shop/server/model/account"
+	"fresh-shop/server/model/login/request"
 	sysReq "fresh-shop/server/model/system/request"
+	"go.uber.org/zap"
 	"time"
 
 	"fresh-shop/server/global"
@@ -21,6 +23,55 @@ import (
 //@return: userInter system.SysUser, err error
 
 type UserService struct{}
+
+// LoginWx 微信登录
+func (userService *UserService) LoginWx(req request.LoginReq) (user *system.SysUser, err error) {
+	// 解密数据
+	encryptor := global.MiniProgram.GetEncryptor()
+	d, err := encryptor.Decrypt(req.SessionKey, req.EncryptedData, req.Iv)
+	if err != nil {
+		global.SugarLog.Errorf("login 微信登陆失败, req: %#v, error: %s", req, err.Error())
+		return
+	}
+	if d.PurePhoneNumber == "" {
+		global.SugarLog.Errorf("login 微信登陆失败, req: %#v, error: 手机号不能为空", req)
+		return nil, fmt.Errorf("获取的手机号为空")
+	}
+	var u system.SysUser
+	fmt.Println(d)
+	if errors.Is(global.DB.Where("phone = ?", d.PhoneNumber).First(&user).Error, gorm.ErrRecordNotFound) {
+		// 不存在则创建用户
+		var authorities []system.SysAuthority
+		authorities = append(authorities, system.SysAuthority{
+			AuthorityId: 1000, // 1000 普通用户
+		})
+		nickName := "启运" + d.PhoneNumber[len(d.PhoneNumber)-4:]
+		u = system.SysUser{
+			Username:    d.PhoneNumber,
+			NickName:    nickName,
+			Password:    global.Config.Wechat.RandomPassword,
+			AuthorityId: 1000, // 1000 普通用户
+			Authorities: authorities,
+			Enable:      1,
+			Phone:       d.PhoneNumber,
+			OpenId:      req.OpenId,
+		}
+		regUser, err := userService.Register(u)
+		user = &regUser
+		if err != nil {
+			global.Log.Error("注册失败!", zap.Error(err))
+			return user, err
+		}
+	} else {
+		u = system.SysUser{
+			Phone:  d.PhoneNumber,
+			OpenId: req.OpenId,
+		}
+		// 用户存在，进行登录
+		user, err = userService.LoginByPhone(&u)
+	}
+	return user, err
+}
 
 func (userService *UserService) Register(u system.SysUser) (userInter system.SysUser, err error) {
 	// 获取账户列表
@@ -86,13 +137,12 @@ func (userService *UserService) Register(u system.SysUser) (userInter system.Sys
 	return u, err
 }
 
-//@author: [piexlmax](https://github.com/likfees)
-//@author: [SliverHorn](https://github.com/SliverHorn)
-//@function: Login
-//@description: 用户登录
-//@param: u *model.SysUser
-//@return: err error, userInter *model.SysUser
-
+// @author: [piexlmax](https://github.com/likfees)
+// @author: [SliverHorn](https://github.com/SliverHorn)
+// @function: LoginWx
+// @description: 用户登录
+// @param: u *model.SysUser
+// @return: err error, userInter *model.SysUser
 func (userService *UserService) Login(u *system.SysUser) (userInter *system.SysUser, err error) {
 	if nil == global.DB {
 		return nil, fmt.Errorf("db not init")
@@ -105,6 +155,29 @@ func (userService *UserService) Login(u *system.SysUser) (userInter *system.SysU
 		if ok := utils.BcryptCheck(u.Password, user.Password); !ok {
 			return nil, errors.New("用户名不存在或者密码错误")
 		}
+		MenuServiceApp.UserAuthorityDefaultRouter(&user)
+		// 设置登录 IP 和 登录时间
+		user.LoginIp = u.LoginIp
+		user.LoginTime = time.Now()
+		global.DB.Save(&user)
+	}
+	return &user, err
+}
+
+// LoginByPhone @author: [piexlmax](https://github.com/likfees)
+// @author: [SliverHorn](https://github.com/SliverHorn)
+// @function: LoginByPhone
+// @description: 用户登录
+// @param: u *model.SysUser
+// @return: err error, userInter *model.SysUser
+func (userService *UserService) LoginByPhone(u *system.SysUser) (userInter *system.SysUser, err error) {
+	if nil == global.DB {
+		return nil, fmt.Errorf("db not init")
+	}
+
+	var user system.SysUser
+	err = global.DB.Where("phone = ?", u.Phone).Preload("Authorities").Preload("Authority").First(&user).Error
+	if err == nil {
 		MenuServiceApp.UserAuthorityDefaultRouter(&user)
 		// 设置登录 IP 和 登录时间
 		user.LoginIp = u.LoginIp

@@ -108,6 +108,14 @@ func Routers() *gin.Engine {
 			shopRouter.InitTagsPublicRouter(PublicGroup)
 		}
 	}
+	{
+		loginRoute := router.RouterGroupApp.Login
+		loginRoute.InitWechatRouter(PrivateGroup)
+		// 不进行鉴别权的路由
+		{
+			loginRoute.InitWechatPublicRouter(PublicGroup)
+		}
+	}
 
 	global.Log.Info("router register success")
 	return Router

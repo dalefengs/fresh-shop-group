@@ -8,4 +8,5 @@ type ApiGroup struct {
 
 var (
 	wechatService = service.ServiceGroupApp.LoginServiceGroup.WechatService
+	userService   = service.ServiceGroupApp.SystemServiceGroup.UserService
 )

@@ -1,6 +1,7 @@
 package system
 
 import (
+	loginReq "fresh-shop/server/model/login/request"
 	"fresh-shop/server/service/common"
 	"strconv"
 	"time"
@@ -22,7 +23,7 @@ import (
 // @Tags     Base
 // @Summary  用户登录
 // @Produce   application/json
-// @Param    data  body      systemReq.Login                                             true  "用户名, 密码, 验证码"
+// @Param    data  body      systemReq.LoginWx                                             true  "用户名, 密码, 验证码"
 // @Success  200   {object}  response.Response{data=systemRes.LoginResponse,msg=string}  "返回包括用户信息,token,过期时间"
 // @Router   /base/login [post]
 func (b *BaseApi) Login(c *gin.Context) {
@@ -73,6 +74,47 @@ func (b *BaseApi) Login(c *gin.Context) {
 	// 验证码次数+1
 	global.BlackCache.Increment(key, 1)
 	response.FailWithMessage("验证码错误", c)
+}
+
+// LoginWx 登录
+func (b *BaseApi) LoginWx(c *gin.Context) {
+	var req loginReq.LoginReq
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if req.SessionKey == "" {
+		response.FailWithMessage("参数错误", c)
+		return
+	}
+	if req.EncryptedData == "" {
+		response.FailWithMessage("参数错误", c)
+		return
+	}
+	if req.Iv == "" {
+		response.FailWithMessage("参数错误", c)
+		return
+	}
+	if req.OpenId == "" {
+		response.FailWithMessage("参数错误", c)
+		return
+	}
+	user, err := userService.LoginWx(req)
+	if err != nil {
+		global.Log.Error("登陆失败! 用户名不存在或者密码错误!", zap.Error(err))
+		// 验证码次数+1
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if user.Enable != 1 {
+		global.Log.Error("登陆失败! 用户被禁止登录!")
+		// 验证码次数+1
+		response.FailWithMessage("用户被禁止登录", c)
+		return
+	}
+	b.TokenNext(c, *user)
+	return
 }
 
 // TokenNext 登录以后签发jwt

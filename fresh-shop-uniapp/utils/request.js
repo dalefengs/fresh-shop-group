@@ -1,3 +1,9 @@
+/*
+ * @Author: likfees
+ * @Date: 2023-03-23 18:13:11
+ * @LastEditors: likfees
+ * @LastEditTime: 2023-04-14 21:42:36
+ */
 // uniapp request 请求
 import toast from '@/utils/toast.js'
 import config from '@/config/config.js'
@@ -42,6 +48,7 @@ const request = (options) => {
 				if (options.loading) {
 					toast.hide()
 				}
+
 				// 如果响应头部中返回了新的 token，则重新写入本地存储中
 				if (res.header['new-token']) {
 					uni.setStorageSync('token', res.header['new-token'])
@@ -50,6 +57,11 @@ const request = (options) => {
 				// 根据响应状态码处理响应结果
 				switch (res.statusCode) {
 					case 200:
+						if (res.data.code !== 0) {
+							toast.error(res.data.msg)
+							console.log(res.data.msg);
+							resolve(res)
+						}
 						resolve(res.data)
 						break
 					case 401:
@@ -71,6 +83,7 @@ const request = (options) => {
 						reject(res)
 				}
 
+				console.log(`uni.request ${options.url} success`, res);
 				resolve(res)
 			},
 			fail: (err) => {

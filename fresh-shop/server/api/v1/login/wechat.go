@@ -17,15 +17,19 @@ type WeChatApi struct {
 // 及本次登录的会话密钥（session_key）等（用户无感知）
 func (w *WeChatApi) Code2Session(c *gin.Context) {
 	var data request.Jscode2SessionReq
-	err := c.ShouldBindJSON(&data)
+	err := c.ShouldBindQuery(&data)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
+	if data.Jscode == "" {
+		response.FailWithMessage("参数错误", c)
+		return
+	}
 	result, err := wechatService.Code2SessionKey(data)
 	if err != nil {
-		global.Log.Error("创建失败!", zap.Error(err))
-		response.FailWithMessage("创建失败", c)
+		global.Log.Error("失败!", zap.Error(err))
+		response.FailWithMessage("失败", c)
 	} else {
 		response.OkWithData(result, c)
 	}

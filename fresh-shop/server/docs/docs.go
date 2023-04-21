@@ -1514,7 +1514,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/request.Login"
+                            "$ref": "#/definitions/request.LoginWx"
                         }
                     }
                 ],
@@ -5710,7 +5710,7 @@ var doc = `{
                 }
             }
         },
-        "request.Login": {
+        "request.LoginWx": {
             "type": "object",
             "properties": {
                 "captcha": {
