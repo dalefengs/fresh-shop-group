@@ -1,13 +1,25 @@
+<!--
+ * @Author: likfees
+ * @Date: 2023-04-14 13:36:30
+ * @LastEditors: likfees
+ * @LastEditTime: 2023-04-23 13:34:21
+-->
 <template>
 	<pageWrapper>
-		<view class="header" v-bind:class="{ 'status': isH5Plus }" v-if="isLogin">
+		<view class="header" v-bind:class="{ 'status': isH5Plus }" v-if="token">
 			<view class="userinfo">
 				<view class="face">
-					<image :src="userinfo.face"></image>
+					<image :src="user.headerImg"></image>
 				</view>
 				<view class="info">
-					<view class="username">{{ userinfo.username }}</view>
-					<view class="integral">积分:{{ userinfo.integral }}</view>
+					<view class="username">{{ user.nickName }}</view>
+					<view class="integral" @click="copyInvitationCode(user.invitationCode)">
+						<text style="margin-right: 4px;">推荐码：{{ user.invitationCode }} </text>
+						<u-icon name="file-text" color="#fff"></u-icon>
+					</view>
+					<view class="integral">
+						积分：{{ user.point ? user.point : 0 }}
+					</view>
 				</view>
 			</view>
 			<view class="setting">
@@ -39,24 +51,36 @@
 				</view>
 			</view>
 		</view>
-		<view class="list" v-for="(list, list_i) in severList" :key="list_i">
-			<view class="li" v-for="(li, li_i) in list" @tap="toPage(list_i, li_i)"
-				v-bind:class="{ 'noborder': li_i == list.length - 1 }" hover-class="hover" :key="li.name">
-				<view class="icon">
-					<image :src="'../../static/my/list/' + li.icon"></image>
+		<!-- 菜单 -->
+		<view class="list" v-for="(list, index) in severList" :key="index">
+			<view v-for="(li, key) in list" :key="li.name" > 
+				<!-- 条件判断未登录 不显示菜单的条件  -->
+				<view v-if="!severList[index][key].isLogin || severList[index][key].isLogin && token" class="li" @click="menuClick(index, key)"
+					v-bind:class="{ 'noborder': key == list.length - 1 }" hover-class="hover">
+					<view class="icon">
+						<image :src="'../../static/my/list/' + li.icon"></image>
+					</view>
+					<view class="text">{{ severList[index][key].name }}</view>
+					<image class="to" src="../../static/my/to.png"></image>
 				</view>
-				<view class="text">{{ li.name }}</view>
-				<image class="to" src="../../static/my/to.png"></image>
 			</view>
-		</view>
 
-		<loginPop :show="showLoginDialog" @close="hideLogin" />
+		</view>
+		<!-- 登录 -->
+		<loginPop :show="showLoginDialog" @close="hideLogin" @success="loginSuccess" />
+		<!-- 拨号 -->
+		<u-modal :content="content" :show="showPhoneDialog" showCancelButton closeOnClickOverlay @confirm="callPhone"
+			@cancel="() => showPhoneDialog = false" @close="close" confirmText="拨号">
+			<view>联系电话：{{ relationPhone }}</view>
+		</u-modal>
 		<Tabbar :tabsId="3" />
 	</pageWrapper>
 </template>
 <script>
+import toast from '@/utils/toast.js'
 import Tabbar from '@/components/tabbar/tabbar.vue'
 import loginPop from '@/components/loginPop/loginPop.vue'
+import { getUser, getToken, setUser, setToken } from '@/store/storage.js'
 export default {
 	components: {
 		Tabbar,
@@ -70,9 +94,11 @@ export default {
 			//#ifndef APP-PLUS
 			isH5Plus: false,
 			//#endif
-			userinfo: {},
-			isLogin: false,
-			showLoginDialog: true,
+			user: {},
+			token: '',
+			showLoginDialog: false, // 登录
+			showPhoneDialog: false, // 拨号
+			relationPhone: "18899996666", // 联系人电话
 			orderTypeLise: [
 				//name-标题 icon-图标 badge-角标
 				{ name: '待付款', icon: 'fukr.png', badge: 1 },
@@ -82,11 +108,12 @@ export default {
 			],
 			severList: [
 				[
-					{ name: '积分商品', icon: 'point_shop.png' },
-					{ name: '积分明细', icon: 'finance.png' },
-					{ name: '收货地址', icon: 'address.png' },
-					{ name: '清除缓存', icon: 'clear.png' },
-					{ name: '联系我们', icon: 'relation.png' },
+					{ name: '积分商品', icon: 'point_shop.png', handle: this.showPhone },
+					{ name: '积分明细', icon: 'finance.png', handle: this.showPhone },
+					{ name: '收货地址', icon: 'address.png', handle: this.showPhone },
+					{ name: '清除缓存', icon: 'clear.png', handle: this.clearStorage },
+					{ name: '联系我们', icon: 'relation.png', handle: this.showPhone },
+					{ name: '退出登录', icon: 'logout.png', handle: this.logout, isLogin: true },
 				]
 			],
 		};
@@ -97,12 +124,20 @@ export default {
 	},
 	methods: {
 		init() {
-			//用户信息
-			this.userinfo = {
-				face: '../../static/my/face.png',
-				username: "VIP会员10240",
-				integral: "1435"
+			this.token = getToken()
+			//如果登录了，则获取用户信息
+			if (this.token) {
+				this.user = getUser()
+				console.log(this.user);
 			}
+		},
+		// 登录成功
+		loginSuccess(u) {
+			console.log("loginSuccess", u);
+			this.hideLogin();
+			this.token = getToken()
+			this.user = u
+			toast.success("登录成功")
 		},
 		// 显示登录框
 		showLogin() {
@@ -111,6 +146,67 @@ export default {
 		// 隐藏登录框
 		hideLogin() {
 			this.showLoginDialog = false
+		},
+		// 菜单栏点击
+		menuClick(index, key) {
+			this.severList[index][key].handle()
+		},
+		// 显示手机号
+		showPhone() {
+			this.showPhoneDialog = true
+		},
+		// 拨打电话
+		callPhone() {
+			uni.makePhoneCall({
+				phoneNumber: this.relationPhone,
+				success: (result) => { },
+				fail: (error) => { }
+			})
+		},
+		// 点击退出登录
+		logout() {
+			uni.showModal({
+				title: '退出登录',
+				content: '是否确认退出登录',
+				showCancel: true,
+				success: ({ confirm, cancel }) => {
+					if (confirm) {
+						this.token = ''
+						this.user = ''
+						setUser('')
+						setToken('')
+						this.showLogout = false
+						toast.success("退出登录")
+					}
+				}
+			})
+		},
+		// 复制邀请码
+		copyInvitationCode(code) {
+			uni.setClipboardData({
+				data: code,
+				success: () => {
+					toast.success("复制推荐码成功")
+				}
+			})
+		},
+		// 清除缓存
+		clearStorage() {
+			uni.showModal({
+				title: '清除缓存',
+				content: '请谨慎操作',
+				showCancel: true,
+				success: ({ confirm, cancel }) => {
+					if (confirm) {
+						this.token = ''
+						this.user = ''
+						uni.clearStorage()
+						uni.clearStorageSync()
+						toast.success("清除缓存成功")
+					}
+				}
+			})
+			
 		},
 		//用户点击订单类型
 		toOrderType(index) {
@@ -140,6 +236,9 @@ export default {
 	.userinfo {
 		width: 90%;
 		display: flex;
+		position: relative;
+		bottom: 16px;
+		align-items: center;
 
 		.login-btn {
 			font-size: 19px;
@@ -150,8 +249,9 @@ export default {
 
 		.face {
 			flex-shrink: 0;
-			width: 15vw;
-			height: 15vw;
+			width: 20vw;
+			height: 20vw;
+			margin-top: 6px;
 
 			image {
 				width: 100%;
@@ -161,14 +261,14 @@ export default {
 		}
 
 		.info {
-			display: flex;
 			flex-flow: wrap;
 			padding-left: 30upx;
 
 			.username {
 				width: 100%;
 				color: #fff;
-				font-size: 40upx
+				font-size: 40upx;
+				margin-left: 5px;
 			}
 
 			.integral {
@@ -179,7 +279,8 @@ export default {
 				color: #fff;
 				background-color: rgba(0, 0, 0, 0.1);
 				border-radius: 20upx;
-				font-size: 24upx
+				font-size: 24upx;
+				margin-top: 5px;
 			}
 		}
 	}
@@ -188,6 +289,8 @@ export default {
 		flex-shrink: 0;
 		width: 6vw;
 		height: 6vw;
+		position: relative;
+		bottom: 16px;
 
 		image {
 			width: 100%;

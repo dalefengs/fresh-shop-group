@@ -38,9 +38,9 @@
 				<u-empty v-else :style="{ height: scrollViewHeight / 1.6 + 'px' }" width="220" height="220" textSize="16"
 					text="暂无商品" mode="data" icon="http://cdn.uviewui.com/uview/empty/data.png" />
 			</view>
-
-			<shopcart :goods="goods" @add="addCart" @dec="decreaseCart" @delAll="delAll"></shopcart>
+			<shopcart v-if="!loginSuspendShow" :goods="goods" @add="addCart" @dec="decreaseCart" @delAll="delAll"></shopcart>
 		</view>
+		<loginSuspend :show="loginSuspendShow" @success="loginSuccess"></loginSuspend>
 		<Tabbar :tabsId="1" />
 	</pageWrapper>
 </template>
@@ -59,14 +59,18 @@ import {
 } from '@/api/brand.js'
 import config from '@/config/config.js'
 import GoodsList from '@/components/goodsList/goodsList.vue'
+import loginSuspend from '@/components/loginPop/loginSuspend.vue'
+import { getUser, getToken } from '@/store/storage.js'
 export default {
 	components: {
 		Tabbar,
 		shopcart,
-		GoodsList
+		GoodsList,
+		loginSuspend
 	},
 	data() {
 		return {
+			loginSuspendShow: false, // 显示底部登录
 			categoryList: [{
 				ID: 0,
 				title: "全部分类",
@@ -96,6 +100,10 @@ export default {
 	},
 	onLoad() {
 		this.init()
+		const t = getToken()
+		if (!t) {
+			this.loginSuspendShow = true
+		}
 	},
 	onReady() {
 		var windowHeight = uni.getSystemInfoSync().windowHeight
@@ -104,7 +112,7 @@ export default {
 		this.hh = windowHeight - 50
 		this.navCount = Math.round(this.hh / 50)
 
-		this.windows_height = Number(uni.getSystemInfoSync().windowHeight) - 55 - 110 - 50;
+		this.windows_height = Number(uni.getSystemInfoSync().windowHeight) - 55 - 145 - 50;
 		setTimeout(() => {
 			this.getHeightList();
 		}, 1000)
@@ -333,6 +341,10 @@ export default {
 					this.left_scroll = Math.round((active_index * diff) / (this.goods.length - 1))
 				}
 			}
+		},
+		// 登陆成功
+		loginSuccess() {
+			this.loginSuspendShow = false
 		}
 	}
 }
@@ -343,7 +355,7 @@ export default {
 	display: flex;
 	position: absolute;
 	top: 45px;
-	bottom: 115px;
+	bottom: 100px;
 	width: 100%;
 	overflow: hidden;
 }

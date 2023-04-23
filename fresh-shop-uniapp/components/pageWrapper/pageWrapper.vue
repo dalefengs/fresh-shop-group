@@ -2,12 +2,12 @@
  * @Author: likfees
  * @Date: 2023-03-23 22:16:00
  * @LastEditors: likfees
- * @LastEditTime: 2023-03-26 13:38:56
+ * @LastEditTime: 2023-04-23 13:47:08
 -->
 <template>
 	<view :style="{ height: windowHeight + 'px' }">
 		<slot></slot>
-		<u-toast style="z-index:9998;" ref="uToast"></u-toast>
+		<u-toast style="z-index:9998;" ref="toast"></u-toast>
 	</view>
 </template>
 
@@ -26,7 +26,7 @@ export default {
 		}
 	},
 	mounted() {
-		getApp().globalData.toast = this.$refs.uToast
+		getApp().globalData.toast = this.$refs.toast
 		uni.getSystemInfo({
 			success: (res) => {
 				this.windowHeight = res.windowHeight - this.subHeight;

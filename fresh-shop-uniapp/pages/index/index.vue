@@ -2,7 +2,7 @@
  * @Author: likfees
  * @Date: 2023-03-23 15:52:23
  * @LastEditors: likfees
- * @LastEditTime: 2023-04-13 14:33:52
+ * @LastEditTime: 2023-04-23 12:42:26
 -->
 <template>
 	<pageWrapper>
@@ -91,24 +91,29 @@
 				</swiper>
 			</view>
 		</view>
+		<loginSuspend :show="loginSuspendShow" @success="loginSuccess"></loginSuspend>
 		<Tabbar :tabsId="0" />
 	</pageWrapper>
 </template>
 
 <script>
 import Tabbar from '@/components/tabbar/tabbar.vue'
+import loginSuspend from '@/components/loginPop/loginSuspend.vue'
 import GoodsList from '@/components/goodsList/goodsList.vue'
 import config from '@/config/config.js'
 import { getBannerList } from '@/api/banner.js'
 import { getHomeCategoryList } from '@/api/category.js'
 import { getGoodsPageList } from '@/api/goods.js'
+import { getToken } from '@/store/storage.js'
 export default {
 	components: {
 		Tabbar,
-		GoodsList
+		GoodsList,
+		loginSuspend
 	},
 	data() {
 		return {
+			loginSuspendShow: false, // 是否显示底部登录
 			goodsTabsId: 0, // 商品标签切换
 			swiperHeight: 1000, // 商品栏目整体高度 页面大小
 			hotScrollTop: 0,
@@ -141,6 +146,11 @@ export default {
 		this.getHomeCategory();
 		this.getGoodsListData(0)
 		this.getGoodsListData(1)
+		// 如果为登录状态
+		const t = getToken()
+		if (!t) {
+			this.loginSuspendShow = true
+		}
 	},
 	mounted() {
 		// 设置商品列表高度为页面高度
@@ -332,6 +342,10 @@ export default {
 				url: `/pages/goods/goodsInfo?id=` + goods.ID
 			})
 		},
+		// 登陆成功
+		loginSuccess() {
+			this.loginSuspendShow = false
+		}
 	},
 }
 </script>
