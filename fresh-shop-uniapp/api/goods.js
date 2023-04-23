@@ -2,7 +2,7 @@
  * @Author: likfees
  * @Date: 2023-03-24 20:48:21
  * @LastEditors: likfees
- * @LastEditTime: 2023-04-13 21:53:01
+ * @LastEditTime: 2023-04-23 17:52:47
  */
 import request from "@/utils/request"
 
@@ -36,3 +36,14 @@ export const getGoodsPageListLoading = (data) => {
         data
     })
 }
+
+
+// 获取商品详情
+export const getGoodsInfo = (data) => {
+    return request({
+        url: `/goods/findGoods`,
+        method: 'GET',
+        data
+    })
+}
+

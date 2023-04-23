@@ -30,15 +30,17 @@
 						</view>
 					</u-scroll-list>
 				</view>
-				<scroll-view v-if="goodsArr.length > 0" class="foods-wrapper" scroll-y :style="'height:' + windows_height + 'px'"
-					:scroll-top="foodSTop" @scroll="myscroll" scroll-with-animation="true">
+				<scroll-view v-if="goodsArr.length > 0" class="foods-wrapper" scroll-y
+					:style="'height:' + windows_height + 'px'" :scroll-top="foodSTop" @scroll="myscroll"
+					scroll-with-animation="true">
 					<!-- 商品列表 -->
 					<GoodsList :vertical="true" :lists="goodsArr" price-type="￥"></GoodsList>
 				</scroll-view>
-				<u-empty v-else :style="{ height: scrollViewHeight / 1.6 + 'px' }" width="220" height="220" textSize="16"
+				<u-empty v-else :style="{ height: windows_height / 1.6 + 'px' }" width="220" height="220" textSize="16"
 					text="暂无商品" mode="data" icon="http://cdn.uviewui.com/uview/empty/data.png" />
 			</view>
-			<shopcart v-if="!loginSuspendShow" :goods="goods" @add="addCart" @dec="decreaseCart" @delAll="delAll"></shopcart>
+			<shopcart v-if="!loginSuspendShow" :goods="goods" @add="addCart" @dec="decreaseCart" @delAll="delAll">
+			</shopcart>
 		</view>
 		<loginSuspend :show="loginSuspendShow" @success="loginSuccess"></loginSuspend>
 		<Tabbar :tabsId="1" />
@@ -162,13 +164,16 @@ export default {
 			const brandRes = await getBrandListByCategoryId({
 				categoryId: this.currentIndex
 			})
-			brandRes.data.forEach(item => {
-				if (item.logo && item.logo.slice(0, 4) !== 'http') {
-					item.logo = config.baseUrl + "/" + item.logo
-				}
-			})
-
-			this.brandList = brandRes.data
+			if (brandRes.data) {
+				brandRes.data.forEach(item => {
+					if (item.logo && item.logo.slice(0, 4) !== 'http') {
+						item.logo = config.baseUrl + "/" + item.logo
+					}
+				})
+				this.brandList = brandRes.data
+			} else {
+				this.brandList = []
+			}
 		},
 		// type = 1加载 其他为刷新
 		async getGoodsListData(type) {

@@ -15,6 +15,9 @@
                 <el-option v-for="(item,key) in goodsAreaOptions" :key="key" :label="item.label" :value="item.value" />
               </el-select>
             </el-form-item>
+            <el-form-item label="商品产地:" prop="origin">
+              <el-input v-model="formData.origin" :clearable="true" placeholder="请输入产地" />
+            </el-form-item>
             <!-- 积分商品只能是单规格， 普通商品才有多规格 -->
               <!--            <el-form-item v-if="formData.goodsArea === 0" label="规格类型:" prop="specType">
               <el-radio-group v-model="formData.specType" class="ml-4">

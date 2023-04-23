@@ -2,7 +2,7 @@
  * @Author: likfees
  * @Date: 2023-03-23 22:41:48
  * @LastEditors: likfees
- * @LastEditTime: 2023-04-23 13:52:27
+ * @LastEditTime: 2023-04-23 14:37:59
  */
 
 
@@ -35,6 +35,7 @@ const error = (msg) => {
     const t = getApp().globalData.toast
     return new Promise((resolve, reject) => {
         if (t) {
+            console.log(t);
             t.show({
                 type: 'error',
                 message: msg,
@@ -44,6 +45,7 @@ const error = (msg) => {
                 }
             })
         } else {
+            console.log(222222222);
             uni.showToast({
                 title: msg,
                 icon: 'error',

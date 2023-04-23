@@ -2,7 +2,7 @@
  * @Author: likfees
  * @Date: 2023-04-14 13:36:30
  * @LastEditors: likfees
- * @LastEditTime: 2023-04-23 13:34:21
+ * @LastEditTime: 2023-04-23 14:12:03
 -->
 <template>
 	<pageWrapper>
@@ -53,10 +53,11 @@
 		</view>
 		<!-- 菜单 -->
 		<view class="list" v-for="(list, index) in severList" :key="index">
-			<view v-for="(li, key) in list" :key="li.name" > 
+			<view v-for="(li, key) in list" :key="li.name">
 				<!-- 条件判断未登录 不显示菜单的条件  -->
-				<view v-if="!severList[index][key].isLogin || severList[index][key].isLogin && token" class="li" @click="menuClick(index, key)"
-					v-bind:class="{ 'noborder': key == list.length - 1 }" hover-class="hover">
+				<view v-if="!severList[index][key].isLogin || severList[index][key].isLogin && token" class="li"
+					@click="menuClick(index, key)" v-bind:class="{ 'noborder': key == list.length - 1 }"
+					hover-class="hover">
 					<view class="icon">
 						<image :src="'../../static/my/list/' + li.icon"></image>
 					</view>
@@ -69,7 +70,7 @@
 		<!-- 登录 -->
 		<loginPop :show="showLoginDialog" @close="hideLogin" @success="loginSuccess" />
 		<!-- 拨号 -->
-		<u-modal :content="content" :show="showPhoneDialog" showCancelButton closeOnClickOverlay @confirm="callPhone"
+		<u-modal :show="showPhoneDialog" showCancelButton closeOnClickOverlay @confirm="callPhone"
 			@cancel="() => showPhoneDialog = false" @close="close" confirmText="拨号">
 			<view>联系电话：{{ relationPhone }}</view>
 		</u-modal>
@@ -128,7 +129,10 @@ export default {
 			//如果登录了，则获取用户信息
 			if (this.token) {
 				this.user = getUser()
-				console.log(this.user);
+				// 解决 web 端 JSON 转换问题
+				if (typeof this.user === "string") {
+					this.user = JSON.parse(this.user)
+				}
 			}
 		},
 		// 登录成功
@@ -206,7 +210,7 @@ export default {
 					}
 				}
 			})
-			
+
 		},
 		//用户点击订单类型
 		toOrderType(index) {

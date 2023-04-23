@@ -1,7 +1,7 @@
 <template>
 	<view>
 		<view class="goods--box" v-if="!vertical">
-			<view class="goods--item" v-for="(item, index) in lists" :key="index" @click="$emit('onGoods', item)">
+			<view class="goods--item" v-for="(item, index) in lists" :key="index" @click="goodsClick(item)">
 				<view class="item-cover"
 					:style="{ backgroundImage: 'url(' + (item.images.length > 0 ? item.images[0].url : '') + ')' }" />
 				<view class="item-content">
@@ -18,7 +18,7 @@
 			</view>
 		</view>
 		<view class="goodsv--box" v-else>
-			<view class="goodsv--item" v-for="(item, index) in lists" :key="index" @click="$emit('onGoods', item)">
+			<view class="goodsv--item" v-for="(item, index) in lists" :key="index" @click="goodsClick(item)">
 				<view class="item-cover"
 					:style="{ backgroundImage: 'url(' + (item.images.length > 0 ? item.images[0].url : '') + ')' }" />
 				<view class="item-content">
@@ -58,12 +58,30 @@ export default {
 			required: false,
 			default: "￥"
 		},
+		// 样式
 		vertical: {
+			type: Boolean,
+			default: false
+		},
+		// 禁用商品点击默认跳转， 自定义监听 @onGoods
+		disableJump: {
 			type: Boolean,
 			default: false
 		}
 	},
 	mounted() {
+	},
+	methods: {
+		// 商品点击 默认跳转详情
+		goodsClick(goods) {
+			if (this.disableJump) {
+				this.$emit("onGoods", goods)
+			} else {
+				uni.navigateTo({
+					url: `/pages/goods/detail?id=${goods.ID}`
+				})
+			}
+		}
 	}
 }
 </script>
@@ -103,7 +121,7 @@ $radius: 20rpx;
 	align-items: flex-end;
 
 	.price {
-		color: #d4282d;
+		color: #fa3534;
 		font-size: 32rpx;
 		font-weight: 600;
 
@@ -199,6 +217,7 @@ $radius: 20rpx;
 			display: inline-block;
 			padding: 8px 10px 8px 5px;
 			flex: 1;
+
 			&>.title {
 				font-size: 28rpx;
 				line-height: 40rpx;
@@ -210,6 +229,7 @@ $radius: 20rpx;
 			.bottom-txt {
 				justify-content: normal;
 				margin-top: 8px;
+
 				.sale-num {
 					margin-left: 6px;
 				}

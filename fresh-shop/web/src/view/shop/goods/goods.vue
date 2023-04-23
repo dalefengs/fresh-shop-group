@@ -60,6 +60,7 @@
               </div><br>
               <span>所属分类：{{ scope.row.category.title }}</span><br>
               <span>所属品牌：{{ scope.row.brand.name }}</span><br>
+              <span>产地：{{ scope.row.origin ? scope.row.origin : '无' }}</span><br>
             </div>
           </template>
         </el-table-column>
@@ -83,7 +84,8 @@
               <span>商品单位：{{ scope.row.unit }}</span><br>
               <span>最低购买数量：{{ scope.row.minCount }} {{ scope.row.unit }}</span><el-divider direction="vertical" />
               <span>总销量：{{ scope.row.sale }}</span><br>
-              <span>商品重量：{{ scope.row.weight }}g</span><br>
+              <span>商品重量：{{ scope.row.weight }}g</span><el-divider direction="vertical" />
+              <span></span><br>
             </div>
           </template>
         </el-table-column>

@@ -10,4 +10,5 @@ type RouterGroup struct {
 	OrderDetailsRouter
 	OrderDeliveryRouter
 	OrderReturnRouter
+	FavoritesRouter
 }

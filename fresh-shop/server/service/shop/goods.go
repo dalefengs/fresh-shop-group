@@ -647,11 +647,12 @@ func (goodsService *GoodsService) DeleteGoodsByIds(ids request.IdsReq) (err erro
 
 // GetGoods 根据id获取Goods记录
 // Author [piexlmax](https://github.com/likfees)
-func (goodsService *GoodsService) GetGoods(id uint) (goods shop.Goods, err error) {
+func (goodsService *GoodsService) GetGoods(id, userId uint) (goods shop.Goods, err error) {
 	err = global.DB.Where("id = ?", id).
 		Preload("Desc").
 		Preload("Images").
 		Preload("Spec").
+		Preload("Brand").
 		First(&goods).Error
 	if err != nil {
 		return goods, errors.New("获取商品详情失败")
@@ -671,6 +672,13 @@ func (goodsService *GoodsService) GetGoods(id uint) (goods shop.Goods, err error
 			return shop.Goods{}, errors.New("获取商品规格明细失败")
 		}
 		goods.SpecValue = specValue
+	}
+	// 查询商品是否收藏
+	var f shop.GoodsFavorites
+	if errors.Is(global.DB.Where("user_id = ? and goods_id = ?", userId, id).First(&f).Error, gorm.ErrRecordNotFound) {
+		goods.IsFavorite = false
+	} else {
+		goods.IsFavorite = true
 	}
 	return
 }

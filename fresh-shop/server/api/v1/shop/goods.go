@@ -9,6 +9,7 @@ import (
 	"fresh-shop/server/model/shop"
 	shopReq "fresh-shop/server/model/shop/request"
 	"fresh-shop/server/service"
+	"fresh-shop/server/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"strings"
@@ -203,7 +204,8 @@ func (goodsApi *GoodsApi) FindGoods(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	if regoods, err := goodsService.GetGoods(goods.ID); err != nil {
+	userId := utils.GetUserID(c)
+	if regoods, err := goodsService.GetGoods(goods.ID, userId); err != nil {
 		global.Log.Error("查询失败!", zap.Error(err))
 		response.FailWithMessage("查询失败", c)
 	} else {
