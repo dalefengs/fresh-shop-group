@@ -680,6 +680,17 @@ func (goodsService *GoodsService) GetGoods(id, userId uint) (goods shop.Goods, e
 	} else {
 		goods.IsFavorite = true
 	}
+	var cart shop.Cart   // 当前商品购物车中存在的数量
+	var cartTotalNum int // 当前用户购物车总存在的数量
+	// 查询当前用户和当前商品购物车数量 直接查询 num 字段
+	global.DB.Model(shop.Cart{}).Where("user_id = ?", userId).Pluck("SUM(num) as cartNum", &cartTotalNum)
+	cartErr := global.DB.Model(shop.Cart{}).Where("user_id = ? and goods_id = ?", userId, id).First(&cart).Error
+	if cartErr != nil {
+		goods.CartNum = utils.Pointer(0)
+	} else {
+		goods.CartNum = cart.Num
+	}
+	goods.CartTotalNum = &cartTotalNum
 	return
 }
 
