@@ -5,20 +5,22 @@
  * @LastEditTime: 2023-04-21 17:26:13
 -->
 <template>
-    <u-popup :show="show" @open="open" @close="close" :closeable="closeable">
-        <view class="box">
-            <view class="title">用户登录</view>
-            <view class="btn">
-                <u-button :customStyle="otherBtnStyle" open-type="getPhoneNumber"
-                    @getphonenumber="getPhoneNumber">微信用户一键登录</u-button>
+    <view>
+        <u-popup :show="show" @open="open" @close="close" :closeable="closeable">
+            <view class="box">
+                <view class="title">用户登录</view>
+                <view class="btn">
+                    <u-button :customStyle="otherBtnStyle" open-type="getPhoneNumber"
+                              @getphonenumber="getPhoneNumber">微信用户一键登录</u-button>
+                </view>
+                <view class="other-btn" @click="otherBtnClick">其他号码登录/注册</view>
             </view>
-            <view class="other-btn" @click="otherBtnClick">其他号码登录/注册</view>
-        </view>
-    </u-popup>
+        </u-popup>
+        <u-toast style="z-index:9998;" ref="toast"></u-toast>
+    </view>
 </template>
 
 <script>
-import toast from '@/utils/toast.js'
 import { setToken, setExpires, setUser } from '@/store/storage.js'
 import { getWeChatOpenIdByCode, wxLogin } from '@/api/login.js'
 export default {
@@ -47,7 +49,6 @@ export default {
         }
     },
     mounted() {
-        getApp().globalData.toast = this.$refs.uToast
         uni.getSystemInfo({
             success: (res) => {
                 this.windowHeight = res.windowHeight - this.subHeight;
@@ -65,12 +66,12 @@ export default {
                 // 发起登录请求
                 this.login(e.detail.encryptedData, e.detail.iv)
             } else {
-                toast.error("获取手机号失败")
+                this.$message(this.$refs.toast).error("获取手机号失败")
             }
         },
         login(encryptedData, iv) {
             if (!this.sessionKey) {
-                toast.warn("请稍后在试试")
+                this.$message(this.$refs.toast).warn("请稍后在试试")
                 return
             }
             wxLogin({
@@ -113,14 +114,14 @@ export default {
                 }
             } else {
                 //异常处理，再次发起请求或者抛出异常
-                toast.error("获取 sessionKey 失败")
+                this.$message(this.$refs.toast).error("获取 sessionKey 失败")
             }
         },
         close() {
             this.$emit("close");
         },
         otherBtnClick() {
-            toast.info("开发中, 请使用微信登录")
+            this.$message(this.$refs.toast).info("开发中, 请使用微信登录")
         }
     }
 }

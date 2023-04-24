@@ -39,7 +39,7 @@ try {
 Vue.use(uView);
 Vue.use(pageWrapper)
 
-Vue.prototype.$message = toast
+Vue.prototype.$message = toast.message
 
 const app = new Vue({
 	...App

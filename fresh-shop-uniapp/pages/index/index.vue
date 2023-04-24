@@ -93,6 +93,7 @@
 		</view>
 		<loginSuspend :show="loginSuspendShow" @success="loginSuccess"></loginSuspend>
 		<Tabbar :tabsId="0" />
+        <u-toast style="z-index:9998;" ref="toast"></u-toast>
 	</pageWrapper>
 </template>
 
@@ -276,7 +277,7 @@ export default {
 		newScrollTopHandle(e) {
 			//this.newScrollTop = e.detail.scrollTop.toFixed(0)
 		},
-		// 返回列表的顶部 
+		// 返回列表的顶部
 		toTop() {
 			this.hotScrollTop = 0
 			this.newScrollTop = 0
@@ -293,9 +294,9 @@ export default {
 			}
 			const b = await this.getGoodsListData(this.goodsTabsId, 0)
 			if (b) {
-				this.$message.success("刷新成功")
+                this.$message(this.$refs.toast).success("刷新成功")
 			} else {
-				this.$message.success("刷新失败")
+                this.$message(this.$refs.toast).success("刷新失败")
 			}
 			this.hotTriggered = false;
 			this.newTriggered = false;

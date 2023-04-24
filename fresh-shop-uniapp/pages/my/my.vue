@@ -75,10 +75,10 @@
 			<view>联系电话：{{ relationPhone }}</view>
 		</u-modal>
 		<Tabbar :tabsId="3" />
+        <u-toast ref="toast"></u-toast>
 	</pageWrapper>
 </template>
 <script>
-import toast from '@/utils/toast.js'
 import Tabbar from '@/components/tabbar/tabbar.vue'
 import loginPop from '@/components/loginPop/loginPop.vue'
 import { getUser, getToken, setUser, setToken } from '@/store/storage.js'
@@ -141,7 +141,7 @@ export default {
 			this.hideLogin();
 			this.token = getToken()
 			this.user = u
-			toast.success("登录成功")
+            this.$message(this.$refs.toast).success("登录成功")
 		},
 		// 显示登录框
 		showLogin() {
@@ -179,8 +179,7 @@ export default {
 						this.user = ''
 						setUser('')
 						setToken('')
-						this.showLogout = false
-						toast.success("退出登录")
+                        this.$message(this.$refs.toast).success("退出登录")
 					}
 				}
 			})
@@ -190,7 +189,7 @@ export default {
 			uni.setClipboardData({
 				data: code,
 				success: () => {
-					toast.success("复制推荐码成功")
+                    this.$message(this.$refs.toast).success("复制推荐码成功")
 				}
 			})
 		},
@@ -206,7 +205,7 @@ export default {
 						this.user = ''
 						uni.clearStorage()
 						uni.clearStorageSync()
-						toast.success("清除缓存成功")
+                        this.$message(this.$refs.toast).success("清除缓存成功")
 					}
 				}
 			})

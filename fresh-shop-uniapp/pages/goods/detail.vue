@@ -87,14 +87,13 @@
             </view>
         </view>
         <loginSuspend :show="loginSuspendShow" @success="loginSuccess"></loginSuspend>
-        <u-toast ref="toast"></u-toast>
+        <u-toast style="z-index:9998;" ref="toast"></u-toast>
     </pageWrapper>
 </template>
 
 <script>
 import {getToken} from '@/store/storage.js'
 import loginSuspend from '@/components/loginPop/loginSuspend.vue'
-import toast from '@/utils/toast.js'
 import {getGoodsInfo} from '@/api/goods.js'
 import {favorites} from '@/api/favorites.js'
 import config from '@/config/config.js'
@@ -144,6 +143,10 @@ export default {
         }
         this.getGoods()
     },
+    onReady() {
+    },
+    mounted() {
+    },
     methods: {
         // 登陆成功
         loginSuccess() {
@@ -151,9 +154,9 @@ export default {
         },
         getGoods() {
             const data = {
-                ID: this.id
+                ID: this.id,
             }
-            getGoodsInfo(data).then(res => {
+            getGoodsInfo(data, this.$refs.toast).then(res => {
                 res.data.regoods.images.forEach((item, index) => {
                     if (item.url.slice(0, 4) !== 'http') {
                         res.data.regoods.images[index].url = config.baseUrl + "/" + item.url
@@ -173,7 +176,11 @@ export default {
             favorites({
                 goodsId: this.id
             }).then(res => {
-                this.goods.isFavorite = !this.goods.isFavorite
+                if (res.code) {
+                    this.goods.isFavorite = !this.goods.isFavorite
+                }else {
+                    this.$message(this.$refs.toast).error(res.msg)
+                }
             })
         },
         // 添加购物车按钮
@@ -186,7 +193,6 @@ export default {
             } else {
                 addNum--
             }
-            console.log(addNum)
             // 如果有最低购买的数量 且 当前商品没有达到超过的最低购买的数量
             if (this.goods.minCount > 0 && addNum < this.goods.minCount) {
                 if (type === 1) {
@@ -203,7 +209,6 @@ export default {
         // type 1增 2减
         // num 数量
         async addCartReq(type, num) {
-            console.log(num)
             const data = {
                 goodsId: this.id,
                 specType: 0, // 单规格
@@ -212,22 +217,12 @@ export default {
             const res = await addCart(data)
             if (res.code === 0) {
                 if (type === 1) {
-                    this.$refs.toast.show({
-                        type: 'success',
-                        message: "添加购物车成功",
-                        duration: 1000
-                    })
+                    this.$message(this.$refs.toast).success("添加购物车成功")
                     this.goods.cartTotalNum = this.goods.cartTotalNum + (num - this.goods.cartNum)
                 } else {
                     this.goods.cartTotalNum = this.goods.cartTotalNum - (this.goods.cartNum - num)
                 }
                 this.goods.cartNum = num
-            } else {
-                this.$refs.toast.show({
-                    type: 'error',
-                    message: "添加购物车失败",
-                    duration: 1000
-                })
             }
         }
 
@@ -235,7 +230,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .indicator {
   @include flex(row);
   justify-content: center;

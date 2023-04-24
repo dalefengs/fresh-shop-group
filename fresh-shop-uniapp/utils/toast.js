@@ -5,12 +5,25 @@
  * @LastEditTime: 2023-04-23 14:37:59
  */
 
+var toast = null
+const message = (ref) => {
+    toast = ref
+    return {
+        success,
+        error,
+        info,
+        none,
+        warning,
+        loading,
+        hide,
+        show,
+    }
+}
 
 const success = (msg) => {
-    const t = getApp().globalData.toast
     return new Promise((resolve, reject) => {
-        if (t) {
-            t.show({
+        if (toast) {
+            toast.show({
                 type: 'success',
                 message: msg,
                 duration: 1500,
@@ -32,11 +45,9 @@ const success = (msg) => {
 }
 
 const error = (msg) => {
-    const t = getApp().globalData.toast
     return new Promise((resolve, reject) => {
-        if (t) {
-            console.log(t);
-            t.show({
+        if (toast) {
+            toast.show({
                 type: 'error',
                 message: msg,
                 duration: 1500,
@@ -45,7 +56,6 @@ const error = (msg) => {
                 }
             })
         } else {
-            console.log(222222222);
             uni.showToast({
                 title: msg,
                 icon: 'error',
@@ -59,10 +69,9 @@ const error = (msg) => {
 }
 
 const warning = (msg) => {
-    const t = getApp().globalData.toast
     return new Promise((resolve, reject) => {
-        if (t) {
-            t.show({
+        if (toast) {
+            toast.show({
                 type: 'warning',
                 message: msg,
                 duration: 1500,
@@ -84,10 +93,9 @@ const warning = (msg) => {
 }
 
 const info = (msg) => {
-    const t = getApp().globalData.toast
     return new Promise((resolve, reject) => {
-        if (t) {
-            t.show({
+        if (toast) {
+            toast.show({
                 type: 'primary',
                 message: msg,
                 duration: 1500,
@@ -109,10 +117,9 @@ const info = (msg) => {
 }
 
 const none = (msg) => {
-    const t = getApp().globalData.toast
     return new Promise((resolve, reject) => {
-        if (t) {
-            t.show({
+        if (toast) {
+            toast.show({
                 type: 'default',
                 message: msg,
                 duration: 1500,
@@ -135,10 +142,9 @@ const none = (msg) => {
 
 
 const loading = (msg) => {
-    const t = getApp().globalData.toast
     return new Promise((resolve, reject) => {
-        if (t) {
-            t.show({
+        if (toast) {
+            toast.show({
                 type: 'loading',
                 message: msg,
                 duration: 200000,
@@ -157,17 +163,15 @@ const loading = (msg) => {
 
 const hide = () => {
     try {
-        const t = getApp().globalData.toast
-        uni.hideLoading();
-        t.hide()
+        uni.hideLoading()
+        toast.hide()
     } catch (e) { }
 
 }
 
 const show = (options) => {
-    const t = getApp().globalData.toast
     return new Promise((resolve, reject) => {
-        t.show({
+        toast.show({
             ...options,
             complete: () => {
                 resolve()
@@ -179,12 +183,5 @@ const show = (options) => {
 
 
 export default {
-    success,
-    error,
-    info,
-    none,
-    warning,
-    loading,
-    hide,
-    show,
+    message,
 }

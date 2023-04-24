@@ -20,17 +20,18 @@ import config from '@/config/config.js'
  * @param {boolean} [options.showError=true] 是否显示错误提示
  * @param {boolean} [options.autoLogin=false] 是否自动跳转到登录页
  * @returns {Promise} Promise 对象
+ * @param toastRefs
  */
-const request = (options) => {
+const request = (options, toastRefs) => {
 	options.method = options.method || 'GET'
 	options.loading = options.loading === undefined ? false : options.loading // 默认不显示 loading
 	//options.showError = options.showError === undefined ? true : options.showError
 	options.toLogin = options.toLogin === undefined ? false : options.toLogin // 默认不跳转到登录页
-
+	// <u-toast ref="toast"></u-toast>  需要在 request data 中传递 toastRefs = this.$refs.toast
+	toastRefs = toastRefs === undefined ? null : toastRefs // toastRefs
 	if (options.loading) {
-		toast.loading('加载中...')
+		toast.message(toastRefs).loading('加载中...')
 	}
-
 	// 添加请求头
 	options.header = Object.assign({
 		'content-type': 'application/json',
@@ -46,7 +47,7 @@ const request = (options) => {
 			success: (res) => {
 				// 隐藏加载动画
 				if (options.loading) {
-					toast.hide()
+					toast.message(toastRefs).hide()
 				}
 
 				// 如果响应头部中返回了新的 token，则重新写入本地存储中
@@ -58,9 +59,9 @@ const request = (options) => {
 				switch (res.statusCode) {
 					case 200:
 						if (res.data.code !== 0) {
-							toast.error(res.data.msg)
-							console.log(res.data.msg);
+							toast.message(toastRefs).error(res.data.msg)
 							resolve(res)
+							break
 						}
 						resolve(res.data)
 						break
@@ -75,11 +76,11 @@ const request = (options) => {
 						}
 						break
 					case 500:
-						toast.error('服务器异常，请稍后重试！')
+						toast.message(toastRefs).error('服务器异常，请稍后重试！')
 						reject(res)
 						break
 					default:
-						toast.error('请求失败，请稍后重试！')
+						toast.message(toastRefs).error('请求失败，请稍后重试！')
 						reject(res)
 				}
 
@@ -89,10 +90,10 @@ const request = (options) => {
 			fail: (err) => {
 				// 隐藏加载动画
 				if (options.loading) {
-					toast.hide()
+					toast.message(toastRefs).hide()
 				}
 				console.log(`uni.request ${options.url} fail`, err)
-				toast.error('服务器异常，请稍后重试！')
+				toast.message(toastRefs).error('服务器异常，请稍后重试！')
 				reject(err)
 			},
 		})

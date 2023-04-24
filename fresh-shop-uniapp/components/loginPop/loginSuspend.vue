@@ -16,12 +16,12 @@
             </view>
         </view>
         <loginPop :show="showLoginDialog" @close="hideLogin" @success="loginSuccess"> </loginPop>
+        <u-toast style="z-index:9998;" ref="toast"></u-toast>
     </view>
 </template>
 
 <script>
 import loginPop from '@/components/loginPop/loginPop.vue'
-import toast from '@/utils/toast.js'
 export default {
     components: {
         loginPop
@@ -54,7 +54,7 @@ export default {
         loginSuccess(u) {
             this.hideLogin();
             this.$emit("success")
-            toast.success("登录成功")
+            this.$message(this.$refs.toast).success("登录成功")
         },
     }
 }

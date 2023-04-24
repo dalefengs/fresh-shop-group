@@ -21,7 +21,8 @@ export const getGoodsPageList = (data) => {
     })
 }
 
-export const getGoodsPageListLoading = (data) => {
+// refs 为 toast refs
+export const getGoodsPageListLoading = (data, refs) => {
     data.status = 1
     if (!data.page) {
         data.page = 1
@@ -34,16 +35,17 @@ export const getGoodsPageListLoading = (data) => {
         method: 'GET',
         loading: true,
         data
-    })
+    }, refs)
 }
 
 
 // 获取商品详情
-export const getGoodsInfo = (data) => {
+export const getGoodsInfo = (data, refs) => {
     return request({
         url: `/goods/findGoods`,
         method: 'GET',
+        loading: true,
         data
-    })
+    }, refs)
 }
 

@@ -7,7 +7,6 @@
 <template>
 	<view :style="{ height: windowHeight + 'px' }">
 		<slot></slot>
-		<u-toast style="z-index:9998;" ref="toast"></u-toast>
 	</view>
 </template>
 
@@ -26,7 +25,6 @@ export default {
 		}
 	},
 	mounted() {
-		getApp().globalData.toast = this.$refs.toast
 		uni.getSystemInfo({
 			success: (res) => {
 				this.windowHeight = res.windowHeight - this.subHeight;
