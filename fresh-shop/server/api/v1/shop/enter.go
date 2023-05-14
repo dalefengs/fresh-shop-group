@@ -12,4 +12,5 @@ type ApiGroup struct {
 	OrderReturnApi
 	FavoritesApi
 	CartApi
+	UserAddressApi
 }

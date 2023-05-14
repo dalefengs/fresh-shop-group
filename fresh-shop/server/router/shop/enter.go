@@ -12,4 +12,5 @@ type RouterGroup struct {
 	OrderReturnRouter
 	FavoritesRouter
 	CartRouter
+	UserAddressRouter
 }

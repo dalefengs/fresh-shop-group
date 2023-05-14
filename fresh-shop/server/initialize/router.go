@@ -109,6 +109,7 @@ func Routers() *gin.Engine {
 		}
 		shopRouter.InitFavoritesRouter(PrivateGroup)
 		shopRouter.InitCartRouter(PrivateGroup)
+		shopRouter.InitUserAddressRouter(PrivateGroup)
 	}
 	{
 		loginRoute := router.RouterGroupApp.Login

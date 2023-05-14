@@ -50,7 +50,7 @@ func RegisterTables() {
 
 		file.ExaFile{},
 		file.ExaFileChunk{},
-		file.ExaFileUploadAndDownload{}, account.SysRecharge{}, account.UserFinanceType{}, account.UserFinance{}, business.Banner{}, shop.Category{}, shop.Brand{}, shop.BrandCategory{}, shop.Tags{}, shop.Goods{}, shop.GoodsDescription{}, shop.GoodsImage{}, shop.GoodsSpec{}, shop.GoodsSpecItem{}, shop.GoodsSpecValue{}, shop.Order{}, shop.OrderDetails{}, shop.OrderDelivery{}, business.UserDelivery{}, shop.OrderReturn{}, shop.OrderReturnDetails{}, shop.Favorites{}, shop.Cart{},
+		file.ExaFileUploadAndDownload{}, account.SysRecharge{}, account.UserFinanceType{}, account.UserFinance{}, business.Banner{}, shop.Category{}, shop.Brand{}, shop.BrandCategory{}, shop.Tags{}, shop.Goods{}, shop.GoodsDescription{}, shop.GoodsImage{}, shop.GoodsSpec{}, shop.GoodsSpecItem{}, shop.GoodsSpecValue{}, shop.Order{}, shop.OrderDetails{}, shop.OrderDelivery{}, business.UserDelivery{}, shop.OrderReturn{}, shop.OrderReturnDetails{}, shop.Favorites{}, shop.Cart{}, shop.UserAddress{},
 	)
 	if err != nil {
 		global.Log.Error("register table failed", zap.Error(err))

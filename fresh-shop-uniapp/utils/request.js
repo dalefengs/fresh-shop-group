@@ -7,7 +7,7 @@
 // uniapp request 请求
 import toast from '@/utils/toast.js'
 import config from '@/config/config.js'
-
+import { setToken, setUser } from '@/store/storage.js'
 
 /**
  * 封装 Uniapp 的请求工具类
@@ -59,9 +59,19 @@ const request = (options, toastRefs) => {
 				switch (res.statusCode) {
 					case 200:
 						if (res.data.code !== 0) {
-							toast.message(toastRefs).error(res.data.msg)
-							resolve(res)
-							break
+							// 授权已过期
+							if (res.data.code === 401) {
+								toast.message(toastRefs).error('授权已过期，请重新登陆')
+								setToken('')
+								setUser(null)
+								resolve(res.data)
+								break
+							} else {
+								toast.message(toastRefs).error(res.data.msg)
+								resolve(res.data)
+								break
+							}
+
 						}
 						resolve(res.data)
 						break
@@ -72,20 +82,20 @@ const request = (options, toastRefs) => {
 								url: '/pages/login/login'
 							})
 						} else {
-							reject(res)
+							reject(res.data)
 						}
 						break
 					case 500:
 						toast.message(toastRefs).error('服务器异常，请稍后重试！')
-						reject(res)
+						reject(res.data)
 						break
 					default:
 						toast.message(toastRefs).error('请求失败，请稍后重试！')
-						reject(res)
+						reject(res.data)
 				}
 
 				//console.log(`uni.request ${options.url} success`, res);
-				resolve(res)
+				resolve(res.data)
 			},
 			fail: (err) => {
 				// 隐藏加载动画

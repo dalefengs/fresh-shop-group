@@ -17,6 +17,7 @@
 				</view>
 			</view>
 		</view>
+        <!--  每个商品一行   -->
 		<view class="goodsv--box" v-else>
 			<view class="goodsv--item" v-for="(item, index) in lists" :key="index" @click="goodsClick(item)">
 				<view class="item-cover"
@@ -34,8 +35,11 @@
 							<text>{{ item.store > 0 ? '有货' : '无货' }}</text>
 						</view>
 						<view class="sale-num"><text>已售 {{ item.sale }}</text></view>
-						<view class="add-cart-button">
+						<view class="add-cart-button king-relative">
 							<u-icon name="shopping-cart" color="#ffffff" size="24"></u-icon>
+                            <view class="badge">
+                                <u-badge max="99" :value="item.cartNum" shape="circle"></u-badge>
+                            </view>
 						</view>
 					</view>
 				</view>
@@ -248,5 +252,11 @@ $radius: 20rpx;
 	right: 20px;
 	cursor: pointer;
 	padding: 2px 2px 2px 1px;
+
+  .badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+  }
 }
 </style>

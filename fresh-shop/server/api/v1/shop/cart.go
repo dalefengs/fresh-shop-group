@@ -119,6 +119,44 @@ func (cartApi *CartApi) UpdateCart(c *gin.Context) {
 	}
 }
 
+// SelectAllChecked 全选 Cart
+// @Tags Cart
+// @Summary 全选 Cart
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body shop.Cart true "全选 Cart"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"全选成功"}"
+// @Router /cart/selectAllChecked [post]
+func (cartApi *CartApi) SelectAllChecked(c *gin.Context) {
+	userId := utils.GetUserID(c)
+	if err := cartService.SelectAllChecked(userId); err != nil {
+		global.Log.Error("全选失败!", zap.Error(err))
+		response.FailWithMessage("全选失败", c)
+	} else {
+		response.OkWithMessage("全选成功", c)
+	}
+}
+
+// ClearAllChecked 取消全选 Cart
+// @Tags Cart
+// @Summary 取消全选 Cart
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body shop.Cart true "取消全选 Cart"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"取消全选成功"}"
+// @Router /cart/clearAllChecked [post]
+func (cartApi *CartApi) ClearAllChecked(c *gin.Context) {
+	userId := utils.GetUserID(c)
+	if err := cartService.ClearAllChecked(userId); err != nil {
+		global.Log.Error("取消全选失败!", zap.Error(err))
+		response.FailWithMessage("取消全选失败", c)
+	} else {
+		response.OkWithMessage("取消全选成功", c)
+	}
+}
+
 // FindCart 用id查询Cart
 // @Tags Cart
 // @Summary 用id查询Cart
@@ -159,15 +197,14 @@ func (cartApi *CartApi) GetCartList(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	if list, total, err := cartService.GetCartInfoList(pageInfo); err != nil {
+	userId := utils.GetUserID(c)
+	if list, total, err := cartService.GetCartInfoList(pageInfo, userId); err != nil {
 		global.Log.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 	} else {
 		response.OkWithDetailed(response.PageResult{
-			List:     list,
-			Total:    total,
-			Page:     pageInfo.Page,
-			PageSize: pageInfo.PageSize,
+			List:  list,
+			Total: total,
 		}, "获取成功", c)
 	}
 }

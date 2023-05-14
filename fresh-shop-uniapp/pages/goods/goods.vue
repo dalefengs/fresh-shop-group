@@ -30,8 +30,8 @@
 				text="暂无商品" mode="data" icon="http://cdn.uviewui.com/uview/empty/data.png" />
 				<!-- 返回顶部 -->
 			<u-back-top :scroll-top="scrollTop" @click="toTop"></u-back-top>
-
 		</view>
+        <u-toast style="z-index:9998;" ref="toast"></u-toast>
 	</pageWrapper>
 </template>
 
@@ -41,7 +41,7 @@ import config from '@/config/config.js'
 import { getBrandListAll } from '@/api/brand.js'
 import { getCategoryListAll } from '@/api/category.js'
 import { getTagsListAll } from '@/api/tags.js'
-import { getGoodsPageList } from '@/api/goods.js'
+import { getGoodsPageList, getGoodsPageListLoading } from '@/api/goods.js'
 import GoodsList from '@/components/goodsList/goodsList.vue'
 export default {
 	components: {
@@ -55,7 +55,7 @@ export default {
 			type: 0, // 筛选类型 0:排序 1:分类 2:品牌 3:标签
 			sortType: 0, // 排序 id
 			brandId: 0, // 品牌 id
-			categoryId: 0, // 分类 id 
+			categoryId: 0, // 分类 id
 			keyword: '', // 关键字
 			tagsIds: '', // 标签 id
 			brandList: [], // 品牌列表
@@ -228,7 +228,12 @@ export default {
 			}
 			data.page = this.page.page
 			data.pageSize = this.page.pageSize
-			const res = await getGoodsPageList(data)
+            let res = {}
+            if (type == 1) { // 加载
+                res = await getGoodsPageList(data)
+            }else {
+                res = await getGoodsPageListLoading(data, this.$refs.toast)
+            }
 			if (res.code !== 0) {
 				return false
 			}
@@ -267,7 +272,7 @@ export default {
 			}, 500)
 
 		},
-		// 返回列表的顶部 
+		// 返回列表的顶部
 		toTop() {
 			this.scrollTop = 0
 		},
@@ -276,11 +281,11 @@ export default {
 		async onRefresh() {
 			this.triggered = true;
 			const b = await this.getGoodsListData(0)
-			if (b) {
-				this.$message.success("刷新成功")
-			} else {
-				this.$message.success("刷新失败")
-			}
+            if (b) {
+                this.$message(this.$refs.toast).success('刷新成功')
+            } else {
+                this.$message(this.$refs.toast).error('刷新失败')
+            }
 			this.triggered = false;
 		},
 		async scrollTolower(e) {

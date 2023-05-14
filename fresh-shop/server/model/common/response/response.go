@@ -13,8 +13,9 @@ type Response struct {
 }
 
 const (
-	ERROR   = 7
-	SUCCESS = 0
+	ERROR         = 7
+	SUCCESS       = 0
+	TOKEN_EXPIRED = 401
 )
 
 func Result(code int, data interface{}, msg string, c *gin.Context) {
@@ -52,4 +53,8 @@ func FailWithMessage(message string, c *gin.Context) {
 
 func FailWithDetailed(data interface{}, message string, c *gin.Context) {
 	Result(ERROR, data, message, c)
+}
+
+func FailWithTookenExpired(data interface{}, message string, c *gin.Context) {
+	Result(TOKEN_EXPIRED, data, message, c)
 }

@@ -12,4 +12,5 @@ type ServiceGroup struct {
 	OrderReturnService
 	FavoritesService
 	CartService
+	UserAddressService
 }

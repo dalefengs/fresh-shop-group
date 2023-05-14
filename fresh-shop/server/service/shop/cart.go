@@ -52,7 +52,37 @@ func (cartService *CartService) DeleteCartByIds(ids request.IdsReq) (err error) 
 // UpdateCart 更新Cart记录
 // Author [piexlmax](https://github.com/likfees)
 func (cartService *CartService) UpdateCart(cart shop.Cart) (err error) {
-	err = global.DB.Save(&cart).Error
+	var dbC shop.Cart
+	err = global.DB.Where("id = ?", cart.ID).First(&dbC).Error
+	if err != nil {
+		return err
+	}
+	dbC.Checked = cart.Checked
+	err = global.DB.Save(&dbC).Error
+	return err
+}
+
+// SelectAllChecked 全选 Cart记录
+// Author [piexlmax](https://github.com/likfees)
+func (cartService *CartService) SelectAllChecked(userId uint) (err error) {
+	var ids []int
+	err = global.DB.Model(&shop.Cart{}).Where("user_id = ?", userId).Pluck("id", &ids).Error
+	if err != nil {
+		return err
+	}
+	err = global.DB.Model(&shop.Cart{}).Where("id in ?", ids).Update("checked", 1).Error
+	return err
+}
+
+// ClearAllChecked 取消全选 Cart记录
+// Author [piexlmax](https://github.com/likfees)
+func (cartService *CartService) ClearAllChecked(userId uint) (err error) {
+	var ids []int
+	err = global.DB.Model(&shop.Cart{}).Where("user_id = ?", userId).Pluck("id", &ids).Error
+	if err != nil {
+		return err
+	}
+	err = global.DB.Model(&shop.Cart{}).Where("id in ?", ids).Update("checked", 0).Error
 	return err
 }
 
@@ -63,14 +93,15 @@ func (cartService *CartService) GetCart(id uint) (cart shop.Cart, err error) {
 	return
 }
 
-// GetCartInfoList 分页获取Cart记录
+// GetCartInfoList 获取全部 Cart记录
 // Author [piexlmax](https://github.com/likfees)
-func (cartService *CartService) GetCartInfoList(info shopReq.CartSearch) (list []shop.Cart, total int64, err error) {
-	limit := info.PageSize
-	offset := info.PageSize * (info.Page - 1)
+func (cartService *CartService) GetCartInfoList(info shopReq.CartSearch, userId uint) (list []shop.Cart, total int64, err error) {
 	// 创建db
-	db := global.DB.Model(&shop.Cart{})
+	db := global.DB.Model(&shop.Cart{}).Where("user_id = ?", userId).Preload("Goods.Images")
 	var carts []shop.Cart
+	if info.Checked != nil {
+		db = db.Where("checked = ?", *info.Checked)
+	}
 	// 如果有条件搜索 下方会自动创建搜索语句
 	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
 		db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
@@ -80,6 +111,6 @@ func (cartService *CartService) GetCartInfoList(info shopReq.CartSearch) (list [
 		return
 	}
 
-	err = db.Limit(limit).Offset(offset).Find(&carts).Error
+	err = db.Order("created_at desc").Find(&carts).Error
 	return carts, total, err
 }

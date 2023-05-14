@@ -696,7 +696,7 @@ func (goodsService *GoodsService) GetGoods(id, userId uint) (goods shop.Goods, e
 
 // GetGoodsInfoList 分页获取Goods记录
 // Author [piexlmax](https://github.com/likfees)
-func (goodsService *GoodsService) GetGoodsInfoList(info shopReq.GoodsSearch) (list []shop.Goods, total int64, err error) {
+func (goodsService *GoodsService) GetGoodsInfoList(info shopReq.GoodsSearch, userId uint) (list []shop.Goods, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	// 创建db
@@ -730,11 +730,21 @@ func (goodsService *GoodsService) GetGoodsInfoList(info shopReq.GoodsSearch) (li
 	if info.IsFirst != nil {
 		db = db.Where("is_first = ?", info.IsFirst)
 	}
+
 	err = db.Count(&total).Error
 	if err != nil {
 		return
 	}
 	db = db.Order("sort asc, created_at desc")
 	err = db.Limit(limit).Offset(offset).Order("sort asc").Find(&goodss).Error
+	// 用户已经登录
+	if err == nil && userId > 0 {
+		for key, item := range goodss {
+			var cart shop.Cart
+			if !errors.Is(global.DB.Where("user_id = ? and goods_id = ?", userId, item.ID).First(&cart).Error, gorm.ErrRecordNotFound) {
+				goodss[key].CartNum = cart.Num
+			}
+		}
+	}
 	return goodss, total, err
 }

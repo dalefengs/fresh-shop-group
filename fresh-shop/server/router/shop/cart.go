@@ -18,8 +18,8 @@ func (s *CartRouter) InitCartRouter(Router *gin.RouterGroup) {
 		cartRouter.DELETE("deleteCart", cartApi.DeleteCart)           // 删除Cart
 		cartRouter.DELETE("deleteCartByIds", cartApi.DeleteCartByIds) // 批量删除Cart
 		cartRouter.PUT("updateCart", cartApi.UpdateCart)              // 更新Cart
+		cartRouter.POST("selectAllChecked", cartApi.SelectAllChecked) // 全选 Cart
+		cartRouter.POST("clearAllChecked", cartApi.ClearAllChecked)   // 取消全选 Cart
 		cartRouter.GET("getCartList", cartApi.GetCartList)            // 获取Cart列表
-	}
-	{
 	}
 }

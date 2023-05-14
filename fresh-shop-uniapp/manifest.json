@@ -15,6 +15,13 @@
                     }
                 }
             }
+        },
+        "sdkConfigs" : {
+            "maps" : {
+                "qqmap" : {
+                    "key" : "RBWBZ-CV5RW-VX7RW-36ZQL-YZVYF-DDBMM"
+                }
+            }
         }
     },
     /* 5+App特有相关 */
@@ -76,7 +83,13 @@
         "setting" : {
             "urlCheck" : false
         },
-        "usingComponents" : true
+        "usingComponents" : true,
+        "permission" : {
+            "scope.userLocation" : {
+                "desc" : "获取收货地址"
+            }
+        },
+        "requiredPrivateInfos" : [ "getLocation", "chooseLocation" ]
     },
     "mp-alipay" : {
         "usingComponents" : true

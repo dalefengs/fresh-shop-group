@@ -23,7 +23,9 @@
                     <u-scroll-list :indicator="brandList.length > 4" indicatorColor="#fff0f0"
                                    indicatorActiveColor="#00A0DC">
                         <view class="scroll-list" style="flex-direction: row;">
-                            <view class="scroll-list__goods-item" v-for="(item, index) in brandList" :key="index">
+                            <view v-for="(item, index) in brandList" class="scroll-list__goods-item"
+                                  :class="{'brand-active': currentBrandId == item.ID}"
+                                  :key="index" @click="selectBrand(item.ID)">
                                 <image class="scroll-list__goods-item__image" :src="item.logo" mode=""></image>
                                 <br>
                                 <text class="scroll-list__goods-item__text">{{ item.name }}</text>
@@ -102,7 +104,7 @@ export default {
             windows_height: 0, //屏幕高度
             foodSTop: 0, //右侧的滑动值
             currentIndex: 0, // 左边栏默认ID, 分类ID
-            brandId: 0, // 选择的品牌 ID
+            currentBrandId: 0, // 选择的品牌 ID
             last: 0,
             right_height: [], //右侧每个内容的高度集合
             select_index: 0,
@@ -172,6 +174,11 @@ export default {
     },
     methods: {
         async getBrandListData() {
+            const allBrand = [{
+                ID: 0,
+                name: "全部分类",
+                logo: "https://minio.fungs.cn/picture/images/avatar/face.png",
+            }]
             // 获取品牌列表
             const brandRes = await getBrandListByCategoryId({
                 categoryId: this.currentIndex
@@ -182,9 +189,9 @@ export default {
                         item.logo = config.baseUrl + "/" + item.logo
                     }
                 })
-                this.brandList = brandRes.data
+                this.brandList = [...allBrand, ...brandRes.data]
             } else {
-                this.brandList = []
+                this.brandList = allBrand
             }
         },
         // type = 1加载 其他为刷新
@@ -196,8 +203,8 @@ export default {
             if (this.currentIndex > 0) {
                 data.categoryId = this.currentIndex
             }
-            if (this.brandId) {
-                data.brandId = this.brandId
+            if (this.currentBrandId) {
+                data.brandId = this.currentBrandId
             }
             if (this.tagsIds) {
                 data.tagsIds = this.tagsIds
@@ -212,8 +219,8 @@ export default {
             data.pageSize = this.page.pageSize
             let res
             if (type == 0) {
-                 res = await getGoodsPageListLoading(data, this.$refs.toast)
-            }else {
+                res = await getGoodsPageListLoading(data, this.$refs.toast)
+            } else {
                 res = await getGoodsPageList(data)
             }
             if (res.code !== 0) {
@@ -226,7 +233,6 @@ export default {
                     item.images[0].url = config.baseUrl + "/" + item.images[0].url
                 }
             })
-            console.log(res);
             // 进行赋值并计算是否还有下一页
             this.page.total = res.data.total
             // 如果没有更多数据，则将isMore设置为false
@@ -248,41 +254,18 @@ export default {
             await this.getBrandListData()
             await this.getGoodsListData(0)
         },
-
+        // 选择品牌
+        selectBrand(id) {
+            this.currentBrandId = id
+            this.getGoodsListData(0)
+        },
         // 点击侧边栏
         select(categoryId) {
             this.currentIndex = categoryId;
             // 切换分类清空品牌筛选数据
-            this.brandId = 0
+            this.currentBrandId = 0
             this.getBrandListData()
             this.getGoodsListData(0)
-        },
-
-        // 设置点击侧边栏右边滚动的高度
-        setScrollH(index) {
-            var that = this;
-            let height = 0;
-            var query = uni.createSelectorQuery();
-            let foods = query.selectAll('.foods');
-
-            //this.$nextTick(() => {
-            //	foods.fields({
-            //		size: true
-            //	}, data => {
-            //		if (index == 0) {
-            //			that.foodSTop = 0;
-            //		}
-            //		for (let i = 0; i < index; i++) {
-
-            //			height += parseInt(data[i].height);
-            //			// console.log('fh', foods);
-            //			that.foodSTop = height;
-            //			// console.log(that.foodSTop)
-            //		}
-
-            //	}).exec();
-            //})
-
         },
         // 搜索框点击跳转到搜索页面
         searchClick() {
@@ -302,7 +285,6 @@ export default {
                     })
                 })
             } else {
-                console.log('add')
                 this.goods.forEach((good) => {
                     good.foods.forEach((food) => {
                         if (item.name == food.name)
@@ -377,9 +359,9 @@ export default {
             this.triggered = true;
             const b = await this.getGoodsListData(0)
             if (b) {
-                this.$message.success("刷新成功")
+                this.$message(this.$refs.toast).success("刷新成功")
             } else {
-                this.$message.success("刷新失败")
+                this.$message(this.$refs.toast).success("刷新失败")
             }
             this.triggered = false;
         },
@@ -489,19 +471,21 @@ export default {
   flex-direction: column;
 
   &__goods-item {
-    margin-right: 20px;
+    margin-right: 0px;
+    text-align: center;
+    padding: 5px 8px 3px 8px;
 
     &__image {
-      width: 60px;
-      height: 60px;
-      border-radius: 4px;
+      width: 50px;
+      height: 50px;
+      border-radius: 6px;
+      vertical-align: top;
     }
 
     &__text {
       color: #00A0DC;
       text-align: center;
-      font-size: 12px;
-      margin-top: 5px;
+      font-size: 11px;
     }
   }
 
@@ -519,5 +503,10 @@ export default {
       line-height: 16px;
     }
   }
+}
+
+.brand-active {
+  background: #f1eded;
+  border-radius: 8px;
 }
 </style>
