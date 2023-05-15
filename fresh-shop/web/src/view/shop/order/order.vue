@@ -29,7 +29,6 @@
             </el-select>
             </el-form-item>
         <el-form-item label="发货时间">
-            
             <el-date-picker v-model="searchInfo.startShipmentTime" type="datetime" placeholder="搜索条件（起）"></el-date-picker>
             —
             <el-date-picker v-model="searchInfo.endShipmentTime" type="datetime" placeholder="搜索条件（止）"></el-date-picker>

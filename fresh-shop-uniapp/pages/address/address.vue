@@ -52,9 +52,9 @@ export default {
     },
     methods: {
         async getAddressListData() {
-            const res = await getAddressList()
+            const res = await getAddressList(this.$refs.toast)
             if (res.code !== 0) {
-                this.$message(this.$refs.toast).error(res.msg)
+                // this.$message(this.$refs.toast).error(res.msg)
                 return false
             }
             this.list = res.data.list

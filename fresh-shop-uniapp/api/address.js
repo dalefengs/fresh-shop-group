@@ -6,6 +6,7 @@ export const getAddressList = (refs) => {
         url: `/userAddress/getUserAddressList`,
         method: 'GET',
         loading: true,
+        toLogin: true,
     }, refs)
 }
 

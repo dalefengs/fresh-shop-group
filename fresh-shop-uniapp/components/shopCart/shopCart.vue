@@ -294,8 +294,8 @@ export default {
 }
 
 .checked-image {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
 }
 
 
@@ -304,6 +304,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin: 0 auto;
 }
 
 .shop-car {
@@ -378,12 +379,11 @@ export default {
         align-items: center;
 
         .goods-image {
-          width: 90px;
-          height: 90px;
+          width: 70px;
+          height: 70px;
         }
 
         .goodsInfo-box {
-          width: 214px;
           margin-left: 12px;
           display: flex;
           flex-direction: column;
@@ -483,8 +483,8 @@ export default {
         justify-content: space-between;
 
         image {
-          width: 32px;
-          height: 32px;
+          width: 30px;
+          height: 30px;
         }
 
         text {

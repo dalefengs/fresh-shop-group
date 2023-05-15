@@ -18,7 +18,7 @@ import { setToken, setUser } from '@/store/storage.js'
  * @param {Object} [options.header] 请求的头部信息
  * @param {boolean} [options.showLoading=false] 是否显示加载动画
  * @param {boolean} [options.showError=true] 是否显示错误提示
- * @param {boolean} [options.autoLogin=false] 是否自动跳转到登录页
+ * @param {boolean} [options.toLogin=false] 是否自动跳转到登录页
  * @returns {Promise} Promise 对象
  * @param toastRefs
  */
@@ -61,7 +61,16 @@ const request = (options, toastRefs) => {
 						if (res.data.code !== 0) {
 							// 授权已过期
 							if (res.data.code === 401) {
-								toast.message(toastRefs).error('授权已过期，请重新登陆')
+								toast.message(toastRefs).error('授权已过期，请重新登陆').then(() => {
+									if (options.toLogin) {
+										setToken('')
+										setUser(null)
+										// 如果需要自动跳转到登录页，则跳转到登录页
+										uni.reLaunch({
+											url: '/pages/my/my'
+										})
+									}
+								})
 								setToken('')
 								setUser(null)
 								resolve(res.data)
@@ -77,9 +86,10 @@ const request = (options, toastRefs) => {
 						break
 					case 401:
 						if (options.toLogin) {
+							console.log(res.data.msg)
 							// 如果需要自动跳转到登录页，则跳转到登录页
 							uni.reLaunch({
-								url: '/pages/login/login'
+								url: '/pages/my/my'
 							})
 						} else {
 							reject(res.data)
