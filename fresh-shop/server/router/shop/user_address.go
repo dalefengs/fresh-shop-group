@@ -21,7 +21,8 @@ func (s *UserAddressRouter) InitUserAddressRouter(Router *gin.RouterGroup) {
 		userAddressRouter.PUT("updateUserAddress", userAddressApi.UpdateUserAddress)              // 更新UserAddress
 	}
 	{
-		userAddressRouterWithoutRecord.GET("findUserAddress", userAddressApi.FindUserAddress)       // 根据ID获取UserAddress
-		userAddressRouterWithoutRecord.GET("getUserAddressList", userAddressApi.GetUserAddressList) // 获取UserAddress列表
+		userAddressRouterWithoutRecord.GET("findUserAddress", userAddressApi.FindUserAddress)               // 根据ID获取UserAddress
+		userAddressRouterWithoutRecord.GET("findUserDefaultAddress", userAddressApi.FindUserDefaultAddress) // 获取用户默认 UserAddress
+		userAddressRouterWithoutRecord.GET("getUserAddressList", userAddressApi.GetUserAddressList)         // 获取UserAddress列表
 	}
 }

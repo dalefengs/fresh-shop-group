@@ -34,11 +34,11 @@ func (userAddressApi *UserAddressApi) CreateUserAddress(c *gin.Context) {
 		return
 	}
 	userAddress.UserId = utils.Pointer(int(utils.GetUserID(c)))
-	if err := userAddressService.CreateUserAddress(userAddress); err != nil {
+	if address, err := userAddressService.CreateUserAddress(userAddress); err != nil {
 		global.Log.Error("创建失败!", zap.Error(err))
 		response.FailWithMessage("创建失败", c)
 	} else {
-		response.OkWithMessage("创建成功", c)
+		response.OkWithData(address, c)
 	}
 }
 
@@ -137,6 +137,31 @@ func (userAddressApi *UserAddressApi) FindUserAddress(c *gin.Context) {
 		response.FailWithMessage("查询失败", c)
 	} else {
 		response.OkWithData(gin.H{"reuserAddress": reuserAddress}, c)
+	}
+}
+
+// FindUserDefaultAddress 查询用户默认 UserAddress
+// @Tags UserAddress
+// @Summary 用id查询UserAddress
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query shop.UserAddress true "用id查询UserAddress"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"查询成功"}"
+// @Router /userAddress/findUserAddress [get]
+func (userAddressApi *UserAddressApi) FindUserDefaultAddress(c *gin.Context) {
+	var userAddress shop.UserAddress
+	err := c.ShouldBindQuery(&userAddress)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	userId := utils.GetUserID(c)
+	if reuserAddress, err := userAddressService.GetUserDeafultAddress(userId); err != nil {
+		global.Log.Error("查询失败!", zap.Error(err))
+		response.FailWithMessage("查询失败", c)
+	} else {
+		response.OkWithData(reuserAddress, c)
 	}
 }
 

@@ -1,6 +1,7 @@
 package shop
 
 import (
+	"errors"
 	"fresh-shop/server/global"
 	"fresh-shop/server/model/common/request"
 	"fresh-shop/server/model/shop"
@@ -13,7 +14,7 @@ type UserAddressService struct {
 
 // CreateUserAddress 创建UserAddress记录
 // Author [piexlmax](https://github.com/likfees)
-func (userAddressService *UserAddressService) CreateUserAddress(userAddress shop.UserAddress) (err error) {
+func (userAddressService *UserAddressService) CreateUserAddress(userAddress shop.UserAddress) (address shop.UserAddress, err error) {
 	err = global.DB.Transaction(func(tx *gorm.DB) error {
 		if *userAddress.IsDefault == 1 {
 			// 更新所有默认值为 0
@@ -25,7 +26,7 @@ func (userAddressService *UserAddressService) CreateUserAddress(userAddress shop
 		err = tx.Create(&userAddress).Error
 		return err
 	})
-	return err
+	return userAddress, err
 }
 
 // DeleteUserAddress 删除UserAddress记录
@@ -69,6 +70,19 @@ func (userAddressService *UserAddressService) UpdateUserAddress(userAddress shop
 // Author [piexlmax](https://github.com/likfees)
 func (userAddressService *UserAddressService) GetUserAddress(id uint) (userAddress shop.UserAddress, err error) {
 	err = global.DB.Where("id = ?", id).First(&userAddress).Error
+	return
+}
+
+// GetUserDeafultAddress 根据用户id获取默认UserAddress记录
+// Author [piexlmax](https://github.com/likfees)
+func (userAddressService *UserAddressService) GetUserDeafultAddress(userId uint) (userAddress shop.UserAddress, err error) {
+	err = global.DB.Where("user_id = ? and is_default = 1", userId).First(&userAddress).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return userAddress, nil
+		}
+		return
+	}
 	return
 }
 

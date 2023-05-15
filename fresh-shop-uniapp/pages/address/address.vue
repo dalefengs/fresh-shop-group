@@ -9,7 +9,10 @@
                     <text>{{ item.name }}{{ item.sex === 1 ? '先生' : '女士' }}</text>
                     <text class="king-ml-10">{{ item.mobile }}</text>
                     <view class="king-ml-10 king-inline-block" v-if="item.isDefault === 1">
-                        <u-tag text="默认" plain shape="circle"></u-tag>
+                        <u-tag text="默认" plain shape="circle" size="mini"></u-tag>
+                    </view>
+                    <view class="king-ml-10 king-inline-block">
+                        <u-tag :text="item.lable" plain shape="circle" size="mini"></u-tag>
                     </view>
                 </view>
             </view>
@@ -83,14 +86,22 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-
+  font-size: 18px;
+  .address {
+    width: 85%;
+  }
   .info {
     margin-top: 10px;
     color: #6a7076;
+    display: flex;
+    align-items: center;
+    font-size: 17px;
   }
 
   .edit {
     width: 60px;
+    display: flex;
+    justify-content: center;
   }
 }
 

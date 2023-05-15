@@ -367,7 +367,7 @@ export default {
       }
 
       .goodsInfo-left {
-        width: 45px;
+        width: 35px;
         height: 35px;
       }
 
@@ -379,8 +379,8 @@ export default {
         align-items: center;
 
         .goods-image {
-          width: 70px;
-          height: 70px;
+          width: 60px;
+          height: 60px;
         }
 
         .goodsInfo-box {
@@ -466,6 +466,7 @@ export default {
     background-color: #FFFFFF;
     position: fixed;
     bottom: 50px;
+    width: 100%;
     border-bottom: 1px solid #e0dfdf;
 
     .statistics {
@@ -476,11 +477,11 @@ export default {
       justify-content: space-between;
 
       .statistics-left {
-        width: 70px;
+        margin-left: 10px;
+        width: 100px;
         display: flex;
         flex-direction: row;
         align-items: center;
-        justify-content: space-between;
 
         image {
           width: 30px;
@@ -495,7 +496,7 @@ export default {
       }
 
       .statistics-right {
-        width: 300px;
+        width: 100%;
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -506,7 +507,7 @@ export default {
         }
 
         .btn {
-          width: 109px;
+          width: 100px;
           height: 46px;
           line-height: 46px;
           background: #2979ff;
@@ -514,7 +515,7 @@ export default {
           font-size: 15px;
           font-weight: 500;
           color: white;
-          margin-left: 20px;
+          margin-left: 10px;
           border-radius: 40px;
         }
 

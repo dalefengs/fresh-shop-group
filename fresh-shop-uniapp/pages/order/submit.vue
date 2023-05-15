@@ -1,14 +1,30 @@
 <template>
     <pageWrapper>
-        <view>
-            <view class="statistics-box">
-                <text class="total">合计：</text>
-                <text class="text-color">¥{{ total }}</text>
-                <view class="btn" @tap="submit">
-                    <text>提交订单</text>
+        <view class="select-address" @click="addressShow">
+            <view class="icon">
+                <u-icon name="map" color="#2979ff" size="40"></u-icon>
+            </view>
+            <view v-if="addressId === 0" class="title">请选择收货地址</view>
+            <view v-else>
+                <view class="title">{{ address.title + address.detail }}</view>
+                <view class="sub-title">
+                    <text class="king-mr-10">{{ address.name }}{{ address.sex === 1 ? '先生' : '女士' }}</text>
+                    <text>{{ address.mobile }}</text>
+                    <view class="king-ml-10 king-inline-block">
+                        <u-tag :text="address.lable" plain shape="circle" size="mini"></u-tag>
+                    </view>
                 </view>
             </view>
         </view>
+        <view class="statistics-box">
+            <text class="total">合计：</text>
+            <text class="text-color">¥{{ total }}</text>
+            <view class="btn" @tap="submit">
+                <text>提交订单</text>
+            </view>
+        </view>
+        <addressPop :show="showLoginDialog" @close="addressClose" :addressId="addressId"
+                    @checked="addressChecked"></addressPop>
         <u-toast ref="toast"></u-toast>
     </pageWrapper>
 </template>
@@ -17,13 +33,23 @@
 import {getCheckedCartList} from "@/api/cart";
 import config from '@/config/config.js'
 import {getToken} from '@/store/storage.js'
+import {getDefaultAddressInfo} from '@/api/address';
+import addressPop from '@/components/addressPop/addressPop'
 
 export default {
+    components: {
+        addressPop,
+    },
     data() {
         return {
             token: '',
             list: [],
+            addressId: 0, // 用户地址ID
+            address: {}, // 用户收货地址
+            type: 0, // 提货方式 0运输 1自提
             total: 0,
+            showLoginDialog: false,
+
         }
     },
     mounted() {
@@ -37,10 +63,23 @@ export default {
             return
         }
         this.getCartListData()
+        this.getAddressInfo()
     },
     methods: {
+        addressChecked(addressInfo) {
+            this.address = addressInfo
+            this.addressId = addressInfo.ID
+            this.addressClose()
+        },
+        // 显示地址
+        addressShow() {
+            this.showLoginDialog = true
+        },
+        addressClose() {
+            this.showLoginDialog = false
+        },
         async getCartListData() {
-            const res = await getCheckedCartList()
+            const res = await getCheckedCartList(this.$refs.toast)
             if (res.code !== 0) {
                 this.$message(this.$refs.toast).error(res.msg)
                 return
@@ -65,12 +104,46 @@ export default {
                 }
             })
             this.list = res.data.list
+        },
+        // 获取用户默认收货地址
+        getAddressInfo() {
+            getDefaultAddressInfo(this.$refs.toast).then(res => {
+                this.address = res.data
+                this.addressId = res.data.ID
+            })
         }
     }
 }
 </script>
 
 <style lang="scss" scoped>
+
+.select-address {
+  display: flex;
+  align-items: center;
+  height: 120px;
+  margin: 0 10px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 0 20px;
+
+  .icon {
+    margin-right: 20px;
+  }
+
+  .title {
+    font-size: 18px;
+    font-weight: 550;
+  }
+
+  .sub-title {
+    margin-top: 8px;
+    font-size: 17px;
+    color: #454749;
+    display: flex;
+    align-items: center;
+  }
+}
 
 .statistics-box {
   width: 100%;

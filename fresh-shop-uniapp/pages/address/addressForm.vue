@@ -10,6 +10,7 @@
 import {getToken} from '@/store/storage.js'
 import {getAddressInfo, createAddress, updateAddress, deleteAddress} from '@/api/address';
 import ChooseAddress from '@/uni_modules/liu-chooseAddress/components/liu-chooseAddress/liu-chooseAddress.vue'
+import parse from "../../uni_modules/uview-ui/libs/config/props/parse";
 
 export default {
     components: {
@@ -19,7 +20,8 @@ export default {
         return {
             token: '',
             id: 0,
-            address: {}
+            address: {},
+            submit: 0, // 1是提交订单列表过来的
         }
     },
     onLoad(options) {
@@ -35,6 +37,9 @@ export default {
         this.id = options.id
         if (this.id) {
             this.getAddressInfoData()
+        }
+        if (options.submit) {
+            this.submit = parseInt(options.submit)
         }
     },
     methods: {
@@ -84,9 +89,21 @@ export default {
                 this.$message(this.$refs.toast).error(res.msg)
                 return false
             }
-            this.$message(this.$refs.toast).success("操作成功").then(() => {
-                uni.navigateBack()
-            })
+            if (this.submit === 1) {
+                this.$message(this.$refs.toast).success("操作成功").then(() => {
+                    // 获取上一页的页面信息
+                    // 设置值给上一页的 address
+                    let pages = getCurrentPages()
+                    let prevPage = pages[pages.length - 2]
+                    prevPage.address = res.data
+                    prevPage.addressId = res.data.ID
+                    uni.navigateBack()
+                })
+            }else {
+                this.$message(this.$refs.toast).success("操作成功").then(() => {
+                    uni.navigateBack()
+                })
+            }
         },
         //删除地址回调
         async deteleAddress() {

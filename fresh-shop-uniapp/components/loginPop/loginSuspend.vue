@@ -4,7 +4,6 @@
  * @LastEditors: likfees
  * @LastEditTime: 2023-04-23 12:43:56
 -->
-
 <template>
     <view v-if="show">
         <view class="box" @click="showLogin">

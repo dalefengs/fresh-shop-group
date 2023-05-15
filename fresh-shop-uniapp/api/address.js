@@ -23,12 +23,9 @@ export const getAddressInfo = (data, refs) => {
 // 获取默认地址
 export const getDefaultAddressInfo = (refs) => {
     return request({
-        url: `/userAddress/findUserAddress`,
+        url: `/userAddress/findUserDefaultAddress`,
         method: 'GET',
         loading: false,
-        data: {
-            isDefault: 1
-        }
     }, refs)
 }
 
