@@ -42,3 +42,18 @@ func GenerateInviteCode(length int) string {
 	}
 	return string(code)
 }
+
+// GenerateOrderNumber 生成订单号函数
+func GenerateOrderNumber(prefix string) string {
+
+	// 将当前时间戳转换成字符串
+	timeStr := time.Now().Format("20060102150405")
+	// 生成5位随机数
+	rand.Seed(time.Now().UnixNano())
+	min := 10000
+	max := 99999
+	r := rand.Intn(max-min+1) + min
+	// 将随机数和时间戳拼接成字符串
+	orderNumber := fmt.Sprintf("%s%s%d", prefix, timeStr, r)
+	return orderNumber
+}

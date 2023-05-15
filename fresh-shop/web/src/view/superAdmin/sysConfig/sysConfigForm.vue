@@ -2,23 +2,22 @@
   <div>
     <div class="gva-form-box">
       <el-form :model="formData" ref="elFormRef" label-position="right" :rules="rule" label-width="80px">
-        <el-form-item label="用户id:" prop="userId">
-          <el-input v-model.number="formData.userId" :clearable="true" placeholder="请输入" />
-        </el-form-item>
-        <el-form-item label="是否默认:" prop="isDefault">
-          <el-switch v-model="formData.isDefault" active-color="#13ce66" inactive-color="#ff4949" active-text="是" inactive-text="否" clearable ></el-switch>
-        </el-form-item>
-        <el-form-item label="收货人姓名:" prop="name">
+        <el-form-item label="配置参数键:" prop="name">
           <el-input v-model="formData.name" :clearable="true" placeholder="请输入" />
         </el-form-item>
-        <el-form-item label="手机号:" prop="mobile">
-          <el-input v-model="formData.mobile" :clearable="true" placeholder="请输入" />
+        <el-form-item label="配置参数值:" prop="value">
+          <el-input v-model="formData.value" :clearable="true" placeholder="请输入" />
         </el-form-item>
-        <el-form-item label="收货人地区编码:" prop="area">
-          <el-input v-model="formData.area" :clearable="true" placeholder="请输入" />
+        <el-form-item label="配置分组:" prop="groupType">
+          <el-input v-model="formData.groupType" :clearable="true" placeholder="请输入" />
         </el-form-item>
-        <el-form-item label="详细地址:" prop="address">
-          <el-input v-model="formData.address" :clearable="true" placeholder="请输入" />
+        <el-form-item label="中文描述:" prop="desc">
+          <el-input v-model="formData.desc" :clearable="true" placeholder="请输入" />
+        </el-form-item>
+        <el-form-item label="状态:" prop="status">
+          <el-select v-model="formData.status" placeholder="请选择" :clearable="true">
+            <el-option v-for="(item,key) in statusOptions" :key="key" :label="item.label" :value="item.value" />
+          </el-select>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="save">保存</el-button>
@@ -31,16 +30,16 @@
 
 <script>
 export default {
-  name: 'UserAddress'
+  name: 'SysConfig'
 }
 </script>
 
 <script setup>
 import {
-  createUserAddress,
-  updateUserAddress,
-  findUserAddress
-} from '@/api/userAddress'
+  createSysConfig,
+  updateSysConfig,
+  findSysConfig
+} from '@/api/sysConfig'
 
 // 自动获取字典
 import { getDictFunc } from '@/utils/format'
@@ -51,13 +50,13 @@ const route = useRoute()
 const router = useRouter()
 
 const type = ref('')
+const statusOptions = ref([])
 const formData = ref({
-            userId: 0,
-            isDefault: false,
             name: '',
-            mobile: '',
-            area: '',
-            address: '',
+            value: '',
+            groupType: '',
+            desc: '',
+            status: undefined,
         })
 // 验证规则
 const rule = reactive({
@@ -69,14 +68,15 @@ const elFormRef = ref()
 const init = async () => {
  // 建议通过url传参获取目标数据ID 调用 find方法进行查询数据操作 从而决定本页面是create还是update 以下为id作为url参数示例
     if (route.query.id) {
-      const res = await findUserAddress({ ID: route.query.id })
+      const res = await findSysConfig({ ID: route.query.id })
       if (res.code === 0) {
-        formData.value = res.data.reuserAddress
+        formData.value = res.data.resysConfig
         type.value = 'update'
       }
     } else {
       type.value = 'create'
     }
+    statusOptions.value = await getDictFunc('status')
 }
 
 init()
@@ -87,13 +87,13 @@ const save = async() => {
             let res
            switch (type.value) {
              case 'create':
-               res = await createUserAddress(formData.value)
+               res = await createSysConfig(formData.value)
                break
              case 'update':
-               res = await updateUserAddress(formData.value)
+               res = await updateSysConfig(formData.value)
                break
              default:
-               res = await createUserAddress(formData.value)
+               res = await createSysConfig(formData.value)
                break
            }
            if (res.code === 0) {

@@ -11,10 +11,40 @@ import (
 	"math"
 )
 
+// 如果数据库中的ID发生改变这里也需要修改
+const (
+	CASH  = 1 // 余额
+	POINT = 2 // 积分
+)
+
+// 限定操作类型
+type optionType int
+
+var (
+	OptionTypeCASH = optionType(0) // 操作余额
+	OptionTypeLock = optionType(1) // 操作锁仓
+)
+
+func NewFinance(optionType optionType, typeId int, userId uint, username string, amount float64, fromId string, fromUserId uint, fromUsername string, remark string) *account.UserFinance {
+	finance := account.UserFinance{
+		TypeId:     utils.Pointer(typeId),
+		Username:   username,
+		UserId:     utils.Pointer(int(userId)),
+		OptionType: utils.Pointer(int(optionType)), // 余额操作
+		Amount:     utils.Pointer(amount),
+		FromId:     fromId,
+		FromUserId: utils.Pointer(int(fromUserId)),
+		FromName:   fromUsername,
+		Remarks:    remark,
+	}
+	return &finance
+}
+
 // AccountUnifyDeduction 账户统一扣减
 // groupId 账户类型
 // finance 入账数据，需要填写完整
 func AccountUnifyDeduction(groupId int, finance account.UserFinance) error {
+
 	if finance.FeeAmount == nil {
 		finance.FeeAmount = utils.Pointer(0.0)
 	}

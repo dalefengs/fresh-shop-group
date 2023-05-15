@@ -2,13 +2,14 @@ package shop
 
 import (
 	"fresh-shop/server/global"
-    "fresh-shop/server/model/shop"
-    "fresh-shop/server/model/common/request"
-    shopReq "fresh-shop/server/model/shop/request"
-    "fresh-shop/server/model/common/response"
-    "fresh-shop/server/service"
-    "github.com/gin-gonic/gin"
-    "go.uber.org/zap"
+	"fresh-shop/server/model/common/request"
+	"fresh-shop/server/model/common/response"
+	"fresh-shop/server/model/shop"
+	shopReq "fresh-shop/server/model/shop/request"
+	"fresh-shop/server/service"
+	"fresh-shop/server/utils"
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type OrderApi struct {
@@ -16,8 +17,7 @@ type OrderApi struct {
 
 var orderService = service.ServiceGroupApp.ShopServiceGroup.OrderService
 
-
-// CreateOrder 创建Order
+// CreateOrder 创建待支付订单 Order
 // @Tags Order
 // @Summary 创建Order
 // @Security ApiKeyAuth
@@ -33,8 +33,19 @@ func (orderApi *OrderApi) CreateOrder(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	if err := orderService.CreateOrder(order); err != nil {
-        global.Log.Error("创建失败!", zap.Error(err))
+	if order.AddressId == nil || *order.AddressId == 0 {
+		response.FailWithMessage("请选择收货地址", c)
+		return
+	}
+	if len(order.CartIds) <= 0 {
+		response.FailWithMessage("购物车参数错误", c)
+		return
+	}
+	userId := utils.GetUserID(c)
+	order.UserId = utils.Pointer(int(userId))
+	userClaims := utils.GetUserInfo(c)
+	if err := orderService.CreateOrder(order, userClaims); err != nil {
+		global.Log.Error("创建失败!", zap.Error(err))
 		response.FailWithMessage("创建失败", c)
 	} else {
 		response.OkWithMessage("创建成功", c)
@@ -58,7 +69,7 @@ func (orderApi *OrderApi) DeleteOrder(c *gin.Context) {
 		return
 	}
 	if err := orderService.DeleteOrder(order); err != nil {
-        global.Log.Error("删除失败!", zap.Error(err))
+		global.Log.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
 	} else {
 		response.OkWithMessage("删除成功", c)
@@ -76,13 +87,13 @@ func (orderApi *OrderApi) DeleteOrder(c *gin.Context) {
 // @Router /order/deleteOrderByIds [delete]
 func (orderApi *OrderApi) DeleteOrderByIds(c *gin.Context) {
 	var IDS request.IdsReq
-    err := c.ShouldBindJSON(&IDS)
+	err := c.ShouldBindJSON(&IDS)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 	if err := orderService.DeleteOrderByIds(IDS); err != nil {
-        global.Log.Error("批量删除失败!", zap.Error(err))
+		global.Log.Error("批量删除失败!", zap.Error(err))
 		response.FailWithMessage("批量删除失败", c)
 	} else {
 		response.OkWithMessage("批量删除成功", c)
@@ -106,7 +117,7 @@ func (orderApi *OrderApi) UpdateOrder(c *gin.Context) {
 		return
 	}
 	if err := orderService.UpdateOrder(order); err != nil {
-        global.Log.Error("更新失败!", zap.Error(err))
+		global.Log.Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败", c)
 	} else {
 		response.OkWithMessage("更新成功", c)
@@ -130,7 +141,7 @@ func (orderApi *OrderApi) FindOrder(c *gin.Context) {
 		return
 	}
 	if reorder, err := orderService.GetOrder(order.ID); err != nil {
-        global.Log.Error("查询失败!", zap.Error(err))
+		global.Log.Error("查询失败!", zap.Error(err))
 		response.FailWithMessage("查询失败", c)
 	} else {
 		response.OkWithData(gin.H{"reorder": reorder}, c)
@@ -154,14 +165,14 @@ func (orderApi *OrderApi) GetOrderList(c *gin.Context) {
 		return
 	}
 	if list, total, err := orderService.GetOrderInfoList(pageInfo); err != nil {
-	    global.Log.Error("获取失败!", zap.Error(err))
-        response.FailWithMessage("获取失败", c)
-    } else {
-        response.OkWithDetailed(response.PageResult{
-            List:     list,
-            Total:    total,
-            Page:     pageInfo.Page,
-            PageSize: pageInfo.PageSize,
-        }, "获取成功", c)
-    }
+		global.Log.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+	} else {
+		response.OkWithDetailed(response.PageResult{
+			List:     list,
+			Total:    total,
+			Page:     pageInfo.Page,
+			PageSize: pageInfo.PageSize,
+		}, "获取成功", c)
+	}
 }

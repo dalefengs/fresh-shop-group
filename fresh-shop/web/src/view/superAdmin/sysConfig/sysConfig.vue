@@ -2,6 +2,22 @@
   <div>
     <div class="gva-search-box">
       <el-form :inline="true" :model="searchInfo" class="demo-form-inline" @keyup.enter="onSubmit">
+        <el-form-item label="配置参数键">
+         <el-input v-model="searchInfo.name" placeholder="搜索条件" />
+
+        </el-form-item>
+        <el-form-item label="配置参数值">
+         <el-input v-model="searchInfo.value" placeholder="搜索条件" />
+
+        </el-form-item>
+        <el-form-item label="配置分组">
+         <el-input v-model="searchInfo.groupType" placeholder="搜索条件" />
+
+        </el-form-item>
+        <el-form-item label="中文描述">
+         <el-input v-model="searchInfo.desc" placeholder="搜索条件" />
+
+        </el-form-item>
         <el-form-item label="创建时间">
           <el-date-picker v-model="searchInfo.startCreatedAt" type="datetime" placeholder="开始时间"></el-date-picker>
            —
@@ -37,19 +53,21 @@
         >
         <el-table-column type="selection" width="55" />
         <el-table-column align="left" label="编号" prop="ID" width="90" />
-        <el-table-column align="left" label="商品id" prop="goodsId" width="120" />
-        <el-table-column align="left" label="用户id" prop="userId" width="120" />
-        <el-table-column align="left" label="商品规格(0单规格 1多规格)" prop="specType" width="120">
-            <template #default="scope">{{ formatBoolean(scope.row.specType) }}</template>
+        <el-table-column align="left" label="配置参数键" prop="name" width="120" />
+        <el-table-column align="left" label="配置参数值" prop="value" width="120" />
+        <el-table-column align="left" label="配置分组" prop="groupType" width="120" />
+        <el-table-column align="left" label="中文描述" prop="desc"/>
+        <el-table-column align="left" label="状态" prop="status" width="120">
+            <template #default="scope">
+            {{ filterDict(scope.row.status,statusOptions) }}
+            </template>
         </el-table-column>
-        <el-table-column align="left" label="规格Id" prop="specItemId" width="120" />
-        <el-table-column align="left" label="商品数量" prop="num" width="120" />
         <el-table-column align="left" label="创建日期" width="180">
             <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
         <el-table-column align="left" label="操作">
             <template #default="scope">
-            <el-button type="primary" link icon="edit" class="table-button" @click="updateCartFunc(scope.row)">变更</el-button>
+            <el-button type="primary" link icon="edit" class="table-button" @click="updateSysConfigFunc(scope.row)">变更</el-button>
             <el-button type="primary" link icon="delete" @click="deleteRow(scope.row)">删除</el-button>
             </template>
         </el-table-column>
@@ -68,20 +86,22 @@
     </div>
     <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" :title="type === 'create' ? '新增操作' : '修改操作'">
       <el-form :model="formData" label-position="right" ref="elFormRef" :rules="rule" label-width="80px">
-        <el-form-item label="商品id:"  prop="goodsId" >
-          <el-input v-model.number="formData.goodsId" :clearable="true" placeholder="请输入" />
+        <el-form-item label="配置参数键:"  prop="name" >
+          <el-input v-model="formData.name" :clearable="true"  placeholder="请输入" />
         </el-form-item>
-        <el-form-item label="用户id:"  prop="userId" >
-          <el-input v-model.number="formData.userId" :clearable="true" placeholder="请输入" />
+        <el-form-item label="配置参数值:"  prop="value" >
+          <el-input v-model="formData.value" :clearable="true"  placeholder="请输入" />
         </el-form-item>
-        <el-form-item label="商品规格(0单规格 1多规格):"  prop="specType" >
-          <el-switch v-model="formData.specType" active-color="#13ce66" inactive-color="#ff4949" active-text="是" inactive-text="否" clearable ></el-switch>
+        <el-form-item label="配置分组:"  prop="groupType" >
+          <el-input v-model="formData.groupType" :clearable="true"  placeholder="请输入" />
         </el-form-item>
-        <el-form-item label="规格Id:"  prop="specItemId" >
-          <el-input v-model.number="formData.specItemId" :clearable="true" placeholder="请输入" />
+        <el-form-item label="中文描述:"  prop="desc" >
+          <el-input v-model="formData.desc" :clearable="true"  placeholder="请输入" />
         </el-form-item>
-        <el-form-item label="商品数量:"  prop="num" >
-          <el-input v-model.number="formData.num" :clearable="true" placeholder="请输入" />
+        <el-form-item label="状态:"  prop="status" >
+          <el-select v-model="formData.status" placeholder="请选择" style="width:100%" :clearable="true" >
+            <el-option v-for="(item,key) in statusOptions" :key="key" :label="item.label" :value="item.value" />
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -96,19 +116,19 @@
 
 <script>
 export default {
-  name: 'Cart'
+  name: 'SysConfig'
 }
 </script>
 
 <script setup>
 import {
-  createCart,
-  deleteCart,
-  deleteCartByIds,
-  updateCart,
-  findCart,
-  getCartList
-} from '@/api/cart'
+  createSysConfig,
+  deleteSysConfig,
+  deleteSysConfigByIds,
+  updateSysConfig,
+  findSysConfig,
+  getSysConfigList
+} from '@/api/sysConfig'
 
 // 全量引入格式化工具 请按需保留
 import { getDictFunc, formatDate, formatBoolean, filterDict } from '@/utils/format'
@@ -116,12 +136,13 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
 
 // 自动化生成的字典（可能为空）以及字段
+const statusOptions = ref([])
 const formData = ref({
-        goodsId: 0,
-        userId: 0,
-        specType: false,
-        specItemId: 0,
-        num: 0,
+        name: '',
+        value: '',
+        groupType: '',
+        desc: '',
+        status: undefined,
         })
 
 // 验证规则
@@ -148,9 +169,6 @@ const onReset = () => {
 const onSubmit = () => {
   page.value = 1
   pageSize.value = 10
-  if (searchInfo.value.specType === ""){
-      searchInfo.value.specType=null
-  }
   getTableData()
 }
 
@@ -168,7 +186,7 @@ const handleCurrentChange = (val) => {
 
 // 查询
 const getTableData = async() => {
-  const table = await getCartList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
+  const table = await getSysConfigList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
   if (table.code === 0) {
     tableData.value = table.data.list
     total.value = table.data.total
@@ -183,6 +201,7 @@ getTableData()
 
 // 获取需要的字典 可能为空 按需保留
 const setOptions = async () =>{
+    statusOptions.value = await getDictFunc('status')
 }
 
 // 获取需要的字典 可能为空 按需保留
@@ -203,7 +222,7 @@ const deleteRow = (row) => {
         cancelButtonText: '取消',
         type: 'warning'
     }).then(() => {
-            deleteCartFunc(row)
+            deleteSysConfigFunc(row)
         })
     }
 
@@ -225,7 +244,7 @@ const onDelete = async() => {
         multipleSelection.value.map(item => {
           ids.push(item.ID)
         })
-      const res = await deleteCartByIds({ ids })
+      const res = await deleteSysConfigByIds({ ids })
       if (res.code === 0) {
         ElMessage({
           type: 'success',
@@ -243,19 +262,19 @@ const onDelete = async() => {
 const type = ref('')
 
 // 更新行
-const updateCartFunc = async(row) => {
-    const res = await findCart({ ID: row.ID })
+const updateSysConfigFunc = async(row) => {
+    const res = await findSysConfig({ ID: row.ID })
     type.value = 'update'
     if (res.code === 0) {
-        formData.value = res.data.recart
+        formData.value = res.data.resysConfig
         dialogFormVisible.value = true
     }
 }
 
 
 // 删除行
-const deleteCartFunc = async (row) => {
-    const res = await deleteCart({ ID: row.ID })
+const deleteSysConfigFunc = async (row) => {
+    const res = await deleteSysConfig({ ID: row.ID })
     if (res.code === 0) {
         ElMessage({
                 type: 'success',
@@ -281,11 +300,11 @@ const openDialog = () => {
 const closeDialog = () => {
     dialogFormVisible.value = false
     formData.value = {
-        goodsId: 0,
-        userId: 0,
-        specType: false,
-        specItemId: 0,
-        num: 0,
+        name: '',
+        value: '',
+        groupType: '',
+        desc: '',
+        status: undefined,
         }
 }
 // 弹窗确定
@@ -295,13 +314,13 @@ const enterDialog = async () => {
               let res
               switch (type.value) {
                 case 'create':
-                  res = await createCart(formData.value)
+                  res = await createSysConfig(formData.value)
                   break
                 case 'update':
-                  res = await updateCart(formData.value)
+                  res = await updateSysConfig(formData.value)
                   break
                 default:
-                  res = await createCart(formData.value)
+                  res = await createSysConfig(formData.value)
                   break
               }
               if (res.code === 0) {

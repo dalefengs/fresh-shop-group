@@ -17,6 +17,7 @@ type ApiGroup struct {
 	AutoCodeHistoryApi
 	DictionaryDetailApi
 	AuthorityBtnApi
+	SysConfigApi
 }
 
 var (
