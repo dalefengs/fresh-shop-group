@@ -33,12 +33,8 @@ func (orderApi *OrderApi) CreateOrder(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	if order.AddressId == nil || *order.AddressId == 0 {
+	if order.AddressId == 0 {
 		response.FailWithMessage("请选择收货地址", c)
-		return
-	}
-	if len(order.CartIds) <= 0 {
-		response.FailWithMessage("购物车参数错误", c)
 		return
 	}
 	userId := utils.GetUserID(c)
@@ -46,7 +42,7 @@ func (orderApi *OrderApi) CreateOrder(c *gin.Context) {
 	userClaims := utils.GetUserInfo(c)
 	if err := orderService.CreateOrder(order, userClaims); err != nil {
 		global.Log.Error("创建失败!", zap.Error(err))
-		response.FailWithMessage("创建失败", c)
+		response.FailWithMessage(err.Error(), c)
 	} else {
 		response.OkWithMessage("创建成功", c)
 	}

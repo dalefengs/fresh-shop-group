@@ -25,9 +25,9 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 	if errors.Is(global.DB.Where("id = ?", order.AddressId).First(&address).Error, gorm.ErrRecordNotFound) {
 		return errors.New("收货地址不存在")
 	}
-	// 获取购物车列表数据
+	// 获取购物车已选中的商品数据
 	var cartList []shop.Cart
-	global.DB.Where("user_id = ? and id in ?", order.UserId, order.CartIds).Preload("Goods.Images").Find(&cartList)
+	global.DB.Where("user_id = ? and checked = 1", order.UserId).Preload("Goods.Images").Find(&cartList)
 	if len(cartList) <= 0 {
 		return errors.New("商品查询失败")
 	}
@@ -45,17 +45,18 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 	// 判断库存是否充足  以后可以上锁，解决高并发
 	for _, c := range cartList {
 		// 购物车数量大于库存
-		if *c.Num > *c.Goods.Store {
+		if c.Num > *c.Goods.Store {
+			global.SugarLog.Errorf("创建订单使库存不足 goodsId:%d, 购买数量:%d, 库存数量:%d \n", c.Goods.ID, c.Num, *c.Goods.Store)
 			return errors.New("商品库存不足")
 		}
 		// 计算总数量
-		*order.Num = *order.Num + *c.Num
+		order.Num = order.Num + c.Num
 
 		// 计算总金额 如果优惠价小于成本价
-		if *c.Goods.Price < *c.Goods.CostPrice {
-			*order.Total += float64(*c.Num) * *c.Goods.Price
+		if *c.Goods.Price > 0 && *c.Goods.Price < *c.Goods.CostPrice {
+			order.Total += float64(c.Num) * *c.Goods.Price
 		} else {
-			*order.Total += float64(*c.Num) * *c.Goods.CostPrice
+			order.Total += float64(c.Num) * *c.Goods.CostPrice
 		}
 		// 组织订单详情数据
 		imgUrl := ""
@@ -68,15 +69,16 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 		orderDetail.GoodsImage = imgUrl
 		orderDetail.Unit = c.Goods.Unit
 		orderDetail.Num = c.Num
-		orderDetail.Price = c.Goods.Price
+		orderDetail.Price = *c.Goods.Price
+		orderDetail.Total = 0
 		// 计算单个商品多个数量的总金额
-		if *c.Goods.Price < *c.Goods.CostPrice {
-			*orderDetail.Total = float64(*c.Num) * *c.Goods.Price
+		if *c.Goods.Price > 0 && *c.Goods.Price < *c.Goods.CostPrice {
+			orderDetail.Total = float64(c.Num) * *c.Goods.Price
 		} else {
-			*orderDetail.Total = float64(*c.Num) * *c.Goods.CostPrice
+			orderDetail.Total = float64(c.Num) * *c.Goods.CostPrice
 		}
 		// 规格id 现在只开发了单规格订单，多规格以后在支持
-		orderDetail.SpecId = utils.Pointer(0)
+		orderDetail.SpecId = 0
 		orderDetail.SpecKeyName = ""
 
 		// 计算赠送积分
@@ -86,7 +88,7 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 				global.SugarLog.Errorf("创建订单详情信息时转换积分配置参数异常, err:%v \n", err)
 				return err
 			}
-			*orderDetail.GiftPoints = *orderDetail.Total * (float64(point) / 100)
+			orderDetail.GiftPoints = orderDetail.Total * (float64(point) / 100)
 		}
 		orderDetailList = append(orderDetailList, orderDetail)
 	}
@@ -94,13 +96,14 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 	// 设置订单基本信息
 	order.OrderSn = utils.GenerateOrderNumber("SN")
 	// 商品区域默认为普通商品
-	if order.GoodsArea == nil || *order.GoodsArea == 0 {
-		*order.GoodsArea = 0
-	}
+	order.GoodsArea = utils.Pointer(0)
 	order.ShipmentName = address.Name
 	order.ShipmentMobile = address.Mobile
 	order.ShipmentAddress = address.Address + address.Title + address.Detail
-	*order.Status = 0 // 未付款状态
+	order.Status = utils.Pointer(0)  // 未付款状态
+	order.Payment = utils.Pointer(1) // 默认是微信支付
+	order.StatusCancel = utils.Pointer(0)
+	order.StatusRefund = utils.Pointer(0)
 	// 计算总赠送积分
 	if pointSwitch {
 		point, err := strconv.Atoi(pointCfg)
@@ -109,7 +112,7 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 			return err
 		}
 		// 公式 总金额 * n%
-		*order.GiftPoints = *order.Total * (float64(point) / 100)
+		order.GiftPoints = order.Total * (float64(point) / 100)
 	}
 
 	log := fmt.Sprintf("[OrderService] CreateOrder submit data:%+v; \n", order)
@@ -121,22 +124,35 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 		global.SugarLog.Errorf("log:%s,err:%v \n", log, err)
 		return errors.New("订单创建失败")
 	}
+	if order.ID == 0 {
+		txDB.Rollback()
+		global.SugarLog.Errorf("log:%s, err: 创建订单后订单ID获取失败 \n", log)
+		return errors.New("订单创建失败")
+	}
 	// 创建订单详情
 	// 设置订单详情 orderId
-	for _, v := range orderDetailList {
-		v.OrderId = order.ID
+	for k, _ := range orderDetailList {
+		orderDetailList[k].OrderId = order.ID
 	}
 	if err = global.DB.Create(&orderDetailList).Error; err != nil {
 		txDB.Rollback()
 		global.SugarLog.Errorf("log:%s,err:%v \n", log, err)
 		return errors.New("订单详情创建失败")
 	}
-	// 删除购物车列表
-	if err = global.DB.Delete(&cartList).Error; err != nil {
-		txDB.Rollback()
-		global.SugarLog.Errorf("log:%s,err:%v \n", log, err)
-		return errors.New("购物车删除失败")
+	// 扣减库存
+	for _, v := range cartList {
+		if err = global.DB.Model(&shop.Goods{}).Where("id = ?", v.GoodsId).Update("store", gorm.Expr("store - ?", v.Num)).Error; err != nil {
+			txDB.Rollback()
+			global.SugarLog.Errorf("log:%s,err:%v \n", log, err)
+			return errors.New("库存扣减失败")
+		}
 	}
+	// 删除购物车列表
+	//if err = global.DB.Delete(&cartList).Error; err != nil {
+	//	txDB.Rollback()
+	//	global.SugarLog.Errorf("log:%s,err:%v \n", log, err)
+	//	return errors.New("购物车删除失败")
+	//}
 	// 提交事务
 	txDB.Commit()
 	return nil

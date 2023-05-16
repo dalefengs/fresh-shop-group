@@ -33,14 +33,14 @@ func (cartApi *CartApi) CreateCart(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	if cart.GoodsId == nil || cart.Num == nil {
+	if cart.GoodsId == nil || cart.Num == 0 {
 		global.Log.Error("参数错误!", zap.Error(err))
 		response.FailWithMessage("参数错误", c)
 	}
 	userId := utils.GetUserID(c)
 	cart.UserId = utils.Pointer(int(userId))
 	if err := cartService.CreateCart(cart); err != nil {
-		global.Log.Error("添加购物车失败!", zap.Error(err))
+		global.Log.Error(err.Error(), zap.Error(err))
 		response.FailWithMessage("添加购物车失败", c)
 	} else {
 		response.OkWithMessage("success", c)

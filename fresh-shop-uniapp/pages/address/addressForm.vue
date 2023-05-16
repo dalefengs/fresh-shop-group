@@ -97,6 +97,7 @@ export default {
                     let prevPage = pages[pages.length - 2]
                     prevPage.address = res.data
                     prevPage.addressId = res.data.ID
+                    prevPage.showLoginDialog = false
                     uni.navigateBack()
                 })
             }else {

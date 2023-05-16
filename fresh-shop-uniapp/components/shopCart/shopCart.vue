@@ -44,7 +44,7 @@
                                 <!--                            <text class="spe">规格：{{ cart.goods.remark }}</text>-->
                                 <view class="goods-box">
                                     <text class="goods-price">
-                                        ¥{{ cart.goods.price > 0 ? cart.goods.price : cart.goods.costPrice }}
+                                        ¥{{ cart.goods.price > 0 && cart.goods.price < cart.goods.costPrice  ? cart.goods.price : cart.goods.costPrice }}
                                         <text class="goods-unit"> / {{ cart.goods.unit }}</text>
                                     </text>
                                     <view class="goods-num-box">
@@ -257,11 +257,12 @@ export default {
                 if (c.checked !== 1) {
                     return
                 }
-                if (c.goods.price > 0) {
+                if (c.goods.price > 0 && c.goods.price < c.goods.costPrice) {
                     total += c.goods.price * c.num
                 } else {
-                    total += c.goods.constPrice
+                    total += c.goods.costPrice * c.num
                 }
+                console.log(c.goods.price, c.goods.costPrice, c.num)
             })
             this.total = total.toFixed(2)
         },

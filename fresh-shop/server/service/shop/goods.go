@@ -688,7 +688,7 @@ func (goodsService *GoodsService) GetGoods(id, userId uint) (goods shop.Goods, e
 	if cartErr != nil {
 		goods.CartNum = utils.Pointer(0)
 	} else {
-		goods.CartNum = cart.Num
+		goods.CartNum = &cart.Num
 	}
 	goods.CartTotalNum = &cartTotalNum
 	return
@@ -742,7 +742,7 @@ func (goodsService *GoodsService) GetGoodsInfoList(info shopReq.GoodsSearch, use
 		for key, item := range goodss {
 			var cart shop.Cart
 			if !errors.Is(global.DB.Where("user_id = ? and goods_id = ?", userId, item.ID).First(&cart).Error, gorm.ErrRecordNotFound) {
-				goodss[key].CartNum = cart.Num
+				goodss[key].CartNum = &cart.Num
 			}
 		}
 	}

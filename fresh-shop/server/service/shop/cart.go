@@ -6,7 +6,6 @@ import (
 	"fresh-shop/server/model/common/request"
 	"fresh-shop/server/model/shop"
 	shopReq "fresh-shop/server/model/shop/request"
-	"fresh-shop/server/utils"
 	"gorm.io/gorm"
 )
 
@@ -17,15 +16,23 @@ type CartService struct {
 // Author [piexlmax](https://github.com/likfees)
 func (cartService *CartService) CreateCart(cart shop.Cart) (err error) {
 	var c shop.Cart
+	var goods shop.Goods
+	if errors.Is(global.DB.Where("id = ?", cart.GoodsId).First(&goods).Error, gorm.ErrRecordNotFound) {
+		return errors.New("商品不存在")
+	}
+	if *goods.Store < cart.Num {
+		return errors.New("商品库存不足")
+	}
 	// 记录不存在则创建
-	cart.SpecItemId = utils.Pointer(0)
+	cart.SpecItemId = 0
 	if errors.Is(global.DB.Where("user_id = ? and goods_id = ?", cart.UserId, cart.GoodsId).First(&c).Error, gorm.ErrRecordNotFound) {
-		if *cart.Num > 0 {
+
+		if cart.Num > 0 {
 			err = global.DB.Create(&cart).Error
 		}
 	} else {
 		// 如果如果数量 == 0 则删除
-		if *cart.Num == 0 {
+		if cart.Num == 0 {
 			err = global.DB.Delete(&c).Error
 		} else {
 			c.Num = cart.Num
