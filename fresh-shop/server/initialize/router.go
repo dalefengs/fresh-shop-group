@@ -114,11 +114,11 @@ func Routers() *gin.Engine {
 		shopRouter.InitUserAddressRouter(PrivateGroup)
 	}
 	{
-		loginRoute := router.RouterGroupApp.Login
-		loginRoute.InitWechatRouter(PrivateGroup)
+		wechatRoute := router.RouterGroupApp.Wechat
+		wechatRoute.InitWechatRouter(PrivateGroup)
 		// 不进行鉴别权的路由
 		{
-			loginRoute.InitWechatPublicRouter(PublicGroup)
+			wechatRoute.InitWechatPublicRouter(PublicGroup)
 		}
 	}
 

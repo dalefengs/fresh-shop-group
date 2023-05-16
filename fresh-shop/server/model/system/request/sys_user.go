@@ -18,7 +18,7 @@ type Register struct {
 	Email        string `json:"email" file:"电子邮箱"`
 }
 
-// User login structure
+// User wechat structure
 type Login struct {
 	Username  string `json:"username"`  // 用户名
 	Password  string `json:"password"`  // 密码
@@ -45,13 +45,13 @@ type SetUserAuthorities struct {
 }
 
 type ChangeUserInfo struct {
-	ID           uint                  `gorm:"primarykey"`                                                                                      // 主键ID
-	NickName     string                `json:"nickName" gorm:"default:系统用户;comment:用户昵称"`                                               // 用户昵称
-	Phone        string                `json:"phone"  gorm:"comment:用户手机号"`                                                                // 用户手机号
-	AuthorityIds []uint                `json:"authorityIds" gorm:"-"`                                                                           // 角色ID
+	ID           uint                  `gorm:"primarykey"`                                                                                  // 主键ID
+	NickName     string                `json:"nickName" gorm:"default:系统用户;comment:用户昵称"`                                                   // 用户昵称
+	Phone        string                `json:"phone"  gorm:"comment:用户手机号"`                                                                 // 用户手机号
+	AuthorityIds []uint                `json:"authorityIds" gorm:"-"`                                                                       // 角色ID
 	Email        string                `json:"email"  gorm:"comment:用户邮箱"`                                                                  // 用户邮箱
 	HeaderImg    string                `json:"headerImg" gorm:"default:https://minio.fungs.cn/picture/images/avatar/face.png;comment:用户头像"` // 用户头像
-	SideMode     string                `json:"sideMode"  gorm:"comment:用户侧边主题"`                                                           // 用户侧边主题
+	SideMode     string                `json:"sideMode"  gorm:"comment:用户侧边主题"`                                                             // 用户侧边主题
 	Enable       int                   `json:"enable" gorm:"comment:冻结用户"`                                                                  //冻结用户
 	Authorities  []system.SysAuthority `json:"-" gorm:"many2many:sys_user_authority;"`
 }

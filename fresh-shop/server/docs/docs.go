@@ -1498,7 +1498,7 @@ var doc = `{
                 }
             }
         },
-        "/base/login": {
+        "/base/wechat": {
             "post": {
                 "produces": [
                     "application/json"

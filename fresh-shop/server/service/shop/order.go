@@ -8,7 +8,9 @@ import (
 	"fresh-shop/server/model/shop"
 	shopReq "fresh-shop/server/model/shop/request"
 	systemReq "fresh-shop/server/model/system/request"
+	"fresh-shop/server/model/wechat/response"
 	"fresh-shop/server/service/common"
+	"fresh-shop/server/service/wechat"
 	"fresh-shop/server/utils"
 	"gorm.io/gorm"
 	"strconv"
@@ -19,17 +21,17 @@ type OrderService struct {
 
 // CreateOrder 创建Order记录
 // Author [piexlmax](https://github.com/likfees)
-func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *systemReq.CustomClaims) (err error) {
+func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *systemReq.CustomClaims, clientIP string) (resp *response.CreateOrderResp, err error) {
 	// 获取收货地址信息
 	var address shop.UserAddress
 	if errors.Is(global.DB.Where("id = ?", order.AddressId).First(&address).Error, gorm.ErrRecordNotFound) {
-		return errors.New("收货地址不存在")
+		return nil, errors.New("收货地址不存在")
 	}
 	// 获取购物车已选中的商品数据
 	var cartList []shop.Cart
 	global.DB.Where("user_id = ? and checked = 1", order.UserId).Preload("Goods.Images").Find(&cartList)
 	if len(cartList) <= 0 {
-		return errors.New("商品查询失败")
+		return nil, errors.New("商品查询失败")
 	}
 	var orderDetailList []shop.OrderDetails
 	pointCfg, err := common.GetSysConfig("point")
@@ -39,7 +41,7 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 			pointSwitch = false
 		} else {
 			global.SugarLog.Errorf("创建订单时查询积分配置参数异常, err:%v \n", err)
-			return err
+			return
 		}
 	}
 	// 判断库存是否充足  以后可以上锁，解决高并发
@@ -47,7 +49,7 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 		// 购物车数量大于库存
 		if c.Num > *c.Goods.Store {
 			global.SugarLog.Errorf("创建订单使库存不足 goodsId:%d, 购买数量:%d, 库存数量:%d \n", c.Goods.ID, c.Num, *c.Goods.Store)
-			return errors.New("商品库存不足")
+			return nil, errors.New("商品库存不足")
 		}
 		// 计算总数量
 		order.Num = order.Num + c.Num
@@ -86,7 +88,7 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 			point, err := strconv.Atoi(pointCfg)
 			if err != nil {
 				global.SugarLog.Errorf("创建订单详情信息时转换积分配置参数异常, err:%v \n", err)
-				return err
+				return nil, err
 			}
 			orderDetail.GiftPoints = orderDetail.Total * (float64(point) / 100)
 		}
@@ -109,7 +111,7 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 		point, err := strconv.Atoi(pointCfg)
 		if err != nil {
 			global.SugarLog.Errorf("创建订单时转换积分配置参数异常, err:%v \n", err)
-			return err
+			return nil, err
 		}
 		// 公式 总金额 * n%
 		order.GiftPoints = order.Total * (float64(point) / 100)
@@ -122,12 +124,12 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 	if err = global.DB.Create(&order).Error; err != nil {
 		txDB.Rollback()
 		global.SugarLog.Errorf("log:%s,err:%v \n", log, err)
-		return errors.New("订单创建失败")
+		return nil, errors.New("订单创建失败")
 	}
 	if order.ID == 0 {
 		txDB.Rollback()
 		global.SugarLog.Errorf("log:%s, err: 创建订单后订单ID获取失败 \n", log)
-		return errors.New("订单创建失败")
+		return nil, errors.New("订单创建失败")
 	}
 	// 创建订单详情
 	// 设置订单详情 orderId
@@ -137,16 +139,16 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 	if err = global.DB.Create(&orderDetailList).Error; err != nil {
 		txDB.Rollback()
 		global.SugarLog.Errorf("log:%s,err:%v \n", log, err)
-		return errors.New("订单详情创建失败")
+		return nil, errors.New("订单详情创建失败")
 	}
 	// 扣减库存
-	for _, v := range cartList {
-		if err = global.DB.Model(&shop.Goods{}).Where("id = ?", v.GoodsId).Update("store", gorm.Expr("store - ?", v.Num)).Error; err != nil {
-			txDB.Rollback()
-			global.SugarLog.Errorf("log:%s,err:%v \n", log, err)
-			return errors.New("库存扣减失败")
-		}
-	}
+	//for _, v := range cartList {
+	//	if err = global.DB.Model(&shop.Goods{}).Where("id = ?", v.GoodsId).Update("store", gorm.Expr("store - ?", v.Num)).Error; err != nil {
+	//		txDB.Rollback()
+	//		global.SugarLog.Errorf("log:%s,err:%v \n", log, err)
+	//		return nil, errors.New("库存扣减失败")
+	//	}
+	//}
 	// 删除购物车列表
 	//if err = global.DB.Delete(&cartList).Error; err != nil {
 	//	txDB.Rollback()
@@ -155,7 +157,22 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 	//}
 	// 提交事务
 	txDB.Commit()
-	return nil
+
+	// 发起 JSAIP 支付返回参数
+	err, jsApiData := wechat.JSAPIPay(userClaims.OpenId, order.OrderSn, order.ID, order.Total, clientIP)
+	if err != nil {
+		global.SugarLog.Errorf("log:%s, 微信 JsApi 发起调用异常, err: %v \n", log, err)
+		return
+	}
+	if jsApiData.ResultCode != "SUCCESS" || jsApiData.ReturnCode != "SUCCESS" {
+		global.SugarLog.Errorf("log:%s, 微信 JsApi 发起调用失败, jsApiData: %#v \n", log, jsApiData)
+		return nil, errors.New("交易调用失败，请重试")
+	}
+	resp = &response.CreateOrderResp{
+		Order: order,
+		Pay:   *jsApiData,
+	}
+	return
 }
 
 // DeleteOrder 删除Order记录

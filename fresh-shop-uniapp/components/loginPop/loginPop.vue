@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import { setToken, setExpires, setUser } from '@/store/storage.js'
+import { setToken, setExpires, setUser, setOpenId } from '@/store/storage.js'
 import { getWeChatOpenIdByCode, wxLogin } from '@/api/login.js'
 export default {
     name: "loginPop",
@@ -83,6 +83,7 @@ export default {
                 console.log('wxLogin res', res);
                 setToken(res.data.token)
                 setExpires(res.data.expiresAt)
+                setOpenId(res.data.user.openId)
                 setUser(res.data.user)
                 this.$emit("success", res.data.user)
             })

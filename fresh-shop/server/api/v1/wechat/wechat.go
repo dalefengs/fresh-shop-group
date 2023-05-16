@@ -1,9 +1,9 @@
-package login
+package wechat
 
 import (
 	"fresh-shop/server/global"
 	"fresh-shop/server/model/common/response"
-	"fresh-shop/server/model/login/request"
+	"fresh-shop/server/model/wechat/request"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -33,4 +33,30 @@ func (w *WeChatApi) Code2Session(c *gin.Context) {
 	} else {
 		response.OkWithData(result, c)
 	}
+}
+
+// CreatePayData 创建微信支付数据
+func (w *WeChatApi) CreatePayData(c *gin.Context) {
+	var data request.WechatPayReq
+	err := c.ShouldBindQuery(&data)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if data.OpenId == "" {
+		response.FailWithMessage("参数错误", c)
+		return
+	}
+	data.ClientIP = c.ClientIP()
+	err = wechatService.CreatePayData(data)
+	if err != nil {
+		global.Log.Error("失败!", zap.Error(err))
+		response.FailWithMessage("失败", c)
+	} else {
+		//response.OkWithData(result, c)
+	}
+}
+
+func (w *WeChatApi) PayNotify(c *gin.Context) {
+	global.SugarLog.Infof("微信支付回调 开始 \n")
 }

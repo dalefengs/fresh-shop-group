@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"fresh-shop/server/model/account"
-	"fresh-shop/server/model/login/request"
 	sysReq "fresh-shop/server/model/system/request"
+	"fresh-shop/server/model/wechat/request"
 	"go.uber.org/zap"
 	"time"
 
@@ -30,11 +30,11 @@ func (userService *UserService) LoginWx(req request.LoginReq) (user *system.SysU
 	encryptor := global.MiniProgram.GetEncryptor()
 	d, err := encryptor.Decrypt(req.SessionKey, req.EncryptedData, req.Iv)
 	if err != nil {
-		global.SugarLog.Errorf("login 微信登陆失败, req: %#v, error: %s", req, err.Error())
+		global.SugarLog.Errorf("wechat 微信登陆失败, req: %#v, error: %s", req, err.Error())
 		return
 	}
 	if d.PurePhoneNumber == "" {
-		global.SugarLog.Errorf("login 微信登陆失败, req: %#v, error: 手机号不能为空", req)
+		global.SugarLog.Errorf("wechat 微信登陆失败, req: %#v, error: 手机号不能为空", req)
 		return nil, fmt.Errorf("获取的手机号为空")
 	}
 	var u system.SysUser

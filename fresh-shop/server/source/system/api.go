@@ -43,7 +43,7 @@ func (i *initApi) InitializeData(ctx context.Context) (context.Context, error) {
 		return ctx, system.ErrMissingDBContext
 	}
 	entities := []sysModel.SysApi{
-		{ApiGroup: "base", Method: "POST", Path: "/base/login", Description: "用户登录(必选)"},
+		{ApiGroup: "base", Method: "POST", Path: "/base/wechat", Description: "用户登录(必选)"},
 
 		{ApiGroup: "jwt", Method: "POST", Path: "/jwt/jsonInBlacklist", Description: "jwt加入黑名单(退出，必选)"},
 

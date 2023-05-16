@@ -12,3 +12,9 @@ type LoginReq struct {
 	Iv            string `json:"iv" form:"iv"`
 	OpenId        string `json:"openid" form:"openid"`
 }
+
+type WechatPayReq struct {
+	OpenId   string `json:"openId" form:"openId"`
+	Body     string `json:"body" form:"body"`
+	ClientIP string `json:"clientIP" form:"clientIP"` // 客户端IP
+}

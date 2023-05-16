@@ -40,11 +40,11 @@ func (orderApi *OrderApi) CreateOrder(c *gin.Context) {
 	userId := utils.GetUserID(c)
 	order.UserId = utils.Pointer(int(userId))
 	userClaims := utils.GetUserInfo(c)
-	if err := orderService.CreateOrder(order, userClaims); err != nil {
+	if orderResp, err := orderService.CreateOrder(order, userClaims, c.ClientIP()); err != nil {
 		global.Log.Error("创建失败!", zap.Error(err))
 		response.FailWithMessage(err.Error(), c)
 	} else {
-		response.OkWithMessage("创建成功", c)
+		response.OkWithData(orderResp, c)
 	}
 }
 

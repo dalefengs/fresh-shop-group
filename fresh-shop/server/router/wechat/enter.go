@@ -1,4 +1,4 @@
-package login
+package wechat
 
 type RouterGroup struct {
 	WechatRouter

@@ -137,11 +137,32 @@ export default {
                 remarks: this.remark,
                 addressId: this.addressId,
                 shipmentType: parseInt(this.shipmentType)
-            },this.$refs.toast)
+            }, this.$refs.toast)
             if (res.code !== 0) {
                 return false
             }
-            await this.$message(this.$refs.toast).success("正在交易中...")
+            this.$message(this.$refs.toast).success("正在交易中...")
+            if (!res.data.pay) {
+                this.$message(this.$refs.toast).error("交易失败，请重试")
+                return false
+            }
+            this.toPay(res.data.pay, res.data.order)
+        },
+        toPay(pay, order) {
+            const time = new Date().getTime()
+            const signStr = `appId=${pay.AppID}&nonceStr=${pay.NonceStr}&package=prepay_id=${pay.PrePayID}&signType=MD5&timeStamp=${time}&key=HC7saiqiuqiyundongku13527326320Q`
+            const sign = md5Libs.md5(signStr).toUpperCase()
+            console.log('加密签名: signStr', signStr, sign)
+            uni.requestPayment({
+                provider: 'wxpay', // 服务提供商，通过 uni.getProvider 获取。
+                timeStamp: time + '',
+                nonceStr: pay.NonceStr,
+                orderInfo: pay.order,
+                package: 'prepay_id=' + pay.PrePayID,
+                signType: 'MD5',
+                paySign: pay.Sign,
+            })
+
         },
         // 地址选择
         addressChecked(addressInfo) {

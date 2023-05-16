@@ -1,7 +1,7 @@
 package system
 
 import (
-	loginReq "fresh-shop/server/model/login/request"
+	loginReq "fresh-shop/server/model/wechat/request"
 	"fresh-shop/server/service/common"
 	"strconv"
 	"time"
@@ -25,7 +25,7 @@ import (
 // @Produce   application/json
 // @Param    data  body      systemReq.LoginWx                                             true  "用户名, 密码, 验证码"
 // @Success  200   {object}  response.Response{data=systemRes.LoginResponse,msg=string}  "返回包括用户信息,token,过期时间"
-// @Router   /base/login [post]
+// @Router   /base/wechat [post]
 func (b *BaseApi) Login(c *gin.Context) {
 	var l systemReq.Login
 	err := c.ShouldBindJSON(&l)
@@ -126,6 +126,7 @@ func (b *BaseApi) TokenNext(c *gin.Context, user system.SysUser) {
 		NickName:    user.NickName,
 		Username:    user.Username,
 		AuthorityId: user.AuthorityId,
+		OpenId:      user.OpenId,
 	})
 	token, err := j.CreateToken(claims)
 	if err != nil {

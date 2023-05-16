@@ -2,7 +2,7 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 
 const routes = [{
   path: '/',
-  redirect: '/login'
+  redirect: '/wechat'
 },
 {
   path: '/init',
@@ -10,9 +10,9 @@ const routes = [{
   component: () => import('@/view/init/index.vue')
 },
 {
-  path: '/login',
+  path: '/wechat',
   name: 'Login',
-  component: () => import('@/view/login/index.vue')
+  component: () => import('@/view/wechat/index.vue')
 }
 ]
 

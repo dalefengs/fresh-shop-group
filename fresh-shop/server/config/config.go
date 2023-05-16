@@ -29,5 +29,6 @@ type Server struct {
 	// 跨域配置
 	Cors CORS `mapstructure:"cors" json:"cors" yaml:"cors"`
 
-	Wechat Wechat `mapstructure:"wechat" json:"wechat" yaml:"wechat"`
+	Wechat    Wechat    `mapstructure:"wechat" json:"wechat" yaml:"wechat"`
+	WechatPay WechatPay `mapstructure:"wechatPay" json:"wechatPay" yaml:"wechatPay"`
 }

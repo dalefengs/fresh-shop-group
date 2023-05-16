@@ -2,6 +2,7 @@ package global
 
 import (
 	"github.com/silenceper/wechat/v2/miniprogram"
+	"github.com/silenceper/wechat/v2/pay"
 	"sync"
 
 	"fresh-shop/server/utils/timer"
@@ -31,6 +32,7 @@ var (
 	BlackCache         local_cache.Cache
 	lock               sync.RWMutex
 	MiniProgram        *miniprogram.MiniProgram // 微信小程序
+	WxPay              *pay.Pay                 // 微信小程序
 )
 
 // GetGlobalDBByDBName 通过名称获取db list中的db

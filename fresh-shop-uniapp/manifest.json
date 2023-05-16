@@ -22,6 +22,9 @@
                     "key" : "RBWBZ-CV5RW-VX7RW-36ZQL-YZVYF-DDBMM"
                 }
             }
+        },
+        "router" : {
+            "mode" : "hash"
         }
     },
     /* 5+App特有相关 */
@@ -37,7 +40,8 @@
         },
         /* 模块配置 */
         "modules" : {
-            "Payment" : {}
+            "Payment" : {},
+            "Barcode" : {}
         },
         /* 应用发布信息 */
         "distribute" : {
@@ -105,3 +109,5 @@
     },
     "vueVersion" : "2"
 }
+/* 5+App特有相关 *//* 模块配置 */
+

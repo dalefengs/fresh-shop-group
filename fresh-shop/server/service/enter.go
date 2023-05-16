@@ -4,9 +4,9 @@ import (
 	"fresh-shop/server/service/account"
 	"fresh-shop/server/service/business"
 	"fresh-shop/server/service/file"
-	"fresh-shop/server/service/login"
 	"fresh-shop/server/service/shop"
 	"fresh-shop/server/service/system"
+	"fresh-shop/server/service/wechat"
 )
 
 type ServiceGroup struct {
@@ -15,7 +15,7 @@ type ServiceGroup struct {
 	AccountServiceGroup  account.ServiceGroup
 	BusinessServiceGroup business.ServiceGroup
 	ShopServiceGroup     shop.ServiceGroup
-	LoginServiceGroup    login.ServiceGroup
+	WechatServiceGroup   wechat.ServiceGroup
 }
 
 var ServiceGroupApp = new(ServiceGroup)

@@ -1,4 +1,4 @@
-package login
+package wechat
 
 import "fresh-shop/server/service"
 
@@ -7,6 +7,6 @@ type ApiGroup struct {
 }
 
 var (
-	wechatService = service.ServiceGroupApp.LoginServiceGroup.WechatService
+	wechatService = service.ServiceGroupApp.WechatServiceGroup.WechatService
 	userService   = service.ServiceGroupApp.SystemServiceGroup.UserService
 )

@@ -82,7 +82,7 @@
 import Tabbar from '@/components/tabbar/tabbar.vue'
 import loginPop from '@/components/loginPop/loginPop.vue'
 import {getUserInfo} from "@/api/user";
-import {getUser, getToken, setUser, setToken} from '@/store/storage.js'
+import {getUser, getToken, setUser, setToken, setOpenId} from '@/store/storage.js'
 
 export default {
   components: {
@@ -186,6 +186,7 @@ export default {
             this.user = ''
             setUser('')
             setToken('')
+            setOpenId('')
             this.$message(this.$refs.toast).success("退出登录")
           }
         }
