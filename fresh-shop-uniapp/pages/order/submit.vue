@@ -66,7 +66,8 @@
         </view>
         <view class="remark">
             <view>备注</view>
-            <u--input placeholder="请输入备注信息" :customStyle="{'padding': '6px 0 0 0'}" border="bottom" v-model="remark"
+            <u--input placeholder="请输入备注信息" :customStyle="{'padding': '6px 0 0 0'}" border="bottom"
+                      v-model="remark"
                       clearable
             ></u--input>
         </view>
@@ -86,6 +87,7 @@
 <script>
 import {getCheckedCartList} from "@/api/cart";
 import config from '@/config/config.js'
+import md5 from '@/utils/md5.js'
 import {getToken} from '@/store/storage.js'
 import {getDefaultAddressInfo} from '@/api/address';
 import {createOrder} from '@/api/order';
@@ -150,8 +152,9 @@ export default {
         },
         toPay(pay, order) {
             const time = new Date().getTime()
-            const signStr = `appId=${pay.AppID}&nonceStr=${pay.NonceStr}&package=prepay_id=${pay.PrePayID}&signType=MD5&timeStamp=${time}&key=HC7saiqiuqiyundongku13527326320Q`
-            const sign = md5Libs.md5(signStr).toUpperCase()
+            const signStr = `appId=${pay.AppID}&nonceStr=${pay.NonceStr}&package=prepay_id=${pay.PrePayID}&signType=MD5&timeStamp=${time}`
+            // const signStr = 'appId=wxdd9fa969ce0103ce&nonceStr=ppXMEMENwksAc0tC&package=prepay_id&signType=MD5&timeStamp=1684247633004&key=HC7saiqiuqiyundongku13527326320Q'
+            const sign = md5.hex_md5_32Upper(signStr)
             console.log('加密签名: signStr', signStr, sign)
             uni.requestPayment({
                 provider: 'wxpay', // 服务提供商，通过 uni.getProvider 获取。
@@ -160,7 +163,9 @@ export default {
                 orderInfo: pay.order,
                 package: 'prepay_id=' + pay.PrePayID,
                 signType: 'MD5',
-                paySign: pay.Sign,
+                paySign: signStr,
+            }).fail(res => {
+                console.log('fail', res)
             })
 
         },
