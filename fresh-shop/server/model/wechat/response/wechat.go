@@ -7,6 +7,6 @@ import (
 
 // CreateOrderResp 创建订单响应
 type CreateOrderResp struct {
-	Pay   orderPay.PreOrder `json:"pay" form:"pay"`
-	Order shop.Order        `json:"order" form:"order"`
+	Pay   orderPay.Config `json:"pay" form:"pay"`
+	Order shop.Order      `json:"order" form:"order"`
 }

@@ -151,23 +151,32 @@ export default {
             this.toPay(res.data.pay, res.data.order)
         },
         toPay(pay, order) {
-            const time = new Date().getTime()
-            const signStr = `appId=${pay.AppID}&nonceStr=${pay.NonceStr}&package=prepay_id=${pay.PrePayID}&signType=MD5&timeStamp=${time}`
-            // const signStr = 'appId=wxdd9fa969ce0103ce&nonceStr=ppXMEMENwksAc0tC&package=prepay_id&signType=MD5&timeStamp=1684247633004&key=HC7saiqiuqiyundongku13527326320Q'
-            const sign = md5.hex_md5_32Upper(signStr)
-            console.log('加密签名: signStr', signStr, sign)
-            uni.requestPayment({
+            const payment = {
                 provider: 'wxpay', // 服务提供商，通过 uni.getProvider 获取。
-                timeStamp: time + '',
-                nonceStr: pay.NonceStr,
+                timeStamp: pay.timestamp,
+                nonceStr: pay.nonceStr,
                 orderInfo: pay.order,
-                package: 'prepay_id=' + pay.PrePayID,
-                signType: 'MD5',
-                paySign: signStr,
-            }).fail(res => {
-                console.log('fail', res)
-            })
-
+                package: 'prepay_id=' + pay.prePayId,
+                signType: pay.signType,
+                paySign: pay.paySign,
+                success: res => {
+                    console.log('success', res)
+                    this.$message(this.$refs.toast).success("支付成功").then(() => {
+                        uni.redirectTo({
+                            url: '/pages/cart/cart'
+                        })
+                    })
+                },
+                fail: res => {
+                    console.log('fail', res)
+                    // 跳转订单详情
+                    // uni.redirectTo({
+                    //     url: '/pages/order/detail?id=' + order.ID
+                    // })
+                }
+            }
+            console.log('payment', payment)
+            uni.requestPayment(payment)
         },
         // 地址选择
         addressChecked(addressInfo) {
