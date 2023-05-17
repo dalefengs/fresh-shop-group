@@ -59,4 +59,6 @@ func (w *WeChatApi) CreatePayData(c *gin.Context) {
 
 func (w *WeChatApi) PayNotify(c *gin.Context) {
 	global.SugarLog.Infof("微信支付回调 开始 \n")
+	//var req notify.PaidResult
+	//global.WxPay.GetNotify().DecryptReqInfo()
 }
