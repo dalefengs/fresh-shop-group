@@ -26,10 +26,10 @@ func (s *WechatService) CreatePayData(payReq request.WechatPayReq) error {
 	return nil
 }
 
-func JSAPIPay(opeid, orderSn string, orderId uint, amount float64, createIp string) (err error, result *orderPay.Config) {
+func JSAPIPay(openId, orderSn string, orderId uint, amount float64, createIp string) (err error, result *orderPay.Config) {
 	order := global.WxPay.GetOrder()
 	param := &orderPay.Params{
-		OpenID:     opeid,
+		OpenID:     openId,
 		Body:       fmt.Sprintf("用户下单 金额:%.2f", amount),
 		OutTradeNo: orderSn,
 		TotalFee:   fmt.Sprintf("%.0f", amount*100), // 订单总金额，单位为分，详见支付金额

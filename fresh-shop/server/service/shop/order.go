@@ -164,10 +164,6 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 		global.SugarLog.Errorf("log:%s, 微信 JsApi 发起调用异常, err: %v \n", log, err)
 		return
 	}
-	//if jsApiData.ResultCode != "SUCCESS" || jsApiData.ReturnCode != "SUCCESS" {
-	//	global.SugarLog.Errorf("log:%s, 微信 JsApi 发起调用失败, jsApiData: %#v \n", log, jsApiData)
-	//	return nil, errors.New("交易调用失败，请重试")
-	//}
 	resp = &response.CreateOrderResp{
 		Order: order,
 		Pay:   *jsApiData,

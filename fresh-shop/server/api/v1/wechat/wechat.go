@@ -5,6 +5,7 @@ import (
 	"fresh-shop/server/model/common/response"
 	"fresh-shop/server/model/wechat/request"
 	"github.com/gin-gonic/gin"
+	"github.com/silenceper/wechat/v2/pay/notify"
 	"go.uber.org/zap"
 )
 
@@ -57,8 +58,15 @@ func (w *WeChatApi) CreatePayData(c *gin.Context) {
 	}
 }
 
+// PayNotify 支付完成回调
 func (w *WeChatApi) PayNotify(c *gin.Context) {
 	global.SugarLog.Infof("微信支付回调 开始 \n")
-	//var req notify.PaidResult
-	//global.WxPay.GetNotify().DecryptReqInfo()
+	var req notify.PaidResult
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	global.SugarLog.Infof("微信支付回调 解析请求参数:%#v \n", req)
+	// global.WxPay.GetNotify().DecryptReqInfo()
 }

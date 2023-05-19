@@ -14,7 +14,7 @@ func (s *WechatRouter) InitWechatRouter(Router *gin.RouterGroup) {
 	weChatRouter := Router.Group("wechat").Use(middleware.OperationRecord())
 	var weChatApi = v1.ApiGroupApp.WechatApiGroup.WeChatApi
 	{
-		weChatRouter.POST("createPayData", weChatApi.CreatePayData) // 根据ID获取Banner
+		weChatRouter.POST("createPayData", weChatApi.CreatePayData) // 创建预支付订单，返回小程序发起支付的参数
 	}
 }
 
@@ -23,7 +23,7 @@ func (s *WechatRouter) InitWechatPublicRouter(Router *gin.RouterGroup) {
 	weChatRouterWithoutRecord := Router.Group("wechat")
 	var weChatApi = v1.ApiGroupApp.WechatApiGroup.WeChatApi
 	{
-		weChatRouterWithoutRecord.GET("code2Session", weChatApi.Code2Session) // 根据ID获取Banner
-		weChatRouterWithoutRecord.GET("pay/notify", weChatApi.PayNotify)      // 根据ID获取Banner
+		weChatRouterWithoutRecord.GET("code2Session", weChatApi.Code2Session) // 换取 Session
+		weChatRouterWithoutRecord.GET("pay/notify", weChatApi.PayNotify)      // 支付成功回调
 	}
 }
