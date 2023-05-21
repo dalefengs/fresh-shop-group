@@ -1,11 +1,16 @@
 package wechat
 
 import (
+	"errors"
 	"fmt"
 	"fresh-shop/server/global"
+	"fresh-shop/server/model/shop"
 	"fresh-shop/server/model/wechat/request"
+	"fresh-shop/server/utils"
 	"github.com/silenceper/wechat/v2/miniprogram/auth"
+	"github.com/silenceper/wechat/v2/pay/notify"
 	orderPay "github.com/silenceper/wechat/v2/pay/order"
+	"gorm.io/gorm"
 	"strconv"
 	"time"
 )
@@ -49,4 +54,48 @@ func JSAPIPay(openId, orderSn string, orderId uint, amount float64, createIp str
 	}
 	result = &preOrder
 	return
+}
+
+// NotifyLogic 支付回调逻辑处理
+func (s *WechatService) NotifyLogic(req *notify.PaidResult) error {
+	orderSn := *req.OutTradeNo
+	log := fmt.Sprintf("订单支付回调逻辑: 订单号：%s, ", orderSn)
+	var order shop.Order
+	if errors.Is(global.DB.Where("order_sn = ?", orderSn).First(&order).Error, gorm.ErrRecordNotFound) {
+		global.SugarLog.Errorf(log + "订单不存在 \n")
+		return errors.New("订单不存在")
+	}
+	// 如果订单已经支付则直接结束
+	if *order.Status == 1 {
+		global.SugarLog.Errorf(log + "订单已支付 \n")
+		return nil
+	}
+	if *order.Status != 0 {
+		global.SugarLog.Errorf(log+"订单状态不正确, Status：%d \n", *order.Status)
+		return errors.New("订单状态不正确")
+	}
+	finishStr := fmt.Sprintf("%.2f", float64(*req.TotalFee)/100)
+	finish, err := strconv.ParseFloat(finishStr, 64)
+	if err != nil {
+		global.SugarLog.Errorf(log+"finishStr 转换 float64 失败, req.TotalFee:%s finishStr:%d \n", *req.TotalFee, finishStr)
+		return err
+	}
+	// req.TimeEnd 转换为 time.Time 类型
+	timeEnd, err := time.Parse("20060102150405", *req.TimeEnd)
+	if err != nil {
+		global.SugarLog.Errorf(log+"timeEnd 格式化时间失败, req.TimeEnd:%s \n", *req.TimeEnd)
+		return err
+	}
+	order.Finish = finish
+	order.Status = utils.Pointer(1)
+	order.PayTime = &timeEnd
+	order.PaymentOpenid = *req.OpenID
+	order.PaymentInfo = *req.Attach
+	order.TransationId = *req.TransactionID
+	if err := global.DB.Save(&order).Error; err != nil {
+		global.SugarLog.Errorf(log+"保存订单信息失败, err:%s \n", err.Error())
+		return err
+	}
+	global.SugarLog.Infof(log + "支付成功")
+	return nil
 }

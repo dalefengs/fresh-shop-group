@@ -20,6 +20,18 @@ export const getOrderInfo = (data, refs) => {
     }, refs)
 }
 
+// 获取订单状态
+export const getOrderStatus = (orderId, refs) => {
+    return request({
+        url: `/order/orderStatus`,
+        method: 'GET',
+        loading: false,
+        data: {
+            ID: orderId
+        }
+    }, refs)
+}
+
 // 创建订单
 export const createOrder = (data, refs) => {
     return request({

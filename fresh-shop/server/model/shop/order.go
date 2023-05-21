@@ -32,8 +32,10 @@ type Order struct {
 	ReceiveTime     *time.Time     `json:"receiveTime" form:"receiveTime" gorm:"column:receive_time;comment:收货时间;"`
 	CancelTime      *time.Time     `json:"cancelTime" form:"cancelTime" gorm:"column:cancel_time;comment:取消时间;"`
 	GiftPoints      float64        `json:"giftPoints" form:"giftPoints" gorm:"column:gift_points;comment:赠送积分数量;size:10;"`
-	OrderDetails    []OrderDetails `json:"orderDetails"`
 	AddressId       int            `json:"addressId" form:"addressId" gorm:"-"` // 收货地址id
+	OrderDetails    []OrderDetails `json:"details"`                             // 订单详情
+	OrderReturn     OrderReturn    `json:"return"`                              // 订单售后
+	OrderDelivery   OrderDelivery  `json:"deliver" gorm:"foreignKey:order_id"`  // 订单发货信息
 }
 
 // TableName Order 表名

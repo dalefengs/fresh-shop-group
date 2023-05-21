@@ -36,7 +36,7 @@ func (w *WeChatApi) Code2Session(c *gin.Context) {
 	}
 }
 
-// CreatePayData 创建微信支付数据
+// CreatePayData 创建微信支付数据  暂时无用
 func (w *WeChatApi) CreatePayData(c *gin.Context) {
 	var data request.WechatPayReq
 	err := c.ShouldBindQuery(&data)
@@ -62,11 +62,34 @@ func (w *WeChatApi) CreatePayData(c *gin.Context) {
 func (w *WeChatApi) PayNotify(c *gin.Context) {
 	global.SugarLog.Infof("微信支付回调 开始 \n")
 	var req notify.PaidResult
-	err := c.ShouldBindJSON(&req)
+	err := c.ShouldBindXML(&req)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	global.SugarLog.Infof("微信支付回调 解析请求参数:%#v \n", req)
-	// global.WxPay.GetNotify().DecryptReqInfo()
+	n := global.WxPay.GetNotify()
+	if ok := n.PaidVerifySign(req); !ok {
+		global.SugarLog.Errorf("支付回调签名验证失败! %#v \n", req)
+		response.WxpayNotify("FAIL", "签名失败", c)
+		return
+	}
+
+	if *req.ReturnCode != "SUCCESS" {
+		global.SugarLog.Errorf("支付回调失败! ReturnCode:%s, ReturnMsg: %s \n", *req.ReturnCode, *req.ReturnMsg)
+		response.WxpayNotify("FAIL", "参数格式校验错误", c)
+		return
+	}
+	if *req.ResultCode != "SUCCESS" {
+		global.SugarLog.Errorf("支付回调失败! ResultCode:%s, ResultMsg: %s \n", *req.ResultCode, *req.ErrCodeDes)
+		response.WxpayNotify("FAIL", "ResultMsg: "+*req.ReturnMsg, c)
+		return
+	}
+	global.SugarLog.Infof("微信支付回调 验证通过开始执行业务逻辑\n")
+	err = wechatService.NotifyLogic(&req)
+	if err != nil {
+		global.SugarLog.Errorf("支付回调失败! err: %v \n", err)
+		response.WxpayNotify("FAIL", "参数格式校验错误", c)
+	} else {
+		response.WxpayNotify("SUCCESS", "OK", c)
+	}
 }

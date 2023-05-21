@@ -87,10 +87,9 @@
 <script>
 import {getCheckedCartList} from "@/api/cart";
 import config from '@/config/config.js'
-import md5 from '@/utils/md5.js'
 import {getToken} from '@/store/storage.js'
 import {getDefaultAddressInfo} from '@/api/address';
-import {createOrder} from '@/api/order';
+import {createOrder, getOrderStatus} from '@/api/order';
 import addressPop from '@/components/addressPop/addressPop'
 
 export default {
@@ -161,22 +160,53 @@ export default {
                 paySign: pay.paySign,
                 success: res => {
                     console.log('success', res)
-                    this.$message(this.$refs.toast).success("支付成功").then(() => {
-                        uni.redirectTo({
-                            url: '/pages/cart/cart'
-                        })
-                    })
+                    this.paySuccess(order.ID)
                 },
                 fail: res => {
                     console.log('fail', res)
-                    // 跳转订单详情
-                    // uni.redirectTo({
-                    //     url: '/pages/order/detail?id=' + order.ID
-                    // })
+                    if (res.errMsg === 'requestPayment:fail cancel') {
+                        this.$message(this.$refs.toast).error("取消支付").then(() => {
+                            uni.redirectTo({
+                                url: '/pages/order/detail?id=' + order.ID
+                            })
+                        })
+                        return false
+                    }
+                    this.$message(this.$refs.toast).error("支付失败").then(() => {
+                        uni.redirectTo({
+                            url: '/pages/order/detail?id=' + order.ID
+                        })
+                    })
                 }
             }
             console.log('payment', payment)
             uni.requestPayment(payment)
+        },
+        paySuccess(orderId) {
+            let errCount = 0
+            const statusInterval = setInterval(async () => {
+                const res = await getOrderStatus(orderId);
+                if (res.code !== 0) {
+                    errCount ++
+                    // 只允许重试 100 次
+                    if (errCount > 100) {
+                        clearInterval(statusInterval); // 清除定时器
+                        uni.redirectTo({
+                            url: '/pages/order/list'
+                        })
+                    }
+                    return false;
+                }
+                if (res.data.status === 1) {
+                    clearInterval(statusInterval); // 清除定时器
+                    // 进行其他操作
+                    this.$message(this.$refs.toast).success("支付成功").then(() => {
+                        uni.redirectTo({
+                            url: '/pages/order/detail?id=' + orderId
+                        })
+                    })
+                }
+            }, 1000);
         },
         // 地址选择
         addressChecked(addressInfo) {

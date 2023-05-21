@@ -144,6 +144,34 @@ func (orderApi *OrderApi) FindOrder(c *gin.Context) {
 	}
 }
 
+// OrderStatus 获取订单状态
+// @Tags Order
+// @Summary 用id查询Order
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query shop.Order true "获取订单状态"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"查询成功"}"
+// @Router /order/orderStatus [get]
+func (orderApi *OrderApi) OrderStatus(c *gin.Context) {
+	var order shop.Order
+	err := c.ShouldBindQuery(&order)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if order.ID == 0 {
+		response.FailWithMessage("订单ID不能为空", c)
+		return
+	}
+	if reorder, err := orderService.OrderStatus(order.ID); err != nil {
+		global.Log.Error("查询失败!", zap.Error(err))
+		response.FailWithMessage("查询失败", c)
+	} else {
+		response.OkWithData(reorder, c)
+	}
+}
+
 // GetOrderList 分页获取Order列表
 // @Tags Order
 // @Summary 分页获取Order列表

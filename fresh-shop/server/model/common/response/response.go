@@ -1,6 +1,7 @@
 package response
 
 import (
+	"github.com/silenceper/wechat/v2/pay/notify"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -57,4 +58,12 @@ func FailWithDetailed(data interface{}, message string, c *gin.Context) {
 
 func FailWithTookenExpired(data interface{}, message string, c *gin.Context) {
 	Result(TOKEN_EXPIRED, data, message, c)
+}
+
+// WxpayNotify 响应微信支付回调
+func WxpayNotify(returnCode, returnMsg string, c *gin.Context) {
+	c.JSON(http.StatusOK, notify.PaidResp{
+		ReturnCode: returnCode,
+		ReturnMsg:  returnMsg,
+	})
 }

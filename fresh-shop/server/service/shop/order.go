@@ -12,6 +12,7 @@ import (
 	"fresh-shop/server/service/common"
 	"fresh-shop/server/service/wechat"
 	"fresh-shop/server/utils"
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"strconv"
 )
@@ -171,6 +172,11 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 	return
 }
 
+// OrderDeliver 订单发货
+func (orderService *OrderService) OrderDeliver(order shop.Order) (err error) {
+	return
+}
+
 // DeleteOrder 删除Order记录
 // Author [piexlmax](https://github.com/likfees)
 func (orderService *OrderService) DeleteOrder(order shop.Order) (err error) {
@@ -208,8 +214,28 @@ func (orderService *OrderService) UpdateOrder(order shop.Order) (err error) {
 // GetOrder 根据id获取Order记录
 // Author [piexlmax](https://github.com/likfees)
 func (orderService *OrderService) GetOrder(id uint) (order shop.Order, err error) {
-	err = global.DB.Where("id = ?", id).First(&order).Error
+	err = global.DB.Where("id = ?", id).
+		Preload("OrderDetails.Goods").
+		Preload("OrderReturn.Details").
+		Preload("OrderDelivery.UserDelivery").
+		First(&order).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return order, errors.New("订单不存在")
+	}
 	return
+}
+
+// OrderStatus 获取订单状态
+// Author [piexlmax](https://github.com/likfees)
+func (orderService *OrderService) OrderStatus(id uint) (status gin.H, err error) {
+	var o shop.Order
+	if errors.Is(global.DB.Select("status").Where("id = ?", id).First(&o).Error, gorm.ErrRecordNotFound) {
+		return gin.H{}, errors.New("订单不存在")
+	}
+	result := gin.H{
+		"status": o.Status,
+	}
+	return result, nil
 }
 
 // GetOrderInfoList 分页获取Order记录

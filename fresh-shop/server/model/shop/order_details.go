@@ -18,6 +18,7 @@ type OrderDetails struct {
 	Price       float64 `json:"price" form:"price" gorm:"column:price;comment:订单价格;size:14;"`
 	Total       float64 `json:"total" form:"total" gorm:"column:total;comment:订单总价格;size:14;"`
 	GiftPoints  float64 `json:"giftPoints" form:"giftPoints" gorm:"column:gift_points;comment:赠送积分数量;size:10;"`
+	Goods       Goods   `json:"goods"`
 }
 
 // TableName OrderDetails 表名

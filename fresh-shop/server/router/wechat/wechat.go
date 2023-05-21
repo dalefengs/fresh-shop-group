@@ -24,6 +24,6 @@ func (s *WechatRouter) InitWechatPublicRouter(Router *gin.RouterGroup) {
 	var weChatApi = v1.ApiGroupApp.WechatApiGroup.WeChatApi
 	{
 		weChatRouterWithoutRecord.GET("code2Session", weChatApi.Code2Session) // 换取 Session
-		weChatRouterWithoutRecord.GET("pay/notify", weChatApi.PayNotify)      // 支付成功回调
+		weChatRouterWithoutRecord.POST("pay/notify", weChatApi.PayNotify)     // 支付成功回调
 	}
 }
