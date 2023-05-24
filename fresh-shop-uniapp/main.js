@@ -5,8 +5,14 @@ import Vue from 'vue'
 import uView from '@/uni_modules/uview-ui'
 import pageWrapper from '@/components/pageWrapper/pageWrapper.vue'
 import toast from '@/utils/toast.js'
+import {filters} from '@/filter/filters.js'
 Vue.config.productionTip = false
 App.mpType = 'app'
+
+// 定义全局自定义过滤器
+Object.keys(filters).forEach(key => {
+	Vue.filter(key, filters[key])
+})
 
 try {
 	function isPromise(obj) {

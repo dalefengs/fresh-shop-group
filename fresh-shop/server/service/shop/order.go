@@ -15,6 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"strconv"
+	"strings"
 )
 
 type OrderService struct {
@@ -82,8 +83,16 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 		}
 		// 规格id 现在只开发了单规格订单，多规格以后在支持
 		orderDetail.SpecId = 0
-		orderDetail.SpecKeyName = ""
-
+		spec := ""
+		if *c.Goods.Weight > 0 {
+			spec = string(rune(*c.Goods.Weight))
+		}
+		if strings.TrimSpace(spec) == "" {
+			spec = c.Goods.Unit
+		} else {
+			spec = spec + "/" + c.Goods.Unit
+		}
+		orderDetail.SpecKeyName = spec
 		// 计算赠送积分
 		if pointSwitch {
 			point, err := strconv.Atoi(pointCfg)
@@ -96,11 +105,18 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 		orderDetailList = append(orderDetailList, orderDetail)
 	}
 
+	addressName := address.Name
+	if *address.Sex == 1 {
+		addressName = addressName + "先生"
+	} else {
+		addressName = addressName + "女士"
+	}
+
 	// 设置订单基本信息
 	order.OrderSn = utils.GenerateOrderNumber("SN")
 	// 商品区域默认为普通商品
 	order.GoodsArea = utils.Pointer(0)
-	order.ShipmentName = address.Name
+	order.ShipmentName = addressName
 	order.ShipmentMobile = address.Mobile
 	order.ShipmentAddress = address.Address + address.Title + address.Detail
 	order.Status = utils.Pointer(0)  // 未付款状态
