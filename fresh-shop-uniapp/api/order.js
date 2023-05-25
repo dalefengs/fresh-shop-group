@@ -1,5 +1,15 @@
 import request from "@/utils/request"
 
+// 订单支付
+export const orderPay = (refs) => {
+    return request({
+        url: `/order/orderPay`,
+        method: 'POST',
+        loading: true,
+        toLogin: true,
+    }, refs)
+}
+
 // 获取默认列表
 export const getOrderList = (refs) => {
     return request({
@@ -61,3 +71,25 @@ export const deleteOrder = (data, refs) => {
         data
     }, refs)
 }
+
+// 取消订单
+export const cancelOrder = (data, refs) => {
+    return request({
+        url: `/order/cancelOrder`,
+        method: 'POST',
+        loading: true,
+        data
+    }, refs)
+}
+
+
+// 确认收货
+export const confirmOrder = (data, refs) => {
+    return request({
+        url: `/order/confirmOrder`,
+        method: 'POST',
+        loading: true,
+        data
+    }, refs)
+}
+

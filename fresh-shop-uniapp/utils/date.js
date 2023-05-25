@@ -4,6 +4,9 @@
  * @returns {*}
  */
 export function parseDateStr(dateStr) {
+    if (!dateStr) {
+        return ''
+    }
     const date = new Date(dateStr);
     return formatDateTime(date, 'yyyy-MM-dd HH:mm:ss')
 }

@@ -142,7 +142,6 @@ export default {
             if (res.code !== 0) {
                 return false
             }
-            this.$message(this.$refs.toast).success("正在交易中...")
             if (!res.data.pay) {
                 this.$message(this.$refs.toast).error("交易失败，请重试")
                 return false
@@ -150,6 +149,7 @@ export default {
             this.toPay(res.data.pay, res.data.order)
         },
         toPay(pay, order) {
+            this.$message(this.$refs.toast).loading('正在支付中...')
             const payment = {
                 provider: 'wxpay', // 服务提供商，通过 uni.getProvider 获取。
                 timeStamp: pay.timestamp,
@@ -160,10 +160,12 @@ export default {
                 paySign: pay.paySign,
                 success: res => {
                     console.log('success', res)
+                    this.$message(this.$refs.toast).hide()
                     this.paySuccess(order.ID)
                 },
                 fail: res => {
                     console.log('fail', res)
+                    this.$message(this.$refs.toast).hide()
                     if (res.errMsg === 'requestPayment:fail cancel') {
                         this.$message(this.$refs.toast).error("取消支付").then(() => {
                             uni.redirectTo({
@@ -183,22 +185,27 @@ export default {
             uni.requestPayment(payment)
         },
         paySuccess(orderId) {
+            this.$message(this.$refs.toast).loading('正在获取支付结果...')
             let errCount = 0
             const statusInterval = setInterval(async () => {
                 const res = await getOrderStatus(orderId);
                 if (res.code !== 0) {
                     errCount ++
-                    // 只允许重试 100 次
-                    if (errCount > 100) {
+                    // 只允许重试 30 次 30秒
+                    if (errCount > 30) {
                         clearInterval(statusInterval); // 清除定时器
-                        uni.redirectTo({
-                            url: '/pages/order/list'
+                        this.$message(this.$refs.toast).hide()
+                        this.$message(this.$refs.toast).error("获取交易结果超时，请稍后查看").then(() => {
+                            uni.redirectTo({
+                                url: '/pages/order/detail?id=' + orderId
+                            })
                         })
                     }
                     return false;
                 }
                 if (res.data.status === 1) {
                     clearInterval(statusInterval); // 清除定时器
+                    this.$message(this.$refs.toast).hide()
                     // 进行其他操作
                     this.$message(this.$refs.toast).success("支付成功").then(() => {
                         uni.redirectTo({

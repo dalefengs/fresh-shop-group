@@ -10,6 +10,7 @@ image{will-change:transform;}
 /* 当对象内文本一处时显示省略标记(...) */
 .king-indent{text-indent:2em;}
 .king-ellipsis{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.king-ellipsis2{overflow:hidden;ext-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
 /* **********scroll不换行**************/
 .king-scroll-row{white-space:nowrap;width:100%;}
 /* 标签Tag */
@@ -79,6 +80,7 @@ image{will-change:transform;}
 .king-flex-wrap{flex-direction:row;flex-wrap:wrap;}
 .king-flex-nowrap{flex-direction:row;flex-wrap:nowrap;}
 .king-space-between{flex-direction:row;justify-content:space-between;}
+.king-space-between-col{flex-direction:column;justify-content:space-between;}
 .king-flex-center{flex-direction:row;justify-content:center;}
 /* 起始对齐*/
 .king-flex-top{justify-content:flex-start;align-items:center;}
@@ -92,6 +94,8 @@ image{will-change:transform;}
 .king-middle-center{justify-content:center;align-items:center;}
 /* 底步 */
 .king-flex-end{justify-content:flex-end;}
+/* flex-shrink 属性定义了项目的缩小比例，默认为1，即如果空间不足，该项目将缩小，它还有另外一个值，就是0. 要给子元素设置 */
+.king-flex-shrink{flex-shrink: 0;}
 /* **********定位**************/
 /* 定位到中间 */
 .king-center-view{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
