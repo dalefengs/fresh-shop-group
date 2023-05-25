@@ -17,6 +17,7 @@ func (s *OrderRouter) InitOrderRouter(Router *gin.RouterGroup) {
 	{
 		orderRouter.POST("createOrder", orderApi.CreateOrder)             // 创建待支付 Order
 		orderRouter.POST("orderPay", orderApi.OrderPay)                   // 支付 Order, 返回微信支付所需要的参数
+		orderRouter.POST("cancelOrder", orderApi.CancelOrder)             // 取消订单
 		orderRouter.DELETE("deleteOrder", orderApi.DeleteOrder)           // 删除 Order
 		orderRouter.DELETE("deleteOrderByIds", orderApi.DeleteOrderByIds) // 批量删除 Order
 		orderRouter.PUT("updateOrder", orderApi.UpdateOrder)              // 更新 Order

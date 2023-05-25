@@ -27,7 +27,7 @@ const request = (options, toastRefs) => {
 	options.loading = options.loading === undefined ? false : options.loading // 默认不显示 loading
 	//options.showError = options.showError === undefined ? true : options.showError
 	options.toLogin = options.toLogin === undefined ? false : options.toLogin // 默认不跳转到登录页
-	// <u-toast ref="toast"></u-toast>  需要在 request data 中传递 toastRefs = this.$refs.toast
+	// <u-toast ref="toast" style="z-index: 9999"></u-toast>  需要在 request data 中传递 toastRefs = this.$refs.toast
 	toastRefs = toastRefs === undefined ? null : toastRefs // toastRefs
 	if (options.loading) {
 		toast.message(toastRefs).loading('加载中...')

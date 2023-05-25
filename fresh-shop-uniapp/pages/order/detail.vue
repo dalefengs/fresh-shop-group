@@ -23,7 +23,7 @@
                 </view>
                 <view class="king-mt-5">
                     <!-- TODO 售后时间 -->
-                    <text v-if="order.statusCancel > 0">{{ order.cancelTime }}</text>
+                    <text v-if="order.statusCancel > 0">{{ order.cancelTime | parseDate }}</text>
                     <text v-else-if="order.status === 1">{{ order.payTime | parseDate }}</text>
                     <text v-else-if="order.status === 2">{{ order.shipmentTime | parseDate }}</text>
                     <text v-else-if="order.status === 3">{{ order.receiveTime | parseDate }}</text>
@@ -106,7 +106,7 @@
         <view class="menu">
             <!-- 订单状态未付款 且 取消状态0 且未售后-->
             <view class="menu-btn" v-if="order.status === 0 && order.statusCancel === 0 && order.statusRefund === 0 && (!order.return || !order.return.ID)">
-                <u-button type="info" :customStyle="menuBtnStyle"  @click="cancelOrder">取消订单</u-button>
+                <u-button type="info" :customStyle="menuBtnStyle"  @click="() => cancelOrderShow = true">取消订单</u-button>
             </view>
             <!-- 订单状态已付款 且 取消状态0 且未售后 -->
             <view class="menu-btn" v-if="order.status > 0 && order.statusCancel === 0 && (!order.return || !order.return.ID)" >
@@ -116,13 +116,32 @@
                 <u-button type="primary" :customStyle="menuBtnStyle" @click="confirmOrder">售后详情</u-button>
             </view>
             <view class="menu-btn" v-if="order.status === 2">
-                <u-button type="primary" :customStyle="menuBtnStyle" @click="confirmOrder">确认收货</u-button>
+                <u-button type="primary" :customStyle="menuBtnStyle" @click="() => confirmShow = true">确认收货</u-button>
             </view>
             <view class="menu-btn" v-if="order.status === 0 && order.statusCancel === 0">
                 <u-button type="primary" :customStyle="menuBtnStyle" @click="goPay">立即支付</u-button>
             </view>
         </view>
-        <u-toast ref="toast"></u-toast>
+        <u-toast ref="toast" style="z-index: 9999"></u-toast>
+        <u-modal :show="cancelOrderShow" title="取消订单" @confirm="toCancelOrder"
+                 @cancel="() => cancelOrderShow = false"
+                 @close="() => cancelOrderShow = false"
+                 :showCancelButton="true"
+                 :closeOnClickOverlay="true">
+            <text class="king-center">
+                取消订单操作不可恢复,请谨慎操作！
+            </text>
+        </u-modal>
+        <u-modal :show="confirmShow" title="确认收货" @confirm="toConfirmOrder"
+                 @cancel="() => confirmShow = false"
+                 @close="() => confirmShow = false"
+                 :showCancelButton="true"
+                 :closeOnClickOverlay="true"
+                 confirmText="确认收货">
+            <text class="king-center">
+                请您确认货物是否完整！
+            </text>
+        </u-modal>
     </pageWrapper>
 </template>
 
@@ -139,7 +158,9 @@ export default {
             order: {},
             menuBtnStyle: {
                 'border-radius': '20px',
-            }
+            },
+            cancelOrderShow: false, // 取消订单
+            confirmShow: false, // 确认订单
         }
     },
     onLoad(options) {
@@ -173,6 +194,32 @@ export default {
             })
             this.order = res.data.reorder
             console.log('this.order', this.order)
+        },
+        // 取消订单
+        async toCancelOrder() {
+            const res = await cancelOrder({
+                ID: this.orderId
+            }, this.$refs.toast)
+            if (res.code !== 0) {
+                this.cancelOrderShow = false
+                return false
+            }
+            this.cancelOrderShow = false
+            this.$message(this.$refs.toast).success('取消订单成功')
+            await this.getOrderInfoData()
+        },
+        // 确认收货
+        async toConfirmOrder() {
+            const res = await confirmOrder({
+                ID: this.orderId
+            }, this.$refs.toast)
+            if (res.code !== 0) {
+                this.confirmShow = false
+                return false
+            }
+            this.confirmShow = false
+            this.$message(this.$refs.toast).success('确认收货成功')
+            await this.getOrderInfoData()
         },
         // 订单提交
         async goPay() {

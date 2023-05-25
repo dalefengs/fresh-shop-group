@@ -100,7 +100,7 @@
                 确定删除商品吗？
             </text>
         </u-modal>
-        <u-toast ref="toast"></u-toast>
+        <u-toast ref="toast" style="z-index: 9999"></u-toast>
     </view>
 </template>
 

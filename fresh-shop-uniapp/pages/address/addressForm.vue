@@ -2,7 +2,7 @@
     <pageWrapper>
         <liu-chooseAddress ref="chooseAddress" @submit="submitAddress" @detele="deteleAddress">
         </liu-chooseAddress>
-        <u-toast ref="toast"></u-toast>
+        <u-toast ref="toast" style="z-index: 9999"></u-toast>
     </pageWrapper>
 </template>
 

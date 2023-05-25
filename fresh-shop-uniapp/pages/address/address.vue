@@ -24,7 +24,7 @@
         <view class="btn-box" @click="toCreateAddress">
             <view class="btn">添加收货地址</view>
         </view>
-        <u-toast ref="toast"></u-toast>
+        <u-toast ref="toast" style="z-index: 9999"></u-toast>
     </pageWrapper>
 </template>
 

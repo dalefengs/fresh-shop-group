@@ -80,7 +80,7 @@
         </view>
         <addressPop :show="showLoginDialog" @close="addressClose" :addressId="addressId"
                     @checked="addressChecked"></addressPop>
-        <u-toast ref="toast"></u-toast>
+        <u-toast ref="toast" style="z-index: 9999"></u-toast>
     </pageWrapper>
 </template>
 

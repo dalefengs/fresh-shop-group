@@ -103,6 +103,30 @@ func (orderApi *OrderApi) DeleteOrder(c *gin.Context) {
 	}
 }
 
+// CancelOrder 取消订单
+// @Tags Order
+// @Summary 取消订单
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body shop.Order true "取消订单"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"取消成功"}"
+// @Router /order/cancelOrder [delete]
+func (orderApi *OrderApi) CancelOrder(c *gin.Context) {
+	var order shop.Order
+	err := c.ShouldBindJSON(&order)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if err := orderService.CancelOrder(order); err != nil {
+		global.Log.Error("取消失败!", zap.Error(err))
+		response.FailWithMessage(err.Error(), c)
+	} else {
+		response.OkWithMessage("取消成功", c)
+	}
+}
+
 // DeleteOrderByIds 批量删除Order
 // @Tags Order
 // @Summary 批量删除Order

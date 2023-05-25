@@ -16,6 +16,7 @@ import (
 	"gorm.io/gorm"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type OrderService struct {
@@ -227,18 +228,39 @@ func (orderService *OrderService) OrderDeliver(order shop.Order) (err error) {
 func (orderService *OrderService) DeleteOrder(order shop.Order) (err error) {
 	var detail shop.OrderDetails
 	err = global.DB.Transaction(func(tx *gorm.DB) error {
-		err = global.DB.Where("order_id = ?", order.ID).Delete(&detail).Error
+		err = tx.Where("order_id = ?", order.ID).Delete(&detail).Error
 		if err != nil {
 			global.SugarLog.Errorf("删除订单详情失败 %d, err: %v", order.ID, err)
 			return err
 		}
-		err = global.DB.Delete(&order).Error
+		err = tx.Delete(&order).Error
 		if err != nil {
 			global.SugarLog.Errorf("删除订单失败 %d, err: %v", order.ID, err)
 			return err
 		}
 		return nil
 	})
+	return err
+}
+
+// CancelOrder 取消订单
+// Author [likfees](https://github.com/likfees)
+func (orderService *OrderService) CancelOrder(order shop.Order) (err error) {
+	cancelType := 1 // 默认用户取消
+	if order.StatusCancel != nil && *order.StatusCancel > 1 {
+		cancelType = *order.StatusCancel
+	}
+	if errors.Is(global.DB.Where("id = ?", order.ID).First(&order).Error, gorm.ErrRecordNotFound) {
+		return errors.New("订单不存在")
+	}
+	// 发货 收货状态不允许取消
+	if *order.Status >= 2 {
+		return errors.New("订单不允许取消")
+	}
+	// 如果订单已支付需要进行退款
+	order.StatusCancel = &cancelType
+	order.CancelTime = utils.Pointer(time.Now())
+	err = global.DB.Where("id = ?", order.ID).Updates(&order).Error
 	return err
 }
 

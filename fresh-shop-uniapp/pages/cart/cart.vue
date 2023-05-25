@@ -37,7 +37,7 @@
         <Tabbar :tabsId="2"/>
         <!-- 登录 -->
         <loginPop :show="showLoginDialog" @close="hideLogin" @success="loginSuccess"/>
-        <u-toast ref="toast"></u-toast>
+        <u-toast ref="toast" style="z-index: 9999"></u-toast>
     </pageWrapper>
 </template>
 

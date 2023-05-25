@@ -75,7 +75,7 @@
       <view>联系电话：{{ relationPhone }}</view>
     </u-modal>
     <Tabbar :tabsId="3"/>
-    <u-toast ref="toast"></u-toast>
+    <u-toast ref="toast" style="z-index: 9999"></u-toast>
   </pageWrapper>
 </template>
 <script>
