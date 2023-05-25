@@ -188,12 +188,13 @@ export default {
         // 支付成功回调
         paySuccess(orderId) {
             this.$message(this.$refs.toast).loading('正在获取支付结果...')
+            let count = 0
             let errCount = 0
             const statusInterval = setInterval(async () => {
                 const res = await getOrderStatus(orderId);
                 if (res.code !== 0) {
                     errCount ++
-                    // 只允许重试 30 次 30秒
+                    // 只允许错误重试 30 次 30秒
                     if (errCount > 30) {
                         clearInterval(statusInterval); // 清除定时器
                         this.$message(this.$refs.toast).hide()
@@ -204,6 +205,18 @@ export default {
                         })
                     }
                     return false;
+                }
+                count++
+                // 只允许重试获取状态 30 次 30秒
+                if (count > 30) {
+                    clearInterval(statusInterval); // 清除定时器
+                    this.$message(this.$refs.toast).hide()
+                    this.$message(this.$refs.toast).error("获取交易结果超时，请稍后查看").then(() => {
+                        uni.redirectTo({
+                            url: '/pages/order/detail?id=' + orderId
+                        })
+                    })
+                    return
                 }
                 if (res.data.status === 1) {
                     clearInterval(statusInterval); // 清除定时器

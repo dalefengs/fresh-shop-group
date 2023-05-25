@@ -267,6 +267,7 @@ export default {
         // 支付成功回调
         paySuccess(orderId) {
             this.$message(this.$refs.toast).loading('正在获取支付结果...')
+            let count = 0
             let errCount = 0
             const statusInterval = setInterval(async () => {
                 const res = await getOrderStatus(orderId);
@@ -278,6 +279,13 @@ export default {
                         this.$message(this.$refs.toast).hide()
                         this.$message(this.$refs.toast).error("获取交易结果超时，请稍后查看")
                     }
+                    return false;
+                }
+                count++
+                if (count > 30) {
+                    clearInterval(statusInterval); // 清除定时器
+                    this.$message(this.$refs.toast).hide()
+                    this.$message(this.$refs.toast).error("获取交易结果超时，请稍后查看")
                     return false;
                 }
                 if (res.data.status === 1) {
