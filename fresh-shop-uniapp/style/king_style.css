@@ -355,4 +355,4 @@ button[disabled][type=primary]{background-color:#3688FF;opacity:0.8;}
 .king-span24-23{width:95.83%;}
 .king-span24-24{width:100%;}
 /* 其他 */
-
+.king-disabled-click {pointer-events: none;} /** 禁用点击 */

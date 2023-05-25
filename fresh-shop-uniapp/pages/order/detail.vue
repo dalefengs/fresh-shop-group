@@ -46,7 +46,7 @@
                         <view class="goods-image-box">
                             <img class="goods-image" :src="item.goodsImage">
                         </view>
-                        <view>
+                        <view class="king-flex king-space-between-col">
                             <view class="goods-name">{{ item.goodsName }}</view>
                             <view class="goods-spec">规格：{{ item.specKeyName }}</view>
                             <view class="goods-price">¥{{ item.total }}</view>
@@ -367,7 +367,6 @@ export default {
 
       .goods-name {
         font-size: 15px;
-        width: 95%;
         overflow: hidden;
         text-overflow: ellipsis;
         display: -webkit-box;

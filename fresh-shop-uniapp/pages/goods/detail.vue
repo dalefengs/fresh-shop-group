@@ -35,7 +35,7 @@
             </view>
             <view class="store">
                 库存：
-                <text v-if="goods.store > 100">库存充足</text>
+                <text v-if="goods.store > 100">充足</text>
                 <text v-else-if="goods.store > 0 && goods.store < 100">{{ goods.store }}</text>
                 <text v-else style="color: #fa3534;">缺货</text>
             </view>
@@ -80,8 +80,9 @@
                         +
                     </view>
                 </view>
-                <view v-else class="addCartBtn" @click="addCartClick(1)">
-                    <text v-if="goods.minCount > 1">最低 {{ goods.minCount }} 件起购</text>
+                <view v-else class="addCartBtn" :style="{'background-color': goods.store <= 0 || goods.store <= goods.minCount ? '#f29100' : '#2979ff'}" @click="addCartClick(1)">
+                    <text v-if="goods.store <= 0 || goods.store <= goods.minCount"> 库存不足 </text>
+                    <text v-else-if="goods.minCount > 1">最低 {{ goods.minCount }} 件起购</text>
                     <text v-else>加入购物车</text>
                 </view>
             </view>

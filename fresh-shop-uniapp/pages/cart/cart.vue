@@ -26,7 +26,7 @@
             <view v-if="tabsIndex === 0">
                 <!-- 购物车列表 -->
                 <shopCart :list="list" :height="scrollViewHeight" :triggered="triggered"
-                          @onRefresh="onRefresh" @delect="delectCart" @accounts="accounts" @deleteCart="deleteCartByIndex"/>
+                          @onRefresh="onRefresh" @delect="delectCart" @update="updateCart" @accounts="accounts" @deleteCart="deleteCartByIndex"/>
             </view>
             <!-- 快速下单 -->
             <view v-if="tabsIndex === 1">
@@ -94,6 +94,10 @@ export default {
         });
     },
     methods: {
+        // 更新购物车解决微信小程序选中问题
+        updateCart(list) {
+            this.list = list
+        },
         deleteCartByIndex(index) {
             const l = JSON.parse(JSON.stringify(this.list))
             l.splice(index, 1)

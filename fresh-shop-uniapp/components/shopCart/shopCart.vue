@@ -29,19 +29,25 @@
                                     </view>-->
                     <view class="goodsInfo" v-for="(cart,index) in list" :key="index"
                           @longtap="showDeleteCartDalog(index)">
-                        <view class="goodsInfo-left" @tap="checkedGoods(cart.ID, cart.checked, index)">
+                        <view class="goodsInfo-left" :class="{'king-disabled-click': cart.goods.store <= 0 || cart.goods.store < cart.num}" @tap="checkedGoods(cart.ID, cart.checked, index)">
                             <image src="../../static/select.png" v-if="cart.checked == 1" class="checked-image"
                                    mode=""></image>
                             <image src="../../static/not_select.png" v-else class="checked-image" mode=""
                             ></image>
                         </view>
                         <view class="goodsInfo-right">
+                            <view class="goods-image-mask" v-if="cart.goods.store <= 0 || cart.goods.store < cart.num ">
+                                <view class="goods-image-mask-text" >
+                                    补货中
+                                </view>
+                            </view>
                             <image :src="cart.goods.images ? cart.goods.images[0].url : ''"
                                    class="goods-image king-radius10"
                                    mode=""></image>
                             <view class="goodsInfo-box">
-                                <text class="goods-name">{{ cart.goods.name }}</text>
+                                <text class="goods-name king-ellipsis2">{{ cart.goods.name }}</text>
                                 <!--                            <text class="spe">规格：{{ cart.goods.remark }}</text>-->
+                                <text class="goods-store">库存：{{ cart.goods.store }}</text>
                                 <view class="goods-box">
                                     <text class="goods-price">
                                         ¥{{ cart.goods.price > 0 && cart.goods.price < cart.goods.costPrice  ? cart.goods.price : cart.goods.costPrice }}
@@ -145,14 +151,16 @@ export default {
                 let checkedAll = true
                 if (newVal.length > 0) {
                     newVal.forEach(item => {
-                        if (item.checked === 0) {
+                        // 库存大于选择数字
+                        if (item.goods.store > 0 && item.goods.store >= item.num && item.checked === 0) {
                             checkedAll = false
                         }
                     })
                     this.statistics()
                 }
                 this.isCheckAll = checkedAll
-            }
+            },
+            deep: true
         }
     },
     methods: {
@@ -195,6 +203,7 @@ export default {
                 return
             }
             this.list[index].checked = checked
+            this.$emit('update', this.list)
             // 是否全选
             let checkedAll = true
             this.list.forEach(item => {
@@ -244,10 +253,13 @@ export default {
                     return
                 }
                 this.list.forEach(item => {
-                    item.checked = 1
+                    if (item.goods.store > 0 && item.goods.store >= item.num ) {
+                        item.checked = 1
+                    }
                 })
                 this.isCheckAll = true
             }
+            this.$emit('update', this.list)
             this.statistics()
         },
         //统计
@@ -297,6 +309,7 @@ export default {
 .checked-image {
   width: 30px;
   height: 30px;
+  flex-shrink: 0;
 }
 
 
@@ -362,12 +375,16 @@ export default {
       flex-direction: row;
       align-items: center;
       border-bottom: 1px solid #EDEDED;
+      padding: 0 10px;
+      box-sizing: border-box;
+
 
       &:nth-last-child(1) {
         border: none;
       }
 
       .goodsInfo-left {
+        flex-shrink: 0;
         width: 35px;
         height: 35px;
       }
@@ -380,21 +397,47 @@ export default {
         align-items: center;
 
         .goods-image {
-          width: 60px;
-          height: 60px;
+          width: 70px;
+          height: 70px;
+          flex-shrink: 0;
+        }
+        .goods-image-mask {
+          width: 70px;
+          height: 70px;
+          flex-shrink: 0;
+          z-index: 9999;
+          background-color: rgba(173, 171, 171, 0.5);
+          position: absolute;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 10px;
+          .goods-image-mask-text {
+            font-size: 12px;
+            padding: 2px 6px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #fff0f0;
+            border-radius: 10px;
+          }
         }
 
         .goodsInfo-box {
           margin-left: 12px;
           display: flex;
           flex-direction: column;
-          align-items: center;
 
           .goods-name {
-            width: 214px;
+            width: 100%;
             font-size: 16px;
             font-weight: 400;
             color: #313133;
+          }
+
+          .goods-store {
+            font-size: 13px;
+            color: #8e8e92;
+            width: 100%;
+            margin-top: 5px;
           }
 
           .spe {
@@ -407,10 +450,10 @@ export default {
 
           .goods-box {
             width: 214px;
-            margin-top: 9px;
             display: flex;
             flex-direction: row;
             align-items: center;
+            margin-top: 2px;
             justify-content: space-between;
 
             .goods-price {
@@ -479,10 +522,11 @@ export default {
 
       .statistics-left {
         margin-left: 10px;
-        width: 100px;
+        width: 120px;
         display: flex;
         flex-direction: row;
         align-items: center;
+        flex-shrink: 0;
 
         image {
           width: 30px;
@@ -497,11 +541,11 @@ export default {
       }
 
       .statistics-right {
-        width: 100%;
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: flex-end;
+        flex-shrink: 0;
 
         .total {
           color: #313133;
@@ -527,6 +571,7 @@ export default {
         }
 
         .text-color {
+          width: 80px;
           font-size: 22px;
           color: rgba(242, 18, 18, 1);
         }

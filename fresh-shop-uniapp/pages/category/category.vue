@@ -41,7 +41,7 @@
                              :scroll-anchoring="true">
                     <!-- 商品列表 -->
                     <GoodsList :vertical="true" :lists="goodsArr" price-type="￥"></GoodsList>
-                    <view class="king-py-40" @click="scrollTolower">
+                    <view class="king-py-20" @click="scrollTolower">
                         <u-loadmore :status="loadMore" loading-text="努力加载中，请喝杯茶" loadmore-text="上拉加载更多"
                                     nomore-text="实在是没有了"/>
                     </view>
@@ -49,8 +49,7 @@
                 <u-empty v-else :style="{ height: windows_height / 1.6 + 'px' }" width="220" height="220" textSize="16"
                          text="暂无商品" mode="data" icon="http://cdn.uviewui.com/uview/empty/data.png"/>
             </view>
-            <shopcart v-if="!loginSuspendShow" :goods="goods" @add="addCart" @dec="decreaseCart" @delAll="delAll">
-            </shopcart>
+<!--            <shopcart v-if="!loginSuspendShow" :goods="goods" @add="addCart" @dec="decreaseCart" @delAll="delAll"></shopcart>-->
         </view>
         <loginSuspend :show="loginSuspendShow" @success="loginSuccess"></loginSuspend>
         <Tabbar :tabsId="1"/>
@@ -128,7 +127,7 @@ export default {
         this.hh = windowHeight - 50
         this.navCount = Math.round(this.hh / 50)
 
-        this.windows_height = Number(uni.getSystemInfoSync().windowHeight) - 55 - 145 - 50;
+        this.windows_height = Number(uni.getSystemInfoSync().windowHeight) - 55 - 145;
         setTimeout(() => {
             this.getHeightList();
         }, 1000)
@@ -389,7 +388,7 @@ export default {
   display: flex;
   position: absolute;
   top: 45px;
-  bottom: 100px;
+  bottom: 0px;
   width: 100%;
   overflow: hidden;
 }
@@ -476,8 +475,8 @@ export default {
     padding: 5px 8px 3px 8px;
 
     &__image {
-      width: 50px;
-      height: 50px;
+      width: 35px;
+      height: 35px;
       border-radius: 6px;
       vertical-align: top;
     }

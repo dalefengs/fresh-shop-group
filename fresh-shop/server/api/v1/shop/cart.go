@@ -41,7 +41,7 @@ func (cartApi *CartApi) CreateCart(c *gin.Context) {
 	cart.UserId = utils.Pointer(int(userId))
 	if err := cartService.CreateCart(cart); err != nil {
 		global.Log.Error(err.Error(), zap.Error(err))
-		response.FailWithMessage("添加购物车失败", c)
+		response.FailWithMessage(err.Error(), c)
 	} else {
 		response.OkWithMessage("success", c)
 	}
@@ -113,7 +113,7 @@ func (cartApi *CartApi) UpdateCart(c *gin.Context) {
 	}
 	if err := cartService.UpdateCart(cart); err != nil {
 		global.Log.Error("更新失败!", zap.Error(err))
-		response.FailWithMessage("更新失败", c)
+		response.FailWithMessage(err.Error(), c)
 	} else {
 		response.OkWithMessage("更新成功", c)
 	}
