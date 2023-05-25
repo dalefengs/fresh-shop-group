@@ -13,7 +13,7 @@ import (
 
 var ErrRoleExistence = errors.New("存在相同角色id")
 
-//@author: [piexlmax](https://github.com/likfees)
+//@author: [likfees](https://github.com/likfees)
 //@function: CreateAuthority
 //@description: 创建一个角色
 //@param: auth model.SysAuthority
@@ -32,7 +32,7 @@ func (authorityService *AuthorityService) CreateAuthority(auth system.SysAuthori
 	return auth, err
 }
 
-//@author: [piexlmax](https://github.com/likfees)
+//@author: [likfees](https://github.com/likfees)
 //@function: CopyAuthority
 //@description: 复制一个角色
 //@param: copyInfo response.SysAuthorityCopyResponse
@@ -84,7 +84,7 @@ func (authorityService *AuthorityService) CopyAuthority(copyInfo response.SysAut
 	return copyInfo.Authority, err
 }
 
-//@author: [piexlmax](https://github.com/likfees)
+//@author: [likfees](https://github.com/likfees)
 //@function: UpdateAuthority
 //@description: 更改一个角色
 //@param: auth model.SysAuthority
@@ -95,7 +95,7 @@ func (authorityService *AuthorityService) UpdateAuthority(auth system.SysAuthori
 	return auth, err
 }
 
-//@author: [piexlmax](https://github.com/likfees)
+//@author: [likfees](https://github.com/likfees)
 //@function: DeleteAuthority
 //@description: 删除角色
 //@param: auth *model.SysAuthority
@@ -145,7 +145,7 @@ func (authorityService *AuthorityService) DeleteAuthority(auth *system.SysAuthor
 	return err
 }
 
-//@author: [piexlmax](https://github.com/likfees)
+//@author: [likfees](https://github.com/likfees)
 //@function: GetAuthorityInfoList
 //@description: 分页获取数据
 //@param: info request.PageInfo
@@ -166,7 +166,7 @@ func (authorityService *AuthorityService) GetAuthorityInfoList(info request.Page
 	return authority, total, err
 }
 
-//@author: [piexlmax](https://github.com/likfees)
+//@author: [likfees](https://github.com/likfees)
 //@function: GetAuthorityInfo
 //@description: 获取所有角色信息
 //@param: auth model.SysAuthority
@@ -177,7 +177,7 @@ func (authorityService *AuthorityService) GetAuthorityInfo(auth system.SysAuthor
 	return sa, err
 }
 
-//@author: [piexlmax](https://github.com/likfees)
+//@author: [likfees](https://github.com/likfees)
 //@function: SetDataAuthority
 //@description: 设置角色资源权限
 //@param: auth model.SysAuthority
@@ -190,7 +190,7 @@ func (authorityService *AuthorityService) SetDataAuthority(auth system.SysAuthor
 	return err
 }
 
-//@author: [piexlmax](https://github.com/likfees)
+//@author: [likfees](https://github.com/likfees)
 //@function: SetMenuAuthority
 //@description: 菜单与角色绑定
 //@param: auth *model.SysAuthority
@@ -203,7 +203,7 @@ func (authorityService *AuthorityService) SetMenuAuthority(auth *system.SysAutho
 	return err
 }
 
-//@author: [piexlmax](https://github.com/likfees)
+//@author: [likfees](https://github.com/likfees)
 //@function: findChildrenAuthority
 //@description: 查询子角色
 //@param: authority *model.SysAuthority

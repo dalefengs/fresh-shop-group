@@ -17,7 +17,7 @@ type GoodsService struct {
 }
 
 // CreateGoods 创建Goods记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (goodsService *GoodsService) CreateGoods(form shopReq.GoodsSubmitFrom) (err error) {
 	log := "创建商品 --- "
 
@@ -158,7 +158,7 @@ func (goodsService *GoodsService) CreateGoods(form shopReq.GoodsSubmitFrom) (err
 }
 
 // UpdateGoods 更新Goods记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (goodsService *GoodsService) UpdateGoods(form shopReq.GoodsSubmitFrom) (err error) {
 	log := "更新商品 --- "
 
@@ -632,21 +632,21 @@ func findItemIdByVirtualItemId(item *[]shop.GoodsSpecItem, itemId string) (uint,
 }
 
 // DeleteGoods 删除Goods记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (goodsService *GoodsService) DeleteGoods(goods shop.Goods) (err error) {
 	err = global.DB.Delete(&goods).Error
 	return err
 }
 
 // DeleteGoodsByIds 批量删除Goods记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (goodsService *GoodsService) DeleteGoodsByIds(ids request.IdsReq) (err error) {
 	err = global.DB.Delete(&[]shop.Goods{}, "id in ?", ids.Ids).Error
 	return err
 }
 
 // GetGoods 根据id获取Goods记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (goodsService *GoodsService) GetGoods(id, userId uint) (goods shop.Goods, err error) {
 	err = global.DB.Where("id = ?", id).
 		Preload("Desc").
@@ -695,7 +695,7 @@ func (goodsService *GoodsService) GetGoods(id, userId uint) (goods shop.Goods, e
 }
 
 // GetGoodsInfoList 分页获取Goods记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (goodsService *GoodsService) GetGoodsInfoList(info shopReq.GoodsSearch, userId uint) (list []shop.Goods, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)

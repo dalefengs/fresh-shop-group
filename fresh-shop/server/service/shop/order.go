@@ -22,7 +22,7 @@ type OrderService struct {
 }
 
 // CreateOrder 创建Order记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *systemReq.CustomClaims, clientIP string) (resp *response.CreateOrderResp, err error) {
 	// 获取收货地址信息
 	var address shop.UserAddress
@@ -188,13 +188,42 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 	return
 }
 
+// OrderPay 支付 Order, 返回微信支付所需要的参数
+// Author [likfees](https://github.com/likfees)
+func (orderService *OrderService) OrderPay(order shop.Order, userClaims *systemReq.CustomClaims, clientIP string) (resp *response.CreateOrderResp, err error) {
+	log := fmt.Sprintf("[OrderService] OrderPay orderId:%d; \n", order.ID)
+	// 查询订单信息
+	if errors.Is(global.DB.Where("id = ?", order.ID).First(&order).Error, gorm.ErrRecordNotFound) {
+		global.SugarLog.Errorf("log:%s,err:订单不存在 \n", log)
+		return nil, errors.New("订单不存在")
+	}
+	if *order.Status == 1 {
+		global.SugarLog.Errorf("log:%s,err:订单已支付 \n", log)
+		return nil, errors.New("订单已支付")
+	} else if *order.Status != 0 {
+		global.SugarLog.Errorf("log:%s,err:订单状态不正确 \n", log)
+		return nil, errors.New("订单状态不正确")
+	}
+	// 发起 JSAIP 支付返回参数
+	err, jsApiData := wechat.JSAPIPay(userClaims.OpenId, order.OrderSn, order.ID, order.Total, clientIP)
+	if err != nil {
+		global.SugarLog.Errorf("log:%s, 微信 JsApi 发起调用异常, err: %v \n", log, err)
+		return
+	}
+	resp = &response.CreateOrderResp{
+		Order: order,
+		Pay:   *jsApiData,
+	}
+	return
+}
+
 // OrderDeliver 订单发货
 func (orderService *OrderService) OrderDeliver(order shop.Order) (err error) {
 	return
 }
 
 // DeleteOrder 删除Order记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (orderService *OrderService) DeleteOrder(order shop.Order) (err error) {
 	var detail shop.OrderDetails
 	err = global.DB.Transaction(func(tx *gorm.DB) error {
@@ -214,21 +243,21 @@ func (orderService *OrderService) DeleteOrder(order shop.Order) (err error) {
 }
 
 // DeleteOrderByIds 批量删除Order记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (orderService *OrderService) DeleteOrderByIds(ids request.IdsReq) (err error) {
 	err = global.DB.Delete(&[]shop.Order{}, "id in ?", ids.Ids).Error
 	return err
 }
 
 // UpdateOrder 更新Order记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (orderService *OrderService) UpdateOrder(order shop.Order) (err error) {
 	err = global.DB.Save(&order).Error
 	return err
 }
 
 // GetOrder 根据id获取Order记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (orderService *OrderService) GetOrder(id uint) (order shop.Order, err error) {
 	err = global.DB.Where("id = ?", id).
 		Preload("OrderDetails.Goods").
@@ -242,7 +271,7 @@ func (orderService *OrderService) GetOrder(id uint) (order shop.Order, err error
 }
 
 // OrderStatus 获取订单状态
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (orderService *OrderService) OrderStatus(id uint) (status gin.H, err error) {
 	var o shop.Order
 	if errors.Is(global.DB.Select("status").Where("id = ?", id).First(&o).Error, gorm.ErrRecordNotFound) {
@@ -255,7 +284,7 @@ func (orderService *OrderService) OrderStatus(id uint) (status gin.H, err error)
 }
 
 // GetOrderInfoList 分页获取Order记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (orderService *OrderService) GetOrderInfoList(info shopReq.OrderSearch) (list []shop.Order, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)

@@ -48,6 +48,37 @@ func (orderApi *OrderApi) CreateOrder(c *gin.Context) {
 	}
 }
 
+// OrderPay 支付 Order, 返回微信支付所需要的参数
+// @Tags Order
+// @Summary 支付 Order, 返回微信支付所需要的参数
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body shop.Order true "支付 Order, 返回微信支付所需要的参数"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /order/orderPay [post]
+func (orderApi *OrderApi) OrderPay(c *gin.Context) {
+	var order shop.Order
+	err := c.ShouldBindJSON(&order)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if order.ID == 0 {
+		response.FailWithMessage("订单ID不能为空", c)
+		return
+	}
+	userId := utils.GetUserID(c)
+	order.UserId = utils.Pointer(int(userId))
+	userClaims := utils.GetUserInfo(c)
+	if orderResp, err := orderService.OrderPay(order, userClaims, c.ClientIP()); err != nil {
+		global.Log.Error("创建失败!", zap.Error(err))
+		response.FailWithMessage(err.Error(), c)
+	} else {
+		response.OkWithData(orderResp, c)
+	}
+}
+
 // DeleteOrder 删除Order
 // @Tags Order
 // @Summary 删除Order

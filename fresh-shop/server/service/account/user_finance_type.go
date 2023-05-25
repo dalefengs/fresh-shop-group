@@ -11,42 +11,42 @@ type UserFinanceTypeService struct {
 }
 
 // CreateUserFinanceType 创建UserFinanceType记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (userFinanceTypeService *UserFinanceTypeService) CreateUserFinanceType(userFinanceType account.UserFinanceType) (err error) {
 	err = global.DB.Create(&userFinanceType).Error
 	return err
 }
 
 // DeleteUserFinanceType 删除UserFinanceType记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (userFinanceTypeService *UserFinanceTypeService) DeleteUserFinanceType(userFinanceType account.UserFinanceType) (err error) {
 	err = global.DB.Delete(&userFinanceType).Error
 	return err
 }
 
 // DeleteUserFinanceTypeByIds 批量删除UserFinanceType记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (userFinanceTypeService *UserFinanceTypeService) DeleteUserFinanceTypeByIds(ids request.IdsReq) (err error) {
 	err = global.DB.Delete(&[]account.UserFinanceType{}, "id in ?", ids.Ids).Error
 	return err
 }
 
 // UpdateUserFinanceType 更新UserFinanceType记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (userFinanceTypeService *UserFinanceTypeService) UpdateUserFinanceType(userFinanceType account.UserFinanceType) (err error) {
 	err = global.DB.Save(&userFinanceType).Error
 	return err
 }
 
 // GetUserFinanceType 根据id获取UserFinanceType记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (userFinanceTypeService *UserFinanceTypeService) GetUserFinanceType(id uint) (userFinanceType account.UserFinanceType, err error) {
 	err = global.DB.Where("id = ?", id).First(&userFinanceType).Error
 	return
 }
 
 // GetUserFinanceTypeInfoList 分页获取UserFinanceType记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (userFinanceTypeService *UserFinanceTypeService) GetUserFinanceTypeInfoList(info accountReq.UserFinanceTypeSearch) (list []account.UserFinanceType, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)

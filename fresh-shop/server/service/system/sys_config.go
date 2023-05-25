@@ -12,42 +12,42 @@ type SysConfigService struct {
 }
 
 // CreateSysConfig 创建SysConfig记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (sysConfigService *SysConfigService) CreateSysConfig(sysConfig system.SysConfig) (err error) {
 	err = global.DB.Create(&sysConfig).Error
 	return err
 }
 
 // DeleteSysConfig 删除SysConfig记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (sysConfigService *SysConfigService) DeleteSysConfig(sysConfig system.SysConfig) (err error) {
 	err = global.DB.Delete(&sysConfig).Error
 	return err
 }
 
 // DeleteSysConfigByIds 批量删除SysConfig记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (sysConfigService *SysConfigService) DeleteSysConfigByIds(ids request.IdsReq) (err error) {
 	err = global.DB.Delete(&[]system.SysConfig{}, "id in ?", ids.Ids).Error
 	return err
 }
 
 // UpdateSysConfig 更新SysConfig记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (sysConfigService *SysConfigService) UpdateSysConfig(sysConfig system.SysConfig) (err error) {
 	err = global.DB.Save(&sysConfig).Error
 	return err
 }
 
 // GetSysConfig 根据id获取SysConfig记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (sysConfigService *SysConfigService) GetSysConfig(id uint) (sysConfig system.SysConfig, err error) {
 	err = global.DB.Where("id = ?", id).First(&sysConfig).Error
 	return
 }
 
 // GetSysConfigByName 根据 name 获取 SysConfig 记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (sysConfigService *SysConfigService) GetSysConfigByName(name string) (sysConfig system.SysConfig, err error) {
 	err = global.DB.Where("name = ?", name).First(&sysConfig).Error
 	if err != nil {
@@ -60,7 +60,7 @@ func (sysConfigService *SysConfigService) GetSysConfigByName(name string) (sysCo
 }
 
 // GetSysConfigInfoList 分页获取SysConfig记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (sysConfigService *SysConfigService) GetSysConfigInfoList(info businessReq.SysConfigSearch) (list []system.SysConfig, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)

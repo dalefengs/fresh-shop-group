@@ -11,42 +11,42 @@ type UserFinanceCashService struct {
 }
 
 // CreateUserFinanceCash 创建UserFinanceCash记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (userFinanceCashService *UserFinanceCashService) CreateUserFinanceCash(userFinanceCash account.UserFinance) (err error) {
 	err = global.DB.Create(&userFinanceCash).Error
 	return err
 }
 
 // DeleteUserFinanceCash 删除UserFinanceCash记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (userFinanceCashService *UserFinanceCashService) DeleteUserFinanceCash(userFinanceCash account.UserFinance) (err error) {
 	err = global.DB.Delete(&userFinanceCash).Error
 	return err
 }
 
 // DeleteUserFinanceCashByIds 批量删除UserFinanceCash记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (userFinanceCashService *UserFinanceCashService) DeleteUserFinanceCashByIds(ids request.IdsReq) (err error) {
 	err = global.DB.Delete(&[]account.UserFinance{}, "id in ?", ids.Ids).Error
 	return err
 }
 
 // UpdateUserFinanceCash 更新UserFinanceCash记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (userFinanceCashService *UserFinanceCashService) UpdateUserFinanceCash(userFinanceCash account.UserFinance) (err error) {
 	err = global.DB.Save(&userFinanceCash).Error
 	return err
 }
 
 // GetUserFinanceCash 根据id获取UserFinanceCash记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (userFinanceCashService *UserFinanceCashService) GetUserFinanceCash(id uint) (userFinanceCash account.UserFinance, err error) {
 	err = global.DB.Where("id = ?", id).First(&userFinanceCash).Error
 	return
 }
 
 // GetUserFinanceInfoList 分页获取UserFinanceCash记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (userFinanceCashService *UserFinanceCashService) GetUserFinanceInfoList(info accountReq.UserFinanceSearch) (list []account.UserFinance, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)

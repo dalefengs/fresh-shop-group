@@ -18,7 +18,7 @@ type SysRechargeService struct {
 
 // CreateSysRecharge 创建SysRecharge记录
 // 还未支持 冻结，锁定余额操作
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (sysRechargeService *SysRechargeService) CreateSysRecharge(recharge account.SysRecharge, claims *request2.CustomClaims) (err error) {
 	var user sysModel.SysUser
 	if errors.Is(global.DB.Where("username = ?", recharge.Username).First(&user).Error, gorm.ErrRecordNotFound) {
@@ -66,35 +66,35 @@ func (sysRechargeService *SysRechargeService) CreateSysRecharge(recharge account
 }
 
 // DeleteSysRecharge 删除SysRecharge记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (sysRechargeService *SysRechargeService) DeleteSysRecharge(sysRecharge account.SysRecharge) (err error) {
 	err = global.DB.Delete(&sysRecharge).Error
 	return err
 }
 
 // DeleteSysRechargeByIds 批量删除SysRecharge记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (sysRechargeService *SysRechargeService) DeleteSysRechargeByIds(ids request.IdsReq) (err error) {
 	err = global.DB.Delete(&[]account.SysRecharge{}, "id in ?", ids.Ids).Error
 	return err
 }
 
 // UpdateSysRecharge 更新SysRecharge记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (sysRechargeService *SysRechargeService) UpdateSysRecharge(sysRecharge account.SysRecharge) (err error) {
 	err = global.DB.Save(&sysRecharge).Error
 	return err
 }
 
 // GetSysRecharge 根据id获取SysRecharge记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (sysRechargeService *SysRechargeService) GetSysRecharge(id uint) (sysRecharge account.SysRecharge, err error) {
 	err = global.DB.Where("id = ?", id).First(&sysRecharge).Error
 	return
 }
 
 // GetSysRechargeInfoList 分页获取SysRecharge记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (sysRechargeService *SysRechargeService) GetSysRechargeInfoList(info accountReq.SysRechargeSearch) (list []account.SysRecharge, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)

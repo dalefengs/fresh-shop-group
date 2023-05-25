@@ -1,12 +1,12 @@
 import request from "@/utils/request"
 
 // 订单支付
-export const orderPay = (refs) => {
+export const orderPay = (data, refs) => {
     return request({
         url: `/order/orderPay`,
         method: 'POST',
         loading: true,
-        toLogin: true,
+        data
     }, refs)
 }
 

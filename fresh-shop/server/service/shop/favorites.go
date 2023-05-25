@@ -13,7 +13,7 @@ type FavoritesService struct {
 }
 
 // Favorites 创建Favorites记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (favoritesService *FavoritesService) Favorites(favorites shop.Favorites) (err error) {
 	var f shop.GoodsFavorites
 	err = global.DB.Where("user_id = ? and goods_id = ?", favorites.UserId, favorites.GoodsId).First(&f).Error
@@ -27,28 +27,28 @@ func (favoritesService *FavoritesService) Favorites(favorites shop.Favorites) (e
 }
 
 // DeleteFavorites 删除Favorites记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (favoritesService *FavoritesService) DeleteFavorites(favorites shop.Favorites) (err error) {
 	err = global.DB.Delete(&favorites).Error
 	return err
 }
 
 // DeleteFavoritesByIds 批量删除Favorites记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (favoritesService *FavoritesService) DeleteFavoritesByIds(ids request.IdsReq) (err error) {
 	err = global.DB.Delete(&[]shop.Favorites{}, "id in ?", ids.Ids).Error
 	return err
 }
 
 // GetFavorites 根据id获取Favorites记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (favoritesService *FavoritesService) GetFavorites(id uint) (favorites shop.Favorites, err error) {
 	err = global.DB.Where("id = ?", id).First(&favorites).Error
 	return
 }
 
 // GetFavoritesInfoList 分页获取Favorites记录
-// Author [piexlmax](https://github.com/likfees)
+// Author [likfees](https://github.com/likfees)
 func (favoritesService *FavoritesService) GetFavoritesInfoList(info businessReq.FavoritesSearch) (list []shop.Favorites, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)

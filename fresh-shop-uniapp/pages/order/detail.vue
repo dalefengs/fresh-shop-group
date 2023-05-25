@@ -14,7 +14,7 @@
                         <text v-else-if="order.return.refundStatus === -1">退款失败</text>
                     </view>
                     <view v-else>
-                        <text v-if="statusCancel > 0">已取消</text>
+                        <text v-if="order.statusCancel > 0">已取消</text>
                         <text v-else-if="order.status === 0">待付款</text>
                         <text v-else-if="order.status === 1">备货中</text>
                         <text v-else-if="order.status === 2">配送中</text>
@@ -105,14 +105,14 @@
         <view style="height: 50px"></view>
         <view class="menu">
             <!-- 订单状态未付款 且 取消状态0 且未售后-->
-            <view class="menu-btn" v-if="order.status === 0 && order.statusCancel === 0 && order.statusRefund === 0 && !order.return.ID">
+            <view class="menu-btn" v-if="order.status === 0 && order.statusCancel === 0 && order.statusRefund === 0 && (!order.return || !order.return.ID)">
                 <u-button type="info" :customStyle="menuBtnStyle"  @click="cancelOrder">取消订单</u-button>
             </view>
             <!-- 订单状态已付款 且 取消状态0 且未售后 -->
-            <view class="menu-btn" v-if="order.status > 0 && order.statusCancel === 0 && !order.return.ID" >
+            <view class="menu-btn" v-if="order.status > 0 && order.statusCancel === 0 && (!order.return || !order.return.ID)" >
                 <u-button type="info" :customStyle="menuBtnStyle" @click="refundOrder">申请售后</u-button>
             </view>
-            <view class="menu-btn" v-if="order.return.ID">
+            <view class="menu-btn" v-if="order.return && order.return.ID">
                 <u-button type="primary" :customStyle="menuBtnStyle" @click="confirmOrder">售后详情</u-button>
             </view>
             <view class="menu-btn" v-if="order.status === 2">
@@ -128,12 +128,10 @@
 
 <script>
 import config from '@/config/config.js'
-import {getOrderInfo} from '@/api/order'
+import {getOrderInfo, confirmOrder, cancelOrder, orderPay, getOrderStatus} from '@/api/order'
 import {getToken} from '@/store/storage.js'
-import UImage from "../../uni_modules/uview-ui/components/u--image/u--image.vue";
 
 export default {
-    components: {UImage},
     data() {
         return {
             token: '',
@@ -145,7 +143,7 @@ export default {
         }
     },
     onLoad(options) {
-        this.orderId = options.id
+        this.orderId = parseInt(options.id)
         this.token = getToken()
         if (!this.token) {
             this.$refs.toast.show('请先登录').then(res => {
@@ -158,6 +156,7 @@ export default {
         this.getOrderInfoData()
     },
     methods: {
+        // 获取订单信息
         async getOrderInfoData() {
             const res = await getOrderInfo({
                 ID: this.orderId
@@ -174,7 +173,76 @@ export default {
             })
             this.order = res.data.reorder
             console.log('this.order', this.order)
-        }
+        },
+        // 订单提交
+        async goPay() {
+            const res = await orderPay({
+                ID: this.orderId
+            }, this.$refs.toast)
+            if (res.code !== 0) {
+                return false
+            }
+            if (!res.data.pay) {
+                this.$message(this.$refs.toast).error("交易失败，请重试")
+                return false
+            }
+            this.toPay(res.data.pay, res.data.order)
+        },
+        // 发起微信支付
+        toPay(pay, order) {
+            this.$message(this.$refs.toast).loading('正在支付中...')
+            const payment = {
+                provider: 'wxpay', // 服务提供商，通过 uni.getProvider 获取。
+                timeStamp: pay.timestamp,
+                nonceStr: pay.nonceStr,
+                orderInfo: pay.order,
+                package: 'prepay_id=' + pay.prePayId,
+                signType: pay.signType,
+                paySign: pay.paySign,
+                success: res => {
+                    console.log('success', res)
+                    this.$message(this.$refs.toast).hide()
+                    this.paySuccess(order.ID)
+                },
+                fail: res => {
+                    console.log('fail', res)
+                    this.$message(this.$refs.toast).hide()
+                    if (res.errMsg === 'requestPayment:fail cancel') {
+                        this.$message(this.$refs.toast).error("取消支付")
+                        return false
+                    }
+                    this.$message(this.$refs.toast).error("支付失败")
+                }
+            }
+            console.log('payment', payment)
+            uni.requestPayment(payment)
+        },
+        // 支付成功回调
+        paySuccess(orderId) {
+            this.$message(this.$refs.toast).loading('正在获取支付结果...')
+            let errCount = 0
+            const statusInterval = setInterval(async () => {
+                const res = await getOrderStatus(orderId);
+                if (res.code !== 0) {
+                    errCount ++
+                    // 只允许重试 30 次 30秒
+                    if (errCount > 30) {
+                        clearInterval(statusInterval); // 清除定时器
+                        this.$message(this.$refs.toast).hide()
+                        this.$message(this.$refs.toast).error("获取交易结果超时，请稍后查看")
+                    }
+                    return false;
+                }
+                if (res.data.status === 1) {
+                    clearInterval(statusInterval); // 清除定时器
+                    this.$message(this.$refs.toast).hide()
+                    // 进行其他操作
+                    this.$message(this.$refs.toast).success("支付成功").then(() => {
+                        this.getOrderInfoData()
+                    })
+                }
+            }, 1000);
+        },
     }
 }
 </script>

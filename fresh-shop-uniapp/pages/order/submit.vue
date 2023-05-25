@@ -148,6 +148,7 @@ export default {
             }
             this.toPay(res.data.pay, res.data.order)
         },
+        // 发起微信支付
         toPay(pay, order) {
             this.$message(this.$refs.toast).loading('正在支付中...')
             const payment = {
@@ -184,6 +185,7 @@ export default {
             console.log('payment', payment)
             uni.requestPayment(payment)
         },
+        // 支付成功回调
         paySuccess(orderId) {
             this.$message(this.$refs.toast).loading('正在获取支付结果...')
             let errCount = 0
