@@ -41,7 +41,7 @@
         <view class="goods-box">
             <view class="goods-text">共 {{ order.num }} 件商品</view>
             <view class="goods-list">
-                <view v-for="item in order.details" :key="item.ID" class="goods">
+                <view v-for="item in order.details" :key="item.ID" class="goods" @click="toGoodsDetail(item.goodsId)">
                     <view class="king-flex">
                         <view class="goods-image-box">
                             <img class="goods-image" :src="item.goodsImage">
@@ -298,6 +298,11 @@ export default {
                 }
             }, 1000);
         },
+        toGoodsDetail(goodsId) {
+            uni.navigateTo({
+                url: `/pages/goods/detail?id=${goodsId}`
+            })
+        }
     }
 }
 </script>
@@ -326,9 +331,10 @@ export default {
 }
 
 .address {
-  margin-top: 6px;
   background: #FFFFFF;
-  padding: 16px 10px;
+  padding: 16px 16px;
+  margin: 6px 8px 0 8px;
+  border-radius: 10px;
 
   .detail {
     color: #6a7076;
@@ -338,9 +344,10 @@ export default {
 }
 
 .goods-box {
-  margin-top: 6px;
   background: #FFFFFF;
-  padding: 10px 10px;
+  padding: 12px;
+  margin: 6px 8px 0 8px;
+  border-radius: 10px;
 
   .goods-text {
     color: #333333;
@@ -407,8 +414,9 @@ export default {
 
 .order {
   background: #FFFFFF;
-  padding: 10px 10px;
-  margin-top: 6px;
+  padding: 16px;
+  margin: 6px 8px 0 8px;
+  border-radius: 10px;
 
   .order-info {
     display: flex;

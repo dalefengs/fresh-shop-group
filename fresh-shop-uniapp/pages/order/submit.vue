@@ -7,7 +7,7 @@
                 </view>
                 <view v-if="addressId === 0" class="title">请选择收货地址</view>
                 <view v-else>
-                    <view class="title">{{ address.title + address.detail }}</view>
+                    <view class="title king-ellipsis2">{{ address.title + address.detail }}</view>
                     <view class="sub-title">
                         <text class="king-mr-10">{{ address.name }}{{ address.sex === 1 ? '先生' : '女士' }}</text>
                         <text>{{ address.mobile }}</text>
@@ -37,7 +37,7 @@
                        mode=""></image>
                 <view class="goods-info-box">
                     <view class="goods-info-spec">
-                        <text class="goods-name">{{ cart.goods.name }}</text>
+                        <text class="goods-name king-ellipsis2">{{ cart.goods.name }}</text>
                         <text class="spe">规格：{{ cart.goods.weight ? cart.goods.weight + 'g/' : '' }}{{
                                 cart.goods.unit
                             }}
@@ -71,6 +71,7 @@
                       clearable
             ></u--input>
         </view>
+        <view style="height: 70px"></view>
         <view class="statistics-box">
             <text class="total">合计：</text>
             <text class="text-color">¥{{ total }}</text>
@@ -356,8 +357,8 @@ page {
     }
 
     .goods-image {
-      width: 60px;
-      height: 60px;
+      width: 75px;
+      height: 75px;
     }
 
     .goods-info-box {
@@ -374,7 +375,7 @@ page {
       }
 
       .goods-name {
-        font-size: 18px;
+        font-size: 16px;
         font-weight: 400;
         color: #313133;
       }

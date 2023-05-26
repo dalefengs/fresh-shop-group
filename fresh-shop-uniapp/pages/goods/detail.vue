@@ -58,7 +58,7 @@
                     </view>
                     <view>收藏</view>
                 </view>
-                <view class="btn">
+                <view class="btn" @click="toCartPage">
                     <view class="king-inline-block king-relative" style="height: 26px;">
                         <u-icon name="shopping-cart" size="28"></u-icon>
                         <view class="badge">
@@ -225,6 +225,11 @@ export default {
                 }
                 this.goods.cartNum = num
             }
+        },
+        toCartPage() {
+            uni.navigateTo({
+                url: '/pages/cart/cart'
+            })
         }
 
     }

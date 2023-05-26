@@ -28,8 +28,8 @@
                                         &lt;!&ndash;                    <image src="../../static/youjiantou1.png" class="label" mode=""></image>&ndash;&gt;
                                     </view>-->
                     <view class="goodsInfo" v-for="(cart,index) in list" :key="index"
-                          @longtap="showDeleteCartDalog(index)">
-                        <view class="goodsInfo-left" :class="{'king-disabled-click': cart.goods.store <= 0 || cart.goods.store < cart.num}" @tap="checkedGoods(cart.ID, cart.checked, index)">
+                          @longtap="showDeleteCartDalog(index)" @click="toGoodsDetail(cart.goodsId)">
+                        <view class="goodsInfo-left" :class="{'king-disabled-click': cart.goods.store <= 0 || cart.goods.store < cart.num}" @tap.stop="checkedGoods(cart.ID, cart.checked, index)">
                             <image src="../../static/select.png" v-if="cart.checked == 1" class="checked-image"
                                    mode=""></image>
                             <image src="../../static/not_select.png" v-else class="checked-image" mode=""
@@ -55,14 +55,14 @@
                                     </text>
                                     <view class="goods-num-box">
                                         <view class="goods-image"
-                                              @tap="addCartReq(cart.goods.ID, index, 2, cart.num - 1)">
+                                              @tap.stop="addCartReq(cart.goods.ID, index, 2, cart.num - 1)">
                                             <text>-</text>
                                         </view>
                                         <view class="goods-num">
                                             <text>{{ cart.num }}</text>
                                         </view>
                                         <view class="goods-image"
-                                              @tap="addCartReq(cart.goods.ID,index,1, cart.num + 1)">
+                                              @tap.stop="addCartReq(cart.goods.ID,index,1, cart.num + 1)">
                                             <text>+</text>
                                         </view>
                                     </view>
@@ -231,9 +231,12 @@ export default {
                 return
             }
             const res = await addCart(data)
-            if (res.code === 0) {
-                this.list[index].num = num
+            if (res.code !== 0) {
+                console.log("更新购物车失败")
+                return false
             }
+            this.list[index].num = num
+            this.$emit('update', this.list)
             this.statistics()
         },
         //全选
@@ -290,6 +293,11 @@ export default {
         toHome() {
             uni.navigateTo({
                 url: '/pages/index/index'
+            })
+        },
+        toGoodsDetail(id) {
+            uni.navigateTo({
+                url: '/pages/goods/detail?id=' + id
             })
         }
     }
@@ -514,15 +522,17 @@ export default {
     border-bottom: 1px solid #e0dfdf;
 
     .statistics {
+      width: 100%;
+      padding-right: 10px;
       height: 60px;
       display: flex;
       flex-direction: row;
       align-items: center;
       justify-content: space-between;
+      box-sizing: border-box;
 
       .statistics-left {
         margin-left: 10px;
-        width: 120px;
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -571,7 +581,6 @@ export default {
         }
 
         .text-color {
-          width: 80px;
           font-size: 22px;
           color: rgba(242, 18, 18, 1);
         }

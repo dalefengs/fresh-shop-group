@@ -34,7 +34,7 @@
                     </u-scroll-list>
                 </view>
                 <scroll-view v-if="goodsArr.length > 0" class="foods-wrapper" scroll-y
-                             :style="'height:' + windows_height + 'px'" :scroll-top="foodSTop" @scroll="myscroll"
+                             :style="'height:' + windows_height + 'px'" :scroll-top="foodSTop"
                              scroll-with-animation="true" refresher-enabled="true" :refresher-threshold="70"
                              :refresher-triggered="triggered" @refresherrefresh="onRefresh"
                              @scrolltolower="scrollTolower"
@@ -127,7 +127,7 @@ export default {
         this.hh = windowHeight - 50
         this.navCount = Math.round(this.hh / 50)
 
-        this.windows_height = Number(uni.getSystemInfoSync().windowHeight) - 55 - 145;
+        this.windows_height = Number(uni.getSystemInfoSync().windowHeight) - 45 - 89;
         setTimeout(() => {
             this.getHeightList();
         }, 1000)
@@ -323,27 +323,6 @@ export default {
                 _this.right_height = rects.map((item) => item.top);
             }).exec();
         },
-        myscroll(e) {
-            //引入节流
-            let right_content_height = e.detail.scrollHeight - this.windows_height;
-            if (right_content_height == e.detail.scrollTop) {
-                return;
-            }
-            let scroll_top = e.detail.scrollTop + 110; //110是banner图的高度
-            //判断当前的scrollTop在哪个区间内;
-            let now = +new Date();
-            if (now - this.last > 100) {
-                this.last = now;
-                let active_index = this.right_height.findIndex((value, index, arr) => value <= scroll_top &&
-                    scroll_top < arr[index + 1]);
-                this.currentIndex = active_index;
-                if (this.left_height - this.windows_height) {
-                    //如果有超出部分
-                    let diff = this.left_height - this.windows_height
-                    this.left_scroll = Math.round((active_index * diff) / (this.goods.length - 1))
-                }
-            }
-        },
         // 登陆成功
         loginSuccess() {
             this.loginSuspendShow = false
@@ -388,7 +367,7 @@ export default {
   display: flex;
   position: absolute;
   top: 45px;
-  bottom: 0px;
+  bottom: 0;
   width: 100%;
   overflow: hidden;
 }
@@ -475,8 +454,8 @@ export default {
     padding: 5px 8px 3px 8px;
 
     &__image {
-      width: 35px;
-      height: 35px;
+      width: 40px;
+      height: 40px;
       border-radius: 6px;
       vertical-align: top;
     }

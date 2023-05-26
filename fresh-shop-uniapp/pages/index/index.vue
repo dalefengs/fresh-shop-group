@@ -13,24 +13,24 @@
 			</view>
 		</u-sticky>
 		<!-- 轮播图 -->
-		<view class="king-p-10">
+		<view class="king-p-5">
 			<u-swiper :list="banner" keyName="imgUrl" indicator indicatorMode="line" :height="180" circular
 				bgColor="#ffffff"></u-swiper>
 		</view>
 		<!-- 首页分类 -->
-		<view class="king-bg-white king-mx-10 king-radius10 king-py-10" style="min-height: 170px">
+		<view class="king-bg-white king-mx-10 king-radius10 king-py-10" style="min-height: 140px">
 			<u-grid :border="false" col="4">
-				<u-grid-item v-for="c in category" :key="c.ID" class="king-my-5" @click="toGoodsByCategory(c.ID)">
-					<u--image width="50" height="50" :src="c.imgUrl" shape="circle"></u--image>
-					<text class="grid-text king-my-10">{{ c.title }}</text>
+				<u-grid-item v-for="c in category" :key="c.ID" @click="toGoodsByCategory(c.ID)">
+					<u--image width="45" height="45" :src="c.imgUrl" shape="circle"></u--image>
+					<text class="grid-text king-my-5">{{ c.title }}</text>
 				</u-grid-item>
 			</u-grid>
 		</view>
-		<view class="king-m-10 king-radius10">
+		<view class="king-mx-10 king-my-5 king-radius10">
 			<!-- 导航栏目 -->
 			<u-sticky offset-top="45">
 				<view class="king-bg-white king-pb-5 king-radius10" style="height: 50px;">
-					<u-row customStyle="margin-bottom: 10px; height: 50px">
+					<u-row customStyle="margin-bottom: 6px; height: 40px">
 						<u-col span="6">
 							<view class="goods-tabs" @click="changeGoodsTabs(0)">
 								<text>热销商品</text>
@@ -355,7 +355,7 @@ export default {
 .goods-tabs {
 	margin: 0 auto;
 	text-align: center;
-	height: 20px;
+	height: 16px;
 	background: #ffffff;
 
 	.goods-tabs-active {

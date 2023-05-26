@@ -7,7 +7,7 @@
 <template>
 	<view>
 		<u-tabbar :value="tabsId" @change="tabsChange" :fixed="true" :placeholder="true" :safeAreaInsetBottom="true">
-			<u-tabbar-item v-for="(item, key) in tabs" :text="item.text" :icon="item.icon" :key="key" />
+			<u-tabbar-item v-for="(item, key) in tabs" :text="item.text" :icon="item.icon" :key="key" style="z-index: 9999"/>
 		</u-tabbar>
 	</view>
 </template>

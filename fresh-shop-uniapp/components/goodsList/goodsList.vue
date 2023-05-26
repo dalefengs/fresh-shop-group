@@ -246,7 +246,6 @@ $radius: 20rpx;
       width: 75px;
       height: 75px;
       flex-shrink: 0;
-      z-index: 9999;
       background-color: rgba(173, 171, 171, 0.5);
       position: absolute;
       display: flex;
