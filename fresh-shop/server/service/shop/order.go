@@ -311,43 +311,54 @@ func (orderService *OrderService) GetOrderInfoList(info shopReq.OrderSearch) (li
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	// 创建db
-	db := global.DB.Model(&shop.Order{})
+	db := global.DB.Debug().Model(&shop.Order{}).Preload("OrderDetails").Joins("OrderReturn")
 	var orders []shop.Order
 	// 如果有条件搜索 下方会自动创建搜索语句
+
+	if info.Status != nil {
+		if *info.Status == 0 || *info.Status == 1 || *info.Status == 2 || *info.Status == 3 { // 未付款
+			db = db.Where("shop_order.status = ? and shop_order.status_cancel = 0 and shop_order.status_refund = 0", info.Status)
+		} else if *info.Status == 10 { // 售后订单
+			db = db.Where("OrderReturn.order_id = shop_order.id and shop_order.status_cancel = 0")
+		}
+	}
+
+	if info.UserId != nil {
+		db = db.Where("shop_order.user_id = ?", info.UserId)
+	}
 	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
-		db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
+		db = db.Where("shop_order.created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
 	}
 	if info.OrderSn != "" {
-		db = db.Where("order_sn LIKE ?", "%"+info.OrderSn+"%")
+		db = db.Where("shop_order.order_sn LIKE ?", "%"+info.OrderSn+"%")
 	}
 	if info.ShipmentName != "" {
-		db = db.Where("shipment_name LIKE ?", "%"+info.ShipmentName+"%")
+		db = db.Where("shop_order.shipment_name LIKE ?", "%"+info.ShipmentName+"%")
 	}
 	if info.ShipmentMobile != "" {
-		db = db.Where("shipment_mobile LIKE ?", "%"+info.ShipmentMobile+"%")
+		db = db.Where("shop_order.shipment_mobile LIKE ?", "%"+info.ShipmentMobile+"%")
 	}
 	if info.ShipmentAddress != "" {
-		db = db.Where("shipment_address LIKE ?", "%"+info.ShipmentAddress+"%")
+		db = db.Where("shop_order.shipment_address LIKE ?", "%"+info.ShipmentAddress+"%")
 	}
 	if info.Payment != nil {
-		db = db.Where("payment = ?", info.Payment)
-	}
-	if info.Status != nil {
-		db = db.Where("status = ?", info.Status)
+		db = db.Where("shop_order.payment = ?", info.Payment)
 	}
 	if info.StartShipmentTime != nil && info.EndShipmentTime != nil {
-		db = db.Where("shipment_time BETWEEN ? AND ? ", info.StartShipmentTime, info.EndShipmentTime)
+		db = db.Where("shop_order.shipment_time BETWEEN ? AND ? ", info.StartShipmentTime, info.EndShipmentTime)
 	}
 	if info.StartReceiveTime != nil && info.EndReceiveTime != nil {
-		db = db.Where("receive_time BETWEEN ? AND ? ", info.StartReceiveTime, info.EndReceiveTime)
+		db = db.Where("shop_order.receive_time BETWEEN ? AND ? ", info.StartReceiveTime, info.EndReceiveTime)
 	}
 	if info.StartCancelTime != nil && info.EndCancelTime != nil {
-		db = db.Where("cancel_time BETWEEN ? AND ? ", info.StartCancelTime, info.EndCancelTime)
+		db = db.Where("shop_order.cancel_time BETWEEN ? AND ? ", info.StartCancelTime, info.EndCancelTime)
 	}
 	err = db.Count(&total).Error
 	if err != nil {
 		return
 	}
+
+	db = db.Order("shop_order.created_at desc")
 
 	err = db.Limit(limit).Offset(offset).Find(&orders).Error
 	return orders, total, err

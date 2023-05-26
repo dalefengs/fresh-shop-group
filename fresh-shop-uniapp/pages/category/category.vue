@@ -122,7 +122,7 @@ export default {
         }
     },
     onReady() {
-        var windowHeight = uni.getSystemInfoSync().windowHeight
+        const windowHeight = uni.getSystemInfoSync().windowHeight
         // 50 是 tabbar 的高度
         this.hh = windowHeight - 50
         this.navCount = Math.round(this.hh / 50)

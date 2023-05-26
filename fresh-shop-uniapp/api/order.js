@@ -11,12 +11,13 @@ export const orderPay = (data, refs) => {
 }
 
 // 获取默认列表
-export const getOrderList = (refs) => {
+export const getOrderList = (data, loading, refs) => {
     return request({
-        url: `/order/getOrderList`,
+        url: `/order/getUserOrderList`,
         method: 'GET',
-        loading: true,
+        loading: loading,
         toLogin: true,
+        data
     }, refs)
 }
 

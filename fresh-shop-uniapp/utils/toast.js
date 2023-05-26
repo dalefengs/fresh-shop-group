@@ -22,7 +22,7 @@ const message = (ref) => {
 
 const success = (msg) => {
     return new Promise((resolve, reject) => {
-        if (toast) {
+        if (toast && Object.keys(toast).length > 0) {
             toast.show({
                 type: 'success',
                 message: msg,
@@ -46,7 +46,7 @@ const success = (msg) => {
 
 const error = (msg) => {
     return new Promise((resolve, reject) => {
-        if (toast) {
+        if (toast && Object.keys(toast).length > 0) {
             toast.show({
                 type: 'error',
                 message: msg,
@@ -70,7 +70,7 @@ const error = (msg) => {
 
 const warning = (msg) => {
     return new Promise((resolve, reject) => {
-        if (toast) {
+        if (toast && Object.keys(toast).length > 0) {
             toast.show({
                 type: 'warning',
                 message: msg,
@@ -94,7 +94,7 @@ const warning = (msg) => {
 
 const info = (msg) => {
     return new Promise((resolve, reject) => {
-        if (toast) {
+        if (toast && Object.keys(toast).length > 0) {
             toast.show({
                 type: 'primary',
                 message: msg,
@@ -118,7 +118,7 @@ const info = (msg) => {
 
 const none = (msg) => {
     return new Promise((resolve, reject) => {
-        if (toast) {
+        if (toast && Object.keys(toast).length > 0) {
             toast.show({
                 type: 'default',
                 message: msg,
@@ -143,7 +143,7 @@ const none = (msg) => {
 
 const loading = (msg) => {
     return new Promise((resolve, reject) => {
-        if (toast) {
+        if (toast && Object.keys(toast).length > 0) {
             toast.show({
                 type: 'loading',
                 message: msg,

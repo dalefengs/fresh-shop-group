@@ -255,3 +255,34 @@ func (orderApi *OrderApi) GetOrderList(c *gin.Context) {
 		}, "获取成功", c)
 	}
 }
+
+// GetUserOrderList 分页获取登录用户获取Order列表
+// @Tags Order
+// @Summary 页获取登录用户获取Order列表
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query shopReq.OrderSearch true "页获取登录用户获取Order列表"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /order/getUserOrderList [get]
+func (orderApi *OrderApi) GetUserOrderList(c *gin.Context) {
+	var pageInfo shopReq.OrderSearch
+	err := c.ShouldBindQuery(&pageInfo)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	userId := utils.GetUserID(c)
+	pageInfo.UserId = utils.Pointer(int(userId))
+	if list, total, err := orderService.GetOrderInfoList(pageInfo); err != nil {
+		global.Log.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+	} else {
+		response.OkWithDetailed(response.PageResult{
+			List:     list,
+			Total:    total,
+			Page:     pageInfo.Page,
+			PageSize: pageInfo.PageSize,
+		}, "获取成功", c)
+	}
+}

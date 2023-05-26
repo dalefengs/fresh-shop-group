@@ -104,10 +104,11 @@ export default {
       relationPhone: "18899996666", // 联系人电话
       orderTypeLise: [
         //name-标题 icon-图标 badge-角标
-        {name: '待付款', icon: 'fukr.png', badge: 1},
-        {name: '待发货', icon: 'faho.png', badge: 2},
-        {name: '待收货', icon: 'uzho.png', badge: 6},
-        {name: '待售后', icon: 'uzhz.png', badge: 0}
+        {name: '全部订单', icon: 'qrbu.png', badge: 1, status: null},
+        {name: '待付款', icon: 'fukr.png', badge: 1, status: 0},
+        {name: '备货中', icon: 'faho.png', badge: 2, status: 1},
+        {name: '待收货', icon: 'uzho.png', badge: 6, status: 2},
+        {name: '待售后', icon: 'uzhz.png', badge: 0, status: 10}
       ],
       severList: [
         [
@@ -221,7 +222,9 @@ export default {
     },
     //用户点击订单类型
     toOrderType(index) {
-      uni.showToast({title: this.orderTypeLise[index].name});
+        uni.navigateTo({
+          url: '/pages/order/list?status=' + this.orderTypeLise[index].status
+        })
     },
     //用户点击列表项
     toPage(list_i, li_i) {
