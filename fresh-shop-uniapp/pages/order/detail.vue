@@ -205,7 +205,7 @@ export default {
                 return false
             }
             this.cancelOrderShow = false
-            this.$message(this.$refs.toast).success('取消订单成功')
+            await this.$message(this.$refs.toast).success('取消订单成功')
             await this.getOrderInfoData()
         },
         // 确认收货
@@ -218,7 +218,7 @@ export default {
                 return false
             }
             this.confirmShow = false
-            this.$message(this.$refs.toast).success('确认收货成功')
+            await this.$message(this.$refs.toast).success('确认收货成功')
             await this.getOrderInfoData()
         },
         // 订单提交

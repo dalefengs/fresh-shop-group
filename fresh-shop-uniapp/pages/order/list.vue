@@ -71,7 +71,7 @@ export default {
         }
     },
     onLoad(options) {
-        this.currentStatus = options.status
+        this.currentStatus = options.status ? '' + options.status : 'null'
         this.swiperLazyShow[this.currentStatus] = true
         this.token = getToken()
         if (!this.token) {
