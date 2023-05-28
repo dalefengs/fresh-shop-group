@@ -63,7 +63,7 @@
                     </view>
                     <view class="order-bottom">
                         <text>共 {{ order.num }} 件商品</text>
-                        <text class="king-ml-10">实付 <text class="order-bottom-price">¥{{ order.finish }}</text></text>
+                        <text class="king-ml-10" v-if="order.status !== 0">实付 <text class="order-bottom-price">¥{{ order.finish }}</text></text>
                     </view>
                     <view class="order-btn">
                         <view class="btn" v-if="order.statusCancel === 0 && order.status === 0" @tap.stop="showCancelOrderDailog(order.ID)">取消订单</view>

@@ -109,15 +109,15 @@
                 <u-button type="info" :customStyle="menuBtnStyle"  @click="() => cancelOrderShow = true">取消订单</u-button>
             </view>
             <!-- 订单状态已付款 且 取消状态0 且未售后 -->
-            <view class="menu-btn" v-if="order.status > 0 && order.statusCancel === 0 && (!order.return || !order.return.ID)" >
-                <u-button type="info" :customStyle="menuBtnStyle" @click="refundOrder">申请售后</u-button>
-            </view>
+<!--            <view class="menu-btn" v-if="order.status > 0 && order.statusCancel === 0 && (!order.return || !order.return.ID)" >-->
+<!--                <u-button type="info" :customStyle="menuBtnStyle" @click="refundOrder">申请售后</u-button>-->
+<!--            </view>-->
             <view class="menu-btn" v-if="order.return && order.return.ID">
                 <u-button type="primary" :customStyle="menuBtnStyle" @click="confirmOrder">售后详情</u-button>
             </view>
-            <view class="menu-btn" v-if="order.status === 2">
-                <u-button type="primary" :customStyle="menuBtnStyle" @click="() => confirmShow = true">确认收货</u-button>
-            </view>
+<!--            <view class="menu-btn" v-if="order.status === 2">-->
+<!--                <u-button type="primary" :customStyle="menuBtnStyle" @click="() => confirmShow = true">确认收货</u-button>-->
+<!--            </view>-->
             <view class="menu-btn" v-if="order.status === 0 && order.statusCancel === 0">
                 <u-button type="primary" :customStyle="menuBtnStyle" @click="goPay">立即支付</u-button>
             </view>

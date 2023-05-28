@@ -7,6 +7,7 @@ import (
 	"fresh-shop/server/model/common/request"
 	"fresh-shop/server/model/shop"
 	shopReq "fresh-shop/server/model/shop/request"
+	shopResp "fresh-shop/server/model/shop/response"
 	systemReq "fresh-shop/server/model/system/request"
 	"fresh-shop/server/model/wechat/response"
 	"fresh-shop/server/service/common"
@@ -160,19 +161,19 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 		return nil, errors.New("订单详情创建失败")
 	}
 	// 扣减库存
-	//for _, v := range cartList {
-	//	if err = global.DB.Model(&shop.Goods{}).Where("id = ?", v.GoodsId).Update("store", gorm.Expr("store - ?", v.Num)).Error; err != nil {
-	//		txDB.Rollback()
-	//		global.SugarLog.Errorf("log:%s,err:%v \n", log, err)
-	//		return nil, errors.New("库存扣减失败")
-	//	}
-	//}
+	for _, v := range cartList {
+		if err = global.DB.Model(&shop.Goods{}).Where("id = ?", v.GoodsId).Update("store", gorm.Expr("store - ?", v.Num)).Error; err != nil {
+			txDB.Rollback()
+			global.SugarLog.Errorf("log:%s,err:%v \n", log, err)
+			return nil, errors.New("库存扣减失败")
+		}
+	}
 	// 删除购物车列表
-	//if err = global.DB.Delete(&cartList).Error; err != nil {
-	//	txDB.Rollback()
-	//	global.SugarLog.Errorf("log:%s,err:%v \n", log, err)
-	//	return errors.New("购物车删除失败")
-	//}
+	if err = global.DB.Delete(&cartList).Error; err != nil {
+		txDB.Rollback()
+		global.SugarLog.Errorf("log:%s,err:%v \n", log, err)
+		return nil, errors.New("购物车删除失败")
+	}
 	// 提交事务
 	txDB.Commit()
 
@@ -289,6 +290,17 @@ func (orderService *OrderService) GetOrder(id uint) (order shop.Order, err error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return order, errors.New("订单不存在")
 	}
+	return
+}
+
+// FindUserOrderStatus 获取用户订单中数量
+// Author [likfees](https://github.com/likfees)
+func (orderService *OrderService) FindUserOrderStatus(userId uint) (resp shopResp.OrderStatusCountResponse, err error) {
+	err = global.DB.Debug().
+		Table("shop_order").
+		Select("COUNT(CASE WHEN status = 0 and status_cancel = 0 THEN 1 ELSE null END ) as unpaid,COUNT(CASE WHEN status = 1 and status_cancel = 0 and status_refund = 0 THEN 1 ELSE null END ) as delivered,COUNT(CASE WHEN status = 2 and status_cancel = 0 and status_refund = 0 THEN 1 ELSE null END ) as shipped,COUNT(CASE WHEN status = 3 and status_cancel = 0 and status_refund = 0 THEN 1 ELSE null END) as success").
+		Where("user_id = ?", userId).
+		Scan(&resp).Error
 	return
 }
 

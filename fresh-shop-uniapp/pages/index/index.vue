@@ -81,7 +81,7 @@
 							:refresher-triggered="newTriggered" @refresherrefresh="onRefresh"
 							@scrolltolower="newScrollTolower" :scroll-anchoring="true">
 							<!-- 商品列表 -->
-							<GoodsList :lists="goodsNewArr" price-type="$"></GoodsList>
+							<GoodsList :lists="goodsNewArr" price-type="￥"></GoodsList>
 							<view class="king-py-40" @click="newScrollTolower">
 								<u-loadmore :status="newLoadMore" loading-text="努力加载中，请喝杯茶" loadmore-text="上拉加载更多"
 									nomore-text="实在是没有了" />

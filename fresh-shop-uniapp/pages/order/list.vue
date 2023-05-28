@@ -25,9 +25,9 @@
                 <orderList status="3" v-if="currentStatus === '3' || swiperLazyShow['3'] "></orderList>
             </swiper-item>
             <!-- 售后订单 -->
-            <swiper-item item-id="10">
-                <orderList status="10" v-if="currentStatus === '10' || swiperLazyShow['10'] "></orderList>
-            </swiper-item>
+<!--            <swiper-item item-id="10">-->
+<!--                <orderList status="10" v-if="currentStatus === '10' || swiperLazyShow['10'] "></orderList>-->
+<!--            </swiper-item>-->
         </swiper>
         <u-toast ref="toast" style="z-index: 9999"></u-toast>
     </pageWrapper>
@@ -48,7 +48,7 @@ export default {
             token: '',
             list: [],
             statusList: [{
-                name: '全部订单',
+                name: '全部',
                 status: 'null',
             }, {
                 name: '未付款',
@@ -83,6 +83,11 @@ export default {
     onLoad(options) {
         this.currentStatus = options.status ? '' + options.status : 'null'
         this.swiperLazyShow[this.currentStatus] = true
+        this.statusList.forEach((item, index) => {
+            if (item.status === this.currentStatus) {
+                this.tabsCurrentIndex = index
+            }
+        })
         this.token = getToken()
         if (!this.token) {
             this.$refs.toast.show('请先登录').then(res => {

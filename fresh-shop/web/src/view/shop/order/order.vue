@@ -209,7 +209,7 @@
               icon="Van"
               class="table-button"
               @click="showOrderShipment(scope.row, 'update')"
-            >查看发货信息
+            >确认收货
             </el-button>
             <el-button type="primary" link icon="delete" @click="deleteRow(scope.row)">删除</el-button>
           </template>
@@ -388,7 +388,7 @@
         <div class="dialog-footer">
           <el-button @click="closeShipmentDialog">取 消</el-button>
           <el-button v-if="shipmentType === 'update'" type="primary" @click="enterShipmentDialog">确认送达</el-button>
-          <el-button v-else type="primary" @click="enterShipmentDialog">确 认 发 货</el-button>
+          <el-button v-else type="primary" @click="enterShipmentDialog">确认发货</el-button>
         </div>
       </template>
     </el-dialog>

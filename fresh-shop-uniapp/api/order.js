@@ -31,6 +31,16 @@ export const getOrderInfo = (data, refs) => {
     }, refs)
 }
 
+// 用户订单数量统计
+export const getOrderStatusCount = (data, refs) => {
+    return request({
+        url: `/order/findUserOrderStatus`,
+        method: 'GET',
+        loading: false,
+        data
+    }, refs)
+}
+
 // 获取订单状态
 export const getOrderStatus = (orderId, refs) => {
     return request({

@@ -23,9 +23,10 @@ func (s *OrderRouter) InitOrderRouter(Router *gin.RouterGroup) {
 		orderRouter.PUT("updateOrder", orderApi.UpdateOrder)              // 更新 Order
 	}
 	{
-		orderRouterWithoutRecord.GET("findOrder", orderApi.FindOrder)               // 根据ID获取Order
-		orderRouterWithoutRecord.GET("getOrderList", orderApi.GetOrderList)         // 获取Order列表
-		orderRouterWithoutRecord.GET("getUserOrderList", orderApi.GetUserOrderList) // 根据登录用户获取Order列表
-		orderRouterWithoutRecord.GET("orderStatus", orderApi.OrderStatus)           // 获取订单状态 Order
+		orderRouterWithoutRecord.GET("findOrder", orderApi.FindOrder)                     // 根据ID获取Order
+		orderRouterWithoutRecord.GET("findUserOrderStatus", orderApi.FindUserOrderStatus) // 获取用户订单中数量
+		orderRouterWithoutRecord.GET("getOrderList", orderApi.GetOrderList)               // 获取Order列表
+		orderRouterWithoutRecord.GET("getUserOrderList", orderApi.GetUserOrderList)       // 根据登录用户获取Order列表
+		orderRouterWithoutRecord.GET("orderStatus", orderApi.OrderStatus)                 // 获取订单状态 Order
 	}
 }

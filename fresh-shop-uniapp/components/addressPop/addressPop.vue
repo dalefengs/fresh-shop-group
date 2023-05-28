@@ -32,9 +32,10 @@
                                 </view>
                             </view>
                         </view>
-                        <view class="edit" @click="toUpdateAddress(item.ID)">
+
+<!--                    TODO 收货地址跳转    <view class="edit" @click="toUpdateAddress(item.ID)">
                             <u-icon name="edit-pen" size="30"></u-icon>
-                        </view>
+                        </view>-->
                     </view>
                 </scroll-view>
             </view>

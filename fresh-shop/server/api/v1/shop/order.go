@@ -199,6 +199,25 @@ func (orderApi *OrderApi) FindOrder(c *gin.Context) {
 	}
 }
 
+// FindUserOrderStatus 获取用户订单中数量
+// @Tags Order
+// @Summary 获取用户订单中数量
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query shop.Order true "获取用户订单中数量"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"查询成功"}"
+// @Router /order/findUserOrderStatus [get]
+func (orderApi *OrderApi) FindUserOrderStatus(c *gin.Context) {
+	userId := utils.GetUserID(c)
+	if reorder, err := orderService.FindUserOrderStatus(userId); err != nil {
+		global.Log.Error("查询失败!", zap.Error(err))
+		response.FailWithMessage("查询失败", c)
+	} else {
+		response.OkWithData(reorder, c)
+	}
+}
+
 // OrderStatus 获取订单状态
 // @Tags Order
 // @Summary 用id查询Order
