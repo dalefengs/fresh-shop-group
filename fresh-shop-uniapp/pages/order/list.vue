@@ -20,6 +20,10 @@
             <swiper-item item-id="2">
                 <orderList status="2" v-if="currentStatus === '2' || swiperLazyShow['2'] "></orderList>
             </swiper-item>
+            <!-- 已完成 -->
+            <swiper-item item-id="3">
+                <orderList status="3" v-if="currentStatus === '3' || swiperLazyShow['3'] "></orderList>
+            </swiper-item>
             <!-- 售后订单 -->
             <swiper-item item-id="10">
                 <orderList status="10" v-if="currentStatus === '10' || swiperLazyShow['10'] "></orderList>
@@ -53,12 +57,17 @@ export default {
                 name: '备货中',
                 status: '1',
             }, {
-                name: '待收货',
+                name: '配送中',
                 status: '2',
             }, {
-                name: '待售后',
-                status: '10',
-            }],
+                name: '已完成',
+                status: '3',
+            }
+            // , {
+            //     name: '待售后',
+            //     status: '10',
+            // }
+            ],
             tabsCurrentIndex: 0,
             currentStatus: '1', // 当前订单状态 null:全部 0:未支付 1:备货中 2:已发货 3:已完成
             swiperLazyShow: { // 用来控制swiper的懒加载，
@@ -66,7 +75,8 @@ export default {
                 '0': false,
                 '1': false,
                 '2': false,
-                '10': false
+                '3': false,
+                // '10': false
             }
         }
     },

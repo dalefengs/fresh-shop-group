@@ -121,7 +121,7 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 	order.ShipmentMobile = address.Mobile
 	order.ShipmentAddress = address.Address + address.Title + address.Detail
 	order.Status = utils.Pointer(0)  // 未付款状态
-	order.Payment = utils.Pointer(1) // 默认是微信支付
+	order.Payment = utils.Pointer(2) // 默认是微信支付
 	order.StatusCancel = utils.Pointer(0)
 	order.StatusRefund = utils.Pointer(0)
 	// 计算总赠送积分
@@ -311,7 +311,7 @@ func (orderService *OrderService) GetOrderInfoList(info shopReq.OrderSearch) (li
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	// 创建db
-	db := global.DB.Debug().Model(&shop.Order{}).Preload("OrderDetails").Joins("OrderReturn")
+	db := global.DB.Debug().Model(&shop.Order{}).Preload("OrderDetails").Preload("OrderDelivery").Joins("OrderReturn")
 	var orders []shop.Order
 	// 如果有条件搜索 下方会自动创建搜索语句
 

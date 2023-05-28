@@ -8,7 +8,8 @@
             <view v-if="list.length > 0">
                 <view class="order" v-for="(order, index) in list" :key="index" @click="toOrderDetails(order.ID)">
                     <view class="order-status">
-                        <view>{{ order.CreatedAt | parseDate }}</view>
+                        <text v-if="order.delivery && order.delivery.scheduledTime.charAt(0) !== '0'">预计送达: {{ order.delivery.scheduledTime | parseDate }}</text>
+                        <view v-else>{{ order.CreatedAt | parseDate }}</view>
                         <view>
                             <!-- 判断订单是否取消 -->
                             <text v-if="order.statusCancel === 1">已取消</text>
@@ -20,15 +21,15 @@
                                     <text v-if="order.return.refundStatus === 1">退款等待到账</text>
                                     <text v-else-if="order.return === -1">拒绝售后</text>
                                     <text v-else-if="order.return === 0">等待审核</text>
-                                    <text v-else-if="order.return === 1">审核通过</text>
                                     <text v-else-if="order.return === 1 && order.return.refundStatus === 2">售后完成</text>
+                                    <text v-else-if="order.return === 1">审核通过</text>
                                 </text>
                                 <!-- 普通订单 -->
                                 <text v-else>
                                     <text v-if="order.status === 0">等待支付</text>
                                     <text v-else-if="order.status === 1">备货中</text>
                                     <text v-else-if="order.status === 2">已发货</text>
-                                    <text v-else-if="order.status === 3">已发货</text>
+                                    <text v-else-if="order.status === 3">已完成</text>
                                 </text>
                             </text>
                         </view>
@@ -67,7 +68,7 @@
                     <view class="order-btn">
                         <view class="btn" v-if="order.statusCancel === 0 && order.status === 0" @tap.stop="showCancelOrderDailog(order.ID)">取消订单</view>
                         <view class="btn" v-if="order.statusCancel > 0 || order.status === 3" @tap.stop="showDeleteOrderDailog(order.ID)">删除订单</view>
-                        <view class="btn" v-if="order.statusCancel === 0 && order.status === 3" @tap.stop="showConfirmOrderDailog(order.ID)">确认收货</view>
+<!--                        <view class="btn" v-if="order.statusCancel === 0 && order.status === 2" @tap.stop="showConfirmOrderDailog(order.ID)">确认收货</view>-->
                         <view class="btn btn-pay" v-if="order.status === 0 && order.statusCancel === 0" @tap.stop="goPay(order.ID)">立即支付</view>
                     </view>
                 </view>
@@ -228,7 +229,7 @@ export default {
                     this.$message(this.$refs.toast).hide()
                     // 进行其他操作
                     this.$message(this.$refs.toast).success("支付成功").then(() => {
-                        this.getOrderListData()
+                        this.getOrderListData(0)
                     })
                 }
             }, 1000);
@@ -267,7 +268,6 @@ export default {
                     }
                 })
             })
-            console.log(res);
             // 进行赋值并计算是否还有下一页
             this.page.total = res.data.total
             // 如果没有更多数据，则将isMore设置为false
@@ -337,7 +337,7 @@ export default {
             }
             this.showCancelOrder = false
             await this.$message(this.$refs.toast).success('取消订单成功')
-            await this.getOrderListData()
+            await this.getOrderListData(0)
         },
         // 确认收货
         async toConfirmOrder() {
@@ -350,7 +350,7 @@ export default {
             }
             this.showConfirmOrder = false
             await this.$message(this.$refs.toast).success('确认收货成功')
-            await this.getOrderListData()
+            await this.getOrderListData(0)
         },
         // 删除订单
         async toDeleteOrder() {
@@ -363,7 +363,7 @@ export default {
             }
             this.showDeleteOrder = false
             await this.$message(this.$refs.toast).success('删除订单成功')
-            await this.getOrderListData()
+            await this.getOrderListData(0)
         },
     }
 }

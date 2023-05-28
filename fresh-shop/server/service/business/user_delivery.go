@@ -84,3 +84,30 @@ func (userDeliveryService *UserDeliveryService) GetUserDeliveryInfoList(info bus
 	err = db.Limit(limit).Offset(offset).Find(&userDeliverys).Error
 	return userDeliverys, total, err
 }
+
+// GetUserDeliveryAllList 获取所有 UserDelivery 列表
+// Author [likfees](https://github.com/likfees)
+func (userDeliveryService *UserDeliveryService) GetUserDeliveryAllList(info businessReq.UserDeliverySearch) (list []business.UserDelivery, err error) {
+	// 创建db
+	db := global.DB.Model(&business.UserDelivery{})
+	var userDeliverys []business.UserDelivery
+	// 如果有条件搜索 下方会自动创建搜索语句
+	if info.Name != "" {
+		db = db.Where("name LIKE ?", "%"+info.Name+"%")
+	}
+	if info.Status != nil {
+		db = db.Where("status = ?", info.Status)
+	}
+	var OrderStr string
+	orderMap := make(map[string]bool)
+	orderMap["deliverCount"] = true
+	if orderMap[info.Sort] {
+		OrderStr = info.Sort
+		if info.Order == "descending" {
+			OrderStr = OrderStr + " desc"
+		}
+		db = db.Order(OrderStr)
+	}
+	err = db.Find(&userDeliverys).Error
+	return userDeliverys, err
+}

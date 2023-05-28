@@ -183,3 +183,29 @@ func (userDeliveryApi *UserDeliveryApi) GetUserDeliveryList(c *gin.Context) {
 		}, "获取成功", c)
 	}
 }
+
+// GetUserDeliveryAllList 获取所有 UserDelivery 列表
+// @Tags UserDelivery
+// @Summary 获取所有 UserDelivery 列表
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query businessReq.UserDeliverySearch true "获取所有 UserDelivery 列表"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /userDelivery/getUserDeliveryAllList [get]
+func (userDeliveryApi *UserDeliveryApi) GetUserDeliveryAllList(c *gin.Context) {
+	var pageInfo businessReq.UserDeliverySearch
+	err := c.ShouldBindQuery(&pageInfo)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if list, err := userDeliveryService.GetUserDeliveryAllList(pageInfo); err != nil {
+		global.Log.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+	} else {
+		response.OkWithDetailed(gin.H{
+			"list": list,
+		}, "获取成功", c)
+	}
+}

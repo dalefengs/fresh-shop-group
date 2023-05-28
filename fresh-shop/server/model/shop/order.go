@@ -35,7 +35,7 @@ type Order struct {
 	AddressId       int            `json:"addressId" form:"addressId" gorm:"-"` // 收货地址id
 	OrderDetails    []OrderDetails `json:"details"`                             // 订单详情
 	OrderReturn     OrderReturn    `json:"return"`                              // 订单售后
-	OrderDelivery   OrderDelivery  `json:"deliver" gorm:"foreignKey:order_id"`  // 订单发货信息
+	OrderDelivery   OrderDelivery  `json:"delivery" gorm:"foreignKey:order_id"` // 订单发货信息
 }
 
 // TableName Order 表名

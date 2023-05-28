@@ -2,20 +2,19 @@ package shop
 
 import (
 	"fresh-shop/server/global"
-    "fresh-shop/server/model/shop"
-    "fresh-shop/server/model/common/request"
-    shopReq "fresh-shop/server/model/shop/request"
-    "fresh-shop/server/model/common/response"
-    "fresh-shop/server/service"
-    "github.com/gin-gonic/gin"
-    "go.uber.org/zap"
+	"fresh-shop/server/model/common/request"
+	"fresh-shop/server/model/common/response"
+	"fresh-shop/server/model/shop"
+	shopReq "fresh-shop/server/model/shop/request"
+	"fresh-shop/server/service"
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type OrderDeliveryApi struct {
 }
 
 var orderDeliveryService = service.ServiceGroupApp.ShopServiceGroup.OrderDeliveryService
-
 
 // CreateOrderDelivery 创建OrderDelivery
 // @Tags OrderDelivery
@@ -30,14 +29,19 @@ func (orderDeliveryApi *OrderDeliveryApi) CreateOrderDelivery(c *gin.Context) {
 	var orderDelivery shop.OrderDelivery
 	err := c.ShouldBindJSON(&orderDelivery)
 	if err != nil {
+		global.SugarLog.Errorf("解析json 失败 %s \n", err.Error())
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
+	if orderDelivery.OrderId == nil && *orderDelivery.OrderId == 0 {
+		global.SugarLog.Errorf("发货失败! 订单id参数错误 orderId: %d", *orderDelivery.OrderId)
+		response.FailWithMessage("参数错误", c)
+	}
 	if err := orderDeliveryService.CreateOrderDelivery(orderDelivery); err != nil {
-        global.Log.Error("创建失败!", zap.Error(err))
-		response.FailWithMessage("创建失败", c)
+		global.Log.Error("发货失败!", zap.Error(err))
+		response.FailWithMessage("发货失败", c)
 	} else {
-		response.OkWithMessage("创建成功", c)
+		response.OkWithMessage("发货成功", c)
 	}
 }
 
@@ -58,7 +62,7 @@ func (orderDeliveryApi *OrderDeliveryApi) DeleteOrderDelivery(c *gin.Context) {
 		return
 	}
 	if err := orderDeliveryService.DeleteOrderDelivery(orderDelivery); err != nil {
-        global.Log.Error("删除失败!", zap.Error(err))
+		global.Log.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
 	} else {
 		response.OkWithMessage("删除成功", c)
@@ -76,13 +80,13 @@ func (orderDeliveryApi *OrderDeliveryApi) DeleteOrderDelivery(c *gin.Context) {
 // @Router /orderDelivery/deleteOrderDeliveryByIds [delete]
 func (orderDeliveryApi *OrderDeliveryApi) DeleteOrderDeliveryByIds(c *gin.Context) {
 	var IDS request.IdsReq
-    err := c.ShouldBindJSON(&IDS)
+	err := c.ShouldBindJSON(&IDS)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 	if err := orderDeliveryService.DeleteOrderDeliveryByIds(IDS); err != nil {
-        global.Log.Error("批量删除失败!", zap.Error(err))
+		global.Log.Error("批量删除失败!", zap.Error(err))
 		response.FailWithMessage("批量删除失败", c)
 	} else {
 		response.OkWithMessage("批量删除成功", c)
@@ -106,7 +110,7 @@ func (orderDeliveryApi *OrderDeliveryApi) UpdateOrderDelivery(c *gin.Context) {
 		return
 	}
 	if err := orderDeliveryService.UpdateOrderDelivery(orderDelivery); err != nil {
-        global.Log.Error("更新失败!", zap.Error(err))
+		global.Log.Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败", c)
 	} else {
 		response.OkWithMessage("更新成功", c)
@@ -129,8 +133,8 @@ func (orderDeliveryApi *OrderDeliveryApi) FindOrderDelivery(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	if reorderDelivery, err := orderDeliveryService.GetOrderDelivery(orderDelivery.ID); err != nil {
-        global.Log.Error("查询失败!", zap.Error(err))
+	if reorderDelivery, err := orderDeliveryService.GetOrderDelivery(orderDelivery.ID, *orderDelivery.OrderId); err != nil {
+		global.Log.Error("查询失败!", zap.Error(err))
 		response.FailWithMessage("查询失败", c)
 	} else {
 		response.OkWithData(gin.H{"reorderDelivery": reorderDelivery}, c)
@@ -154,14 +158,14 @@ func (orderDeliveryApi *OrderDeliveryApi) GetOrderDeliveryList(c *gin.Context) {
 		return
 	}
 	if list, total, err := orderDeliveryService.GetOrderDeliveryInfoList(pageInfo); err != nil {
-	    global.Log.Error("获取失败!", zap.Error(err))
-        response.FailWithMessage("获取失败", c)
-    } else {
-        response.OkWithDetailed(response.PageResult{
-            List:     list,
-            Total:    total,
-            Page:     pageInfo.Page,
-            PageSize: pageInfo.PageSize,
-        }, "获取成功", c)
-    }
+		global.Log.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+	} else {
+		response.OkWithDetailed(response.PageResult{
+			List:     list,
+			Total:    total,
+			Page:     pageInfo.Page,
+			PageSize: pageInfo.PageSize,
+		}, "获取成功", c)
+	}
 }

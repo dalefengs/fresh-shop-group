@@ -15,13 +15,13 @@ func (s *OrderDeliveryRouter) InitOrderDeliveryRouter(Router *gin.RouterGroup) {
 	orderDeliveryRouterWithoutRecord := Router.Group("orderDelivery")
 	var orderDeliveryApi = v1.ApiGroupApp.ShopApiGroup.OrderDeliveryApi
 	{
-		orderDeliveryRouter.POST("createOrderDelivery", orderDeliveryApi.CreateOrderDelivery)   // 新建OrderDelivery
-		orderDeliveryRouter.DELETE("deleteOrderDelivery", orderDeliveryApi.DeleteOrderDelivery) // 删除OrderDelivery
+		orderDeliveryRouter.DELETE("deleteOrderDelivery", orderDeliveryApi.DeleteOrderDelivery)           // 删除OrderDelivery
 		orderDeliveryRouter.DELETE("deleteOrderDeliveryByIds", orderDeliveryApi.DeleteOrderDeliveryByIds) // 批量删除OrderDelivery
-		orderDeliveryRouter.PUT("updateOrderDelivery", orderDeliveryApi.UpdateOrderDelivery)    // 更新OrderDelivery
+		orderDeliveryRouter.PUT("updateOrderDelivery", orderDeliveryApi.UpdateOrderDelivery)              // 更新OrderDelivery
 	}
 	{
-		orderDeliveryRouterWithoutRecord.GET("findOrderDelivery", orderDeliveryApi.FindOrderDelivery)        // 根据ID获取OrderDelivery
-		orderDeliveryRouterWithoutRecord.GET("getOrderDeliveryList", orderDeliveryApi.GetOrderDeliveryList)  // 获取OrderDelivery列表
+		orderDeliveryRouterWithoutRecord.POST("createOrderDelivery", orderDeliveryApi.CreateOrderDelivery)  // 新建OrderDelivery   因为时间预计时间格式化问题，不记录发货日志
+		orderDeliveryRouterWithoutRecord.GET("findOrderDelivery", orderDeliveryApi.FindOrderDelivery)       // 根据ID获取OrderDelivery
+		orderDeliveryRouterWithoutRecord.GET("getOrderDeliveryList", orderDeliveryApi.GetOrderDeliveryList) // 获取OrderDelivery列表
 	}
 }

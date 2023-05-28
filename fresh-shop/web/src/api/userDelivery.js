@@ -95,3 +95,19 @@ export const getUserDeliveryList = (params) => {
     params
   })
 }
+
+// @Tags UserDelivery
+// @Summary 获取所有 UserDelivery 列表
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query request.PageInfo true "分页获取UserDelivery列表"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /userDelivery/getUserDeliveryAllList [get]
+export const getUserDeliveryAllList = (params) => {
+  return service({
+    url: '/userDelivery/getUserDeliveryAllList',
+    method: 'get',
+    params
+  })
+}

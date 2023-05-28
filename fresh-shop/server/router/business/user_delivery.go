@@ -15,13 +15,14 @@ func (s *UserDeliveryRouter) InitUserDeliveryRouter(Router *gin.RouterGroup) {
 	userDeliveryRouterWithoutRecord := Router.Group("userDelivery")
 	var userDeliveryApi = v1.ApiGroupApp.BusinessApiGroup.UserDeliveryApi
 	{
-		userDeliveryRouter.POST("createUserDelivery", userDeliveryApi.CreateUserDelivery)   // 新建UserDelivery
-		userDeliveryRouter.DELETE("deleteUserDelivery", userDeliveryApi.DeleteUserDelivery) // 删除UserDelivery
+		userDeliveryRouter.POST("createUserDelivery", userDeliveryApi.CreateUserDelivery)             // 新建UserDelivery
+		userDeliveryRouter.DELETE("deleteUserDelivery", userDeliveryApi.DeleteUserDelivery)           // 删除UserDelivery
 		userDeliveryRouter.DELETE("deleteUserDeliveryByIds", userDeliveryApi.DeleteUserDeliveryByIds) // 批量删除UserDelivery
-		userDeliveryRouter.PUT("updateUserDelivery", userDeliveryApi.UpdateUserDelivery)    // 更新UserDelivery
+		userDeliveryRouter.PUT("updateUserDelivery", userDeliveryApi.UpdateUserDelivery)              // 更新UserDelivery
 	}
 	{
-		userDeliveryRouterWithoutRecord.GET("findUserDelivery", userDeliveryApi.FindUserDelivery)        // 根据ID获取UserDelivery
-		userDeliveryRouterWithoutRecord.GET("getUserDeliveryList", userDeliveryApi.GetUserDeliveryList)  // 获取UserDelivery列表
+		userDeliveryRouterWithoutRecord.GET("findUserDelivery", userDeliveryApi.FindUserDelivery)             // 根据ID获取UserDelivery
+		userDeliveryRouterWithoutRecord.GET("getUserDeliveryList", userDeliveryApi.GetUserDeliveryList)       // 获取UserDelivery列表
+		userDeliveryRouterWithoutRecord.GET("getUserDeliveryAllList", userDeliveryApi.GetUserDeliveryAllList) // 获取所有 UserDelivery列表
 	}
 }
