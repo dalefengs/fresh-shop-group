@@ -49,7 +49,7 @@ export const updateAddress = (data, refs) => {
     }, refs)
 }
 
-// 更新地址
+// 删除地址
 export const deleteAddress = (data, refs) => {
     return request({
         url: `/userAddress/deleteUserAddress`,

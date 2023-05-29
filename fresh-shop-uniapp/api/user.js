@@ -14,3 +14,13 @@ export const getUserInfo = (refs) => {
         loading: false,
     },refs)
 }
+
+// 设置自身用户信息
+export const setSelfInfo = (data, refs) => {
+    return request({
+        url: `/user/setSelfInfo`,
+        method: 'PUT',
+        loading: true,
+        data
+    },refs)
+}

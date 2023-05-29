@@ -20,7 +20,7 @@ export const getHomeCategoryList = () => {
         method: 'GET',
         data: {
             page: 1,
-            pageSize: 8,
+            pageSize: 4,
             isFirst: 1
         }
     })

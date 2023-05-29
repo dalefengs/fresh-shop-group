@@ -112,7 +112,7 @@ export default {
 		listArr: {
 			type: Array,
 			default: () => {
-				return ["智能排序", "全部分类", "全部品牌", "筛选"]
+				return ["智能排序", "全部分类", "全部品牌"]
 			}
 		},
 		// item数量超过多少开始滚动

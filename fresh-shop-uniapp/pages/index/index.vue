@@ -8,17 +8,18 @@
 	<pageWrapper>
 		<u-sticky class="king-bg-white">
 			<view class="king-p-5 king-bg-white" style="height: 35px;">
-				<u-search search-icon="scan" disabled :show-action="false" placeholder="日照香炉生紫烟" @click="searchClick">
+<!--				<u-search search-icon="scan" disabled :show-action="false" placeholder="请输入商品名称" @click="searchClick">-->
+				<u-search search-icon="search" disabled :show-action="false" placeholder="请输入商品名称" @click="searchClick">
 				</u-search>
 			</view>
 		</u-sticky>
 		<!-- 轮播图 -->
 		<view class="king-p-5">
-			<u-swiper :list="banner" keyName="imgUrl" indicator indicatorMode="line" :height="180" circular
+			<u-swiper :list="banner" keyName="imgUrl" indicator indicatorMode="line" :height="150" circular
 				bgColor="#ffffff"></u-swiper>
 		</view>
 		<!-- 首页分类 -->
-		<view class="king-bg-white king-mx-10 king-radius10 king-py-10" style="min-height: 140px">
+		<view class="king-bg-white king-mx-10 king-radius10 king-pb-5 king-pt-10" style="min-height: 80px">
 			<u-grid :border="false" col="4">
 				<u-grid-item v-for="c in category" :key="c.ID" @click="toGoodsByCategory(c.ID)">
 					<u--image width="45" height="45" :src="c.imgUrl" shape="circle"></u--image>
@@ -28,9 +29,9 @@
 		</view>
 		<view class="king-mx-10 king-my-5 king-radius10">
 			<!-- 导航栏目 -->
-			<u-sticky offset-top="45">
-				<view class="king-bg-white king-pb-5 king-radius10" style="height: 50px;">
-					<u-row customStyle="margin-bottom: 6px; height: 40px">
+			<u-sticky offset-top="50">
+				<view class="king-bg-white king-radius10" style="height: 40px;">
+					<u-row customStyle="height: 28px">
 						<u-col span="6">
 							<view class="goods-tabs" @click="changeGoodsTabs(0)">
 								<text>热销商品</text>
@@ -158,7 +159,7 @@ export default {
 		uni.getSystemInfo({
 			success: (res) => {
 				const windowHeight = res.windowHeight;
-				this.swiperHeight = windowHeight - 170;
+				this.swiperHeight = windowHeight - 155;
 			},
 		});
 	},

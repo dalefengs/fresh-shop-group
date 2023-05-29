@@ -87,7 +87,7 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 		orderDetail.SpecId = 0
 		spec := ""
 		if *c.Goods.Weight > 0 {
-			spec = string(rune(*c.Goods.Weight)) + "g"
+			spec = fmt.Sprintf("%dg", *c.Goods.Weight)
 		}
 		if strings.TrimSpace(spec) == "" {
 			spec = c.Goods.Unit

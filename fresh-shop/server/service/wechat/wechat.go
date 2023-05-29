@@ -96,6 +96,9 @@ func (s *WechatService) NotifyLogic(req *notify.PaidResult) error {
 		global.SugarLog.Errorf(log+"保存订单信息失败, err:%s \n", err.Error())
 		return err
 	}
+
+	// 生成流水记录
+
 	global.SugarLog.Infof(log + "支付成功")
 	return nil
 }

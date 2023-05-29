@@ -177,11 +177,11 @@ export default {
             favorites({
                 goodsId: this.id
             }).then(res => {
-                if (res.code) {
-                    this.goods.isFavorite = !this.goods.isFavorite
-                }else {
-                    this.$message(this.$refs.toast).error(res.msg)
+                if (res.code !== 0) {
+                    return false
                 }
+                this.goods.isFavorite = !this.goods.isFavorite
+                this.$message(this.$refs.toast).success('收藏成功')
             })
         },
         // 添加购物车按钮

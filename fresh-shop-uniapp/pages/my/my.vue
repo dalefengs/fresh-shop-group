@@ -12,7 +12,7 @@
                     <image :src="user.headerImg"></image>
                 </view>
                 <view class="info">
-                    <view class="username">{{ user.nickName }}</view>
+                    <view class="username" @click="() => showChangeNickName = true">{{ user.nickName }}</view>
 <!--                    <view class="integral" @click="copyInvitationCode(user.invitationCode)">-->
 <!--                        <text style="margin-right: 4px;">推荐码：{{ user.invitationCode ? user.invitationCode : '' }}</text>-->
 <!--                        <u-icon name="file-text" color="#fff"></u-icon>-->
@@ -23,7 +23,7 @@
                 </view>
             </view>
             <view class="setting">
-                <image src="../../static/my/setting.png"></image>
+<!--                <image src="../../static/my/setting.png"></image>-->
             </view>
         </view>
         <!-- 未登录  -->
@@ -76,12 +76,27 @@
         </u-modal>
         <Tabbar :tabsId="3"/>
         <u-toast ref="toast" style="z-index: 9999"></u-toast>
+        <u-modal :show="showChangeNickName" title="修改昵称" @confirm="changeNickName"
+                 @cancel="() => showChangeNickName = false"
+                 @close="() => showChangeNickName = false"
+                 :showCancelButton="true"
+                 :closeOnClickOverlay="true"
+                 confirmText="修改">
+
+            <view class="king-center">
+                <u--input
+                        placeholder="请输入昵称"
+                        border="surround"
+                        v-model="user.nickName"
+                ></u--input>
+            </view>
+        </u-modal>
     </pageWrapper>
 </template>
 <script>
 import Tabbar from '@/components/tabbar/tabbar.vue'
 import loginPop from '@/components/loginPop/loginPop.vue'
-import {getUserInfo} from "@/api/user";
+import {getUserInfo, setSelfInfo} from "@/api/user";
 import {getOrderStatusCount} from "@/api/order";
 import {getUser, getToken, setUser, setToken, setOpenId} from '@/store/storage.js'
 
@@ -104,6 +119,7 @@ export default {
             showLoginDialog: false, // 登录
             showPhoneDialog: false, // 拨号
             relationPhone: "18899996666", // 联系人电话
+            showChangeNickName: false, // 修改昵称模态框
             orderTypeLise: [
                 //name-标题 icon-图标 badge-角标
                 {name: '全部订单', icon: 'qrbu.png', badge: 0, status: null},
@@ -149,6 +165,14 @@ export default {
             this.token = getToken()
             this.user = u
             this.$message(this.$refs.toast).success("登录成功")
+        },
+        async changeNickName() {
+            const res = await setSelfInfo({nickName: this.user.nickName})
+            if (res.code !== 0){
+                return false
+            }
+            this.showChangeNickName = false
+            this.$message(this.$refs.toast).success("修改成功")
         },
         toAddress() {
             uni.navigateTo({

@@ -1,6 +1,6 @@
 <template>
     <pageWrapper>
-        <view class="box" v-for="item in list" :key="item.ID">
+        <view class="box" v-for="item in list" :key="item.ID" @longtap="showDeleteAddressDialog(item.ID)">
             <view class="address">
                 <text>
                     {{ item.address }}{{ item.title }}{{ item.detail }}
@@ -24,18 +24,30 @@
         <view class="btn-box" @click="toCreateAddress">
             <view class="btn">添加收货地址</view>
         </view>
+        <u-modal :show="showDeleteAddress" title="删除收货地址" @confirm="toDeleteAddress"
+                 @cancel="() => showDeleteAddress = false"
+                 @close="() => showDeleteAddress = false"
+                 :showCancelButton="true"
+                 :closeOnClickOverlay="true"
+                 confirmText="删除">
+            <text class="king-center">
+                此操作不可撤销，请谨慎操作！
+            </text>
+        </u-modal>
         <u-toast ref="toast" style="z-index: 9999"></u-toast>
     </pageWrapper>
 </template>
 
 <script>
-import {getAddressList} from '@/api/address';
+import {getAddressList, deleteAddress} from '@/api/address';
 import {getToken} from '@/store/storage.js'
 
 export default {
     data() {
         return {
             token: '',
+            showDeleteAddress: false,
+            currentDeleteId : 0,
             list: [],
         }
     },
@@ -54,6 +66,19 @@ export default {
         this.getAddressListData()
     },
     methods: {
+        showDeleteAddressDialog(id) {
+            this.currentDeleteId = id
+            this.showDeleteAddress = true
+        },
+        async toDeleteAddress() {
+            const res = await deleteAddress({ID: this.currentDeleteId}, this.$refs.toast)
+            if (res.code !== 0) {
+                return  false
+            }
+            this.showDeleteAddress = false
+            await this.$message(this.$refs.toast).success("删除成功")
+            await this.getAddressListData()
+        },
         async getAddressListData() {
             const res = await getAddressList(this.$refs.toast)
             if (res.code !== 0) {

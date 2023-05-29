@@ -177,7 +177,7 @@ $radius: 20rpx;
   .goods--item {
     background: white;
     width: calc(50% - #{$margin*2});
-    height: 225px;
+    //height: 225px;
     border-radius: $radius;
     overflow: hidden;
     margin: $margin;
@@ -192,7 +192,7 @@ $radius: 20rpx;
 
     .item-cover-mask {
       width: calc(50% - #{$margin*2} - 5px);
-      height: 225px;
+      height: 35%;
       flex-shrink: 0;
       z-index: 9999;
       background-color: rgba(173, 171, 171, 0.5);

@@ -44,15 +44,15 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column align="left" label="账户信息" min-width="130" prop="point" sortable="custom">
-          <template #default="scope">
-            <div class="table-multi-line">
-              <div v-for="ac in scope.row.account" :key="ac.ID">
-                <span>{{ ac.group.nameCn }}：{{ ac.amount }}</span>
-              </div>
-            </div>
-          </template>
-        </el-table-column>
+<!--        <el-table-column align="left" label="账户信息" min-width="130" prop="point" sortable="custom">-->
+<!--          <template #default="scope">-->
+<!--            <div class="table-multi-line">-->
+<!--              <div v-for="ac in scope.row.account" :key="ac.ID">-->
+<!--                <span>{{ ac.group.nameCn }}：{{ ac.amount }}</span>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </template>-->
+<!--        </el-table-column>-->
         <el-table-column align="left" label="用户角色" min-width="200">
           <template #default="scope">
             <el-cascader

@@ -452,7 +452,7 @@ func (b *BaseApi) SetSelfInfo(c *gin.Context) {
 		return
 	}
 	user.ID = utils.GetUserID(c)
-	err = userService.SetSelfInfo(system.SysUser{
+	info := system.SysUser{
 		DbModel: global.DbModel{
 			ID: user.ID,
 		},
@@ -462,7 +462,23 @@ func (b *BaseApi) SetSelfInfo(c *gin.Context) {
 		Email:     user.Email,
 		SideMode:  user.SideMode,
 		Enable:    user.Enable,
-	})
+	}
+	if info.HeaderImg != "" {
+		info.HeaderImg = user.HeaderImg
+	}
+	if info.Phone != "" {
+		info.Phone = user.Phone
+	}
+	if info.Email != "" {
+		info.Email = user.Email
+	}
+	if info.SideMode != "" {
+		info.SideMode = user.SideMode
+	}
+	if info.Enable != 0 {
+		info.Enable = user.Enable
+	}
+	err = userService.SetSelfInfo(info)
 	if err != nil {
 		global.Log.Error("设置失败!", zap.Error(err))
 		response.FailWithMessage("设置失败", c)

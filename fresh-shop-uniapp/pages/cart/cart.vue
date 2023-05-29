@@ -79,6 +79,9 @@ export default {
     },
     onLoad() {
         this.token = getToken()
+
+    },
+    onShow() {
         // 登录的情况下获取
         if (this.token) {
             this.getCartListData()

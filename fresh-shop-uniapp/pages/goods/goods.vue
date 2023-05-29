@@ -13,9 +13,9 @@
 					<text class="search-btn" @click="search" style="border: 1rpx solid; color: #2979ff">搜索</text>
 				</view>
 			</view>
-			<filterDropdown ref="dropdown" :itemArr="itemArr" @finish="finish" @clear="clearWhere"></filterDropdown>
+			<filterDropdown style="z-index: 1000" ref="dropdown" :itemArr="itemArr" @finish="finish" @clear="clearWhere"></filterDropdown>
 		</view>
-		<view>
+		<view class="king-mx-10 king-my-5 king-bg-white king-radius10">
 			<scroll-view v-if="goodsArr.length > 0" :scroll-top="scrollTop" scroll-y="true" @scroll="scrollTopHandle"
 				:style="{ height: scrollViewHeight + 'px' }" refresher-enabled="true" :refresher-threshold="70"
 				:refresher-triggered="triggered" @refresherrefresh="onRefresh" @scrolltolower="scrollTolower"
@@ -88,7 +88,6 @@ export default {
 		};
 	},
 	onLoad(option) {
-		console.log(option);
 		if (option.keyword) {
 			this.keyword = option.keyword
 		}
@@ -120,7 +119,6 @@ export default {
 		});
 
 		setTimeout(() => {
-			console.log(this.categoryList);
 			if (this.categoryId) {
 				let title = ''
 				this.categoryList.forEach(item => {
@@ -215,7 +213,7 @@ export default {
 				data.brandId = this.brandId
 			}
 			if (this.tagsIds) {
-				data.tagsIds = this.tagsIds
+				data.tagsIds = this.tagsIds.toString()
 			}
 			if (this.sortType) {
 				data.sortType = this.sortType
@@ -244,7 +242,6 @@ export default {
 					item.images[0].url = config.baseUrl + "/" + item.images[0].url
 				}
 			})
-			console.log(res);
 			// 进行赋值并计算是否还有下一页
 			this.page.total = res.data.total
 			// 如果没有更多数据，则将isMore设置为false
@@ -327,7 +324,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .search-panel-base {
 	height: 100rpx;
 	display: flex;
