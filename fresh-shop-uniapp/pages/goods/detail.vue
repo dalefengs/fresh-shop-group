@@ -181,7 +181,11 @@ export default {
                     return false
                 }
                 this.goods.isFavorite = !this.goods.isFavorite
-                this.$message(this.$refs.toast).success('收藏成功')
+                if (this.goods.isFavorite) {
+                    this.$message(this.$refs.toast).success('收藏成功')
+                }else {
+                    this.$message(this.$refs.toast).success('取消收藏成功')
+                }
             })
         },
         // 添加购物车按钮
