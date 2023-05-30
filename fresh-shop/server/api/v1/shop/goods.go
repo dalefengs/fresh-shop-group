@@ -49,6 +49,30 @@ func (goodsApi *GoodsApi) CreateGoods(c *gin.Context) {
 	}
 }
 
+// BatchCreateGoodsByExcel 批量导入商品信息
+// @Tags Goods
+// @Summary 批量导入商品信息
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body shop.Goods true "批量导入商品信息"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /goods/batchCreateGoodsByExcel [post]
+func (goodsApi *GoodsApi) BatchCreateGoodsByExcel(c *gin.Context) {
+	_, header, err := c.Request.FormFile("file")
+	if err != nil {
+		global.Log.Error("接收文件失败!", zap.Error(err))
+		response.FailWithMessage("接收文件失败", c)
+		return
+	}
+	if err := goodsService.BatchCreateGoodsByExcel(header); err != nil {
+		global.Log.Error("导入失败!", zap.Error(err))
+		response.FailWithMessage(err.Error(), c)
+	} else {
+		response.OkWithMessage("导入成功", c)
+	}
+}
+
 // 基本的字段验证
 func checkGoodsFrom(f *shopReq.GoodsSubmitFrom) error {
 	if f.GoodsInfo.Name == "" {

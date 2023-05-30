@@ -8,12 +8,266 @@ import (
 	"fresh-shop/server/model/shop"
 	shopReq "fresh-shop/server/model/shop/request"
 	"fresh-shop/server/utils"
+	"github.com/xuri/excelize/v2"
 	"gorm.io/gorm"
+	_ "image/png"
+	"mime/multipart"
+	"os"
 	"strconv"
 	"strings"
 )
 
 type GoodsService struct {
+}
+
+// 字段与单元格位置映射
+var excelGoods = map[string]string{
+	"name":         "",  // 商品名称
+	"categoryName": "B", // 分类名称
+	"brandName":    "C", // 品牌名称
+	"costPrice":    "D", // 原价
+	"price":        "E", // 优惠价
+	"minCount":     "F", // 最小购买数量
+	"origin":       "G", // 产地
+	"unit":         "H", // 单位
+	"weight":       "I", // 重量
+	"store":        "J", // 库存
+	"isHot":        "K", // 是否热销
+	"isNew":        "L", // 是否上心
+	"details":      "M", // 详情
+	"image1":       "N", // 图片
+	"image2":       "O", //
+	"image3":       "P", //
+	"image4":       "Q", //
+	"image5":       "R", //
+	"image6":       "S", //
+}
+
+// 字段与单元格位置映射
+var excelGoodsIndex = map[string]int{
+	"name":         0,  // 商品名称
+	"categoryName": 1,  // 分类名称
+	"brandName":    2,  // 品牌名称
+	"costPrice":    3,  // 原价
+	"price":        4,  // 优惠价
+	"minCount":     5,  // 最小购买数量
+	"origin":       6,  // 产地
+	"unit":         7,  // 单位
+	"weight":       8,  // 重量
+	"store":        9,  // 库存
+	"isHot":        10, // 是否热销
+	"isNew":        10, // 是否上心
+	"details":      12, // 详情
+}
+
+// BatchCreateGoodsByExcel 批量导入商品信息
+// Author [likfees](https://github.com/likfees)
+func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.FileHeader) (err error) {
+	//oss := upload.NewOss()
+	//filePath, _, err := oss.UploadFile(header)
+	//if err != nil {
+	//	global.SugarLog.Errorf("上传文件失败 %v", err)
+	//	return errors.New("上传文件失败")
+	//}
+	//f, err := excelize.OpenFile(filePath)
+	f, err := excelize.OpenFile("D:\\Code\\fresh-shop-group\\fresh-shop\\server\\uploads\\file\\excel\\goodsImportTemplate.xlsx")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer func() {
+		if err := f.Close(); err != nil {
+			fmt.Println(err)
+		}
+	}()
+	// 获取 Sheet1 上所有单元格
+	rows, err := f.GetRows("Sheet1")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	if len(rows) <= 1 {
+		global.SugarLog.Errorf("未在 Excel 表中查询到记录, len(rows) = %d", len(rows))
+		return errors.New("未在 Excel 表中查询到记录")
+	}
+	txDB := global.DB.Begin()
+	//totalCount := len(rows) - 2 // 扫描到的商品条数
+	for key, row := range rows {
+		rowIndex := key + 1
+		if rowIndex <= 2 { // 前面两行跳过
+			continue
+		}
+		for _, colCell := range row {
+			fmt.Printf("正在遍历第 %d 行: \n", rowIndex)
+			fmt.Print(colCell, "\t")
+		}
+		log := fmt.Sprintf("第 %d 行, ", rowIndex)
+		name := row[excelGoodsIndex["name"]]
+		categoryName := row[excelGoodsIndex["categoryName"]]
+		brandName := row[excelGoodsIndex["brandName"]]
+		costPrice := row[excelGoodsIndex["costPrice"]]
+		price := row[excelGoodsIndex["price"]]
+		minCount := row[excelGoodsIndex["minCount"]]
+		origin := row[excelGoodsIndex["origin"]]
+		unit := row[excelGoodsIndex["unit"]]
+		weight := row[excelGoodsIndex["weight"]]
+		store := row[excelGoodsIndex["store"]]
+		isHot := row[excelGoodsIndex["isHot"]]
+		isNew := row[excelGoodsIndex["isNew"]]
+		details := row[excelGoodsIndex["details"]]
+
+		err := paramCheckEmpty(rowIndex, name, categoryName, costPrice, unit, weight, store)
+		if err != nil {
+			txDB.Callback()
+			global.SugarLog.Errorw(err.Error())
+			return err
+		}
+		// 分类
+		var category shop.Category
+		if errors.Is(txDB.Where("title = ?", categoryName).First(&category).Error, gorm.ErrRecordNotFound) {
+			category = shop.Category{
+				Title: categoryName,
+			}
+			if err := txDB.Create(&category).Error; err != nil {
+				txDB.Callback()
+				global.SugarLog.Errorf(log+"分类创建失败 categoryName: %s, err:%v", categoryName, err)
+				return errors.New(log + "分类创建失败")
+			}
+		}
+
+		// 品牌
+		brand := shop.Brand{}
+		if brandName != "" {
+			if errors.Is(txDB.Where("name = ?", brandName).First(&brand).Error, gorm.ErrRecordNotFound) {
+				brand = shop.Brand{
+					Name: brandName,
+				}
+				if err := txDB.Create(&brand).Error; err != nil {
+					txDB.Callback()
+					global.SugarLog.Errorf(log+"品牌创建失败 brandName: %s, err:%v", brandName, err)
+					return errors.New(log + "品牌创建失败")
+				}
+			}
+		}
+
+		costPriceFloat, err := strconv.ParseFloat(costPrice, 64)
+		if err != nil {
+			txDB.Callback()
+			global.SugarLog.Errorf(log+"转换原价价失败 costPrice: %s, err:%v", costPrice, err)
+			return errors.New(log + "原价必须为数字")
+		}
+		priceFloat := 0.0
+		if price != "" {
+			priceFloat, err = strconv.ParseFloat(price, 64)
+			if err != nil {
+				txDB.Callback()
+				global.SugarLog.Errorf(log+"转换优惠价失败 price: %s, err:%v", price, err)
+				return errors.New(log + "优惠价格必须为数字")
+			}
+		}
+		minCountInt := 0
+		if minCount != "" {
+			minCountInt, err = strconv.Atoi(minCount)
+			if err != nil {
+				txDB.Callback()
+				global.SugarLog.Errorf(log+"转换最小购买数量失败 minCount: %s, err:%v", minCount, err)
+				return errors.New(log + "最小购买数量必须为数字")
+			}
+		}
+
+		isHotInt := 0
+		if isHot != "" {
+			isHotInt, err = strconv.Atoi(isHot)
+			if err != nil {
+				txDB.Callback()
+				global.SugarLog.Errorf(log+"转换是否热销失败 isHot: %s, err:%v", isHot, err)
+				return errors.New(log + "是否热销必须为数字")
+			}
+		}
+
+		isNewInt := 0
+		if isNew != "" {
+			isNewInt, err = strconv.Atoi(isNew)
+			if err != nil {
+				txDB.Callback()
+				global.SugarLog.Errorf(log+"转换是否上新失败 isNewInt: %s, err:%v", isNewInt, err)
+				return errors.New(log + "是否上新必须为数字")
+			}
+		}
+
+		goods := shop.Goods{
+			Name:       name,
+			CategoryId: utils.Pointer(int(category.ID)),
+			BrandId:    utils.Pointer(int(brand.ID)),
+			CostPrice:  utils.Pointer(costPriceFloat),
+			Price:      utils.Pointer(priceFloat),
+			MinCount:   utils.Pointer(minCountInt),
+			Origin:     origin,
+			IsHot:      utils.Pointer(isHotInt),
+			IsNew:      utils.Pointer(isNewInt),
+		}
+
+		if err := txDB.Create(&goods).Error; err != nil {
+			txDB.Callback()
+			global.SugarLog.Errorf(log+"创建商品信息失败 goods: %v, err:%v", goods, err)
+			return errors.New(log + "创建商品信息失败")
+		}
+
+		// 商品详情
+		goodsDetails := shop.GoodsDescription{
+			GoodsId: utils.Pointer(int(goods.ID)),
+			Details: details,
+		}
+		if err := txDB.Create(&goodsDetails).Error; err != nil {
+			txDB.Callback()
+			global.SugarLog.Errorf(log+"创建商品详情失败 goodsDetails: %v, err:%v", goodsDetails, err)
+			return errors.New(log + "创建商品详情失败")
+		}
+
+		// 获取图片信息
+
+		txDB.Commit()
+		fmt.Println()
+	}
+	pics, err := f.GetPictures("Sheet1", "A3")
+	if err != nil {
+		fmt.Println(err)
+	}
+	for idx, pic := range pics {
+		name := fmt.Sprintf("D:\\Code\\fresh-shop-group\\fresh-shop\\server\\uploads\\file\\excel\\image%d%s", idx+1, pic.Extension)
+		if err := os.WriteFile(name, pic.File, 0644); err != nil {
+			fmt.Println(err)
+		}
+	}
+	//if err := f.SaveAs("D:\\Code\\fresh-shop-group\\fresh-shop\\server\\uploads\\file\\excel\\goodsImportTemplate2.xlsx"); err != nil {
+	//	fmt.Println(err)
+	//}
+	return
+}
+
+// 验证是否为空
+func paramCheckEmpty(rowIndex int, name, categoryName, constPrice, uint, weight, store string) error {
+	msg := fmt.Sprintf("第 %d 行, ", rowIndex)
+	if name == "" {
+		msg = msg + "商品名称、"
+	}
+	if categoryName == "" {
+		msg = msg + "商品分类、"
+	}
+	if constPrice == "" {
+		msg = msg + "商品原价、"
+	}
+	if uint == "" {
+		msg = msg + "商品单位、"
+	}
+	if weight == "" {
+		msg = msg + "商品重量、"
+	}
+	if store == "" {
+		msg = msg + "商品库存、"
+	}
+	msg = strings.TrimRight(msg, "、")
+	return errors.New(msg + "不能为空")
 }
 
 // CreateGoods 创建Goods记录

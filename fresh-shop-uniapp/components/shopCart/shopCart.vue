@@ -28,14 +28,14 @@
                                         &lt;!&ndash;                    <image src="../../static/youjiantou1.png" class="label" mode=""></image>&ndash;&gt;
                                     </view>-->
                     <view class="goodsInfo" v-for="(cart,index) in list" :key="index"
-                          @longtap="showDeleteCartDalog(index)" @click="toGoodsDetail(cart.goodsId)">
+                          @longpress="showDeleteCartDalog(index)" >
                         <view class="goodsInfo-left" :class="{'king-disabled-click': cart.goods.store <= 0 || cart.goods.store < cart.num}" @tap.stop="checkedGoods(cart.ID, cart.checked, index)">
                             <image src="../../static/select.png" v-if="cart.checked == 1" class="checked-image"
                                    mode=""></image>
                             <image src="../../static/not_select.png" v-else class="checked-image" mode=""
                             ></image>
                         </view>
-                        <view class="goodsInfo-right">
+                        <view class="goodsInfo-right" @click.stop="toGoodsDetail(cart.goodsId)">
                             <view class="goods-image-mask" v-if="cart.goods.store <= 0 || cart.goods.store < cart.num ">
                                 <view class="goods-image-mask-text" >
                                     补货中

@@ -5,8 +5,7 @@
                 <view class="item-cover-mask" v-if="item.store <= 0">
                     <view class="item-cover-mask-text">补货中</view>
                 </view>
-				<view class="item-cover"
-					:style="{ backgroundImage: 'url(' + (item.images.length > 0 ? item.images[0].url : '') + ')' }" />
+                <img class="item-img" :src="item.images.length > 0 ? item.images[0].url : ''" alt="">
 				<view class="item-content">
 					<view class="title">{{ item.name }}</view>
 					<view class="bottom-txt">
@@ -177,22 +176,20 @@ $radius: 20rpx;
   .goods--item {
     background: white;
     width: calc(50% - #{$margin*2});
-    //height: 225px;
     border-radius: $radius;
     overflow: hidden;
     margin: $margin;
+    position: relative;
 
-    .item-cover {
-      position: relative;
+
+    .item-img {
       width: 100%;
-      padding-top: 100%;
-      background-position: center;
-      background-size: cover;
+      border-radius: 10px;
     }
 
     .item-cover-mask {
-      width: calc(50% - #{$margin*2} - 5px);
-      height: 35%;
+      width: 100%;
+      height: 100%;
       flex-shrink: 0;
       z-index: 9999;
       background-color: rgba(173, 171, 171, 0.5);
