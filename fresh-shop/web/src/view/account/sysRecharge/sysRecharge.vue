@@ -142,7 +142,7 @@ const groupOptions = ref({})
 
 // 获取账户分组列表
 const getGroupOptions = async() => {
-  const res = await getAccountGroupListAll()
+  const res = await getAccountGroupListAll({ status: 1 })
   if (res.code !== 0) {
     ElMessage.error('获取账户配置异常')
     return

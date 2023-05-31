@@ -124,7 +124,7 @@ const elFormRef = ref()
 // =========== 表格控制部分 ===========
 const page = ref(1)
 const total = ref(0)
-const pageSize = ref(10)
+const pageSize = ref(5)
 const tableData = ref([])
 const searchInfo = ref({})
 
@@ -132,7 +132,7 @@ const accountGroupList = ref({})
 
 // 获取账户列表
 const getAccountGroupTab = async() => {
-  const res = await getAccountGroupList()
+  const res = await getAccountGroupList({ status: 1 })
   accountGroupList.value = res.data.list
   if (accountGroupList.value.length === 0) {
     ElMessage.error('获取账户配置失败')

@@ -17,6 +17,22 @@ export const createGoods = (data) => {
 }
 
 // @Tags Goods
+// @Summary 批量导入Goods
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body model.Goods true "批量导入Goods"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /goods/createGoods [post]
+export const batchCreateGoodsByExcel = (data) => {
+  return service({
+    url: '/goods/batchCreateGoodsByExcel',
+    method: 'post',
+    data
+  })
+}
+
+// @Tags Goods
 // @Summary 删除Goods
 // @Security ApiKeyAuth
 // @accept application/json

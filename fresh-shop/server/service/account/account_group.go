@@ -136,9 +136,13 @@ func (userAccountGroupService *AccountGroupService) GetAccountGroupInfoList(info
 
 // GetAccountGroupInfoListAll 获取所有AccountGroup记录
 // Author [likfees](https://github.com/likfees)
-func (userAccountGroupService *AccountGroupService) GetAccountGroupInfoListAll() (list []account.AccountGroup, err error) {
+func (userAccountGroupService *AccountGroupService) GetAccountGroupInfoListAll(g account.AccountGroup) (list []account.AccountGroup, err error) {
 	var userAccountGroups []account.AccountGroup
-	err = global.DB.Model(&account.AccountGroup{}).Find(&userAccountGroups).Error
+	db := global.DB.Model(&account.AccountGroup{})
+	if g.Status != nil {
+		db = db.Where("status = ?", g.Status)
+	}
+	err = db.Find(&userAccountGroups).Error
 	return userAccountGroups, err
 }
 

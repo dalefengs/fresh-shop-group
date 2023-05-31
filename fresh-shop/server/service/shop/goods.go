@@ -8,11 +8,11 @@ import (
 	"fresh-shop/server/model/shop"
 	shopReq "fresh-shop/server/model/shop/request"
 	"fresh-shop/server/utils"
+	"fresh-shop/server/utils/upload"
 	"github.com/xuri/excelize/v2"
 	"gorm.io/gorm"
 	_ "image/png"
 	"mime/multipart"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -63,14 +63,14 @@ var excelGoodsIndex = map[string]int{
 // BatchCreateGoodsByExcel 批量导入商品信息
 // Author [likfees](https://github.com/likfees)
 func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.FileHeader) (err error) {
-	//oss := upload.NewOss()
-	//filePath, _, err := oss.UploadFile(header)
-	//if err != nil {
-	//	global.SugarLog.Errorf("上传文件失败 %v", err)
-	//	return errors.New("上传文件失败")
-	//}
-	//f, err := excelize.OpenFile(filePath)
-	f, err := excelize.OpenFile("D:\\Code\\fresh-shop-group\\fresh-shop\\server\\uploads\\file\\excel\\goodsImportTemplate.xlsx")
+	oss := upload.NewOss()
+	filePath, _, err := oss.UploadFile(header)
+	if err != nil {
+		global.SugarLog.Errorf("上传文件失败 %v", err)
+		return errors.New("上传文件失败")
+	}
+	f, err := excelize.OpenFile(filePath)
+	//f, err := excelize.OpenFile("D:\\Code\\fresh-shop-group\\fresh-shop\\server\\uploads\\file\\excel\\goodsImportTemplate.xlsx")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -90,15 +90,16 @@ func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.File
 		global.SugarLog.Errorf("未在 Excel 表中查询到记录, len(rows) = %d", len(rows))
 		return errors.New("未在 Excel 表中查询到记录")
 	}
+	// 如果做线上图片服务器需要配置接口使用 oss 包
+	localOss := upload.Local{}
 	txDB := global.DB.Begin()
-	//totalCount := len(rows) - 2 // 扫描到的商品条数
 	for key, row := range rows {
 		rowIndex := key + 1
 		if rowIndex <= 2 { // 前面两行跳过
 			continue
 		}
+		fmt.Printf("正在遍历 Excel 第 %d 行: \n", rowIndex)
 		for _, colCell := range row {
-			fmt.Printf("正在遍历第 %d 行: \n", rowIndex)
 			fmt.Print(colCell, "\t")
 		}
 		log := fmt.Sprintf("第 %d 行, ", rowIndex)
@@ -124,29 +125,43 @@ func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.File
 		}
 		// 分类
 		var category shop.Category
-		if errors.Is(txDB.Where("title = ?", categoryName).First(&category).Error, gorm.ErrRecordNotFound) {
+		categoryErr := txDB.Where("title = ?", categoryName).First(&category).Error
+		if errors.Is(categoryErr, gorm.ErrRecordNotFound) {
 			category = shop.Category{
-				Title: categoryName,
+				Pid:     utils.Pointer(0),
+				Title:   categoryName,
+				IsFirst: utils.Pointer(0),
+				Sort:    utils.Pointer(50),
 			}
-			if err := txDB.Create(&category).Error; err != nil {
+			if categoryErr := txDB.Create(&category).Error; categoryErr != nil {
 				txDB.Callback()
-				global.SugarLog.Errorf(log+"分类创建失败 categoryName: %s, err:%v", categoryName, err)
+				global.SugarLog.Errorf(log+"分类创建失败 categoryName: %s, err:%v", categoryName, categoryErr)
 				return errors.New(log + "分类创建失败")
 			}
+		} else if categoryErr != nil {
+			txDB.Callback()
+			global.SugarLog.Errorf(log+"分类查询失败 categoryName: %s, err:%v", categoryName, categoryErr)
+			return errors.New(log + "分类查询失败")
 		}
 
 		// 品牌
 		brand := shop.Brand{}
 		if brandName != "" {
-			if errors.Is(txDB.Where("name = ?", brandName).First(&brand).Error, gorm.ErrRecordNotFound) {
+			brandErr := txDB.Where("name = ?", brandName).First(&brand).Error
+			if errors.Is(brandErr, gorm.ErrRecordNotFound) {
 				brand = shop.Brand{
 					Name: brandName,
+					Sort: utils.Pointer(50),
 				}
-				if err := txDB.Create(&brand).Error; err != nil {
+				if brandErr = txDB.Create(&brand).Error; brandErr != nil {
 					txDB.Callback()
-					global.SugarLog.Errorf(log+"品牌创建失败 brandName: %s, err:%v", brandName, err)
+					global.SugarLog.Errorf(log+"品牌创建失败 brandName: %s, err:%v", brandName, brandErr)
 					return errors.New(log + "品牌创建失败")
 				}
+			} else if brandErr != nil {
+				txDB.Callback()
+				global.SugarLog.Errorf(log+"品牌查询失败 brandName: %s, err:%v", brandName, brandErr)
+				return errors.New(log + "品牌查询失败")
 			}
 		}
 
@@ -174,6 +189,12 @@ func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.File
 				return errors.New(log + "最小购买数量必须为数字")
 			}
 		}
+		weightInt, err := strconv.Atoi(weight)
+		if err != nil {
+			txDB.Callback()
+			global.SugarLog.Errorf(log+"转换重量失败 weight: %s, err:%v", weight, err)
+			return errors.New(log + "商品重量必须为数字")
+		}
 
 		isHotInt := 0
 		if isHot != "" {
@@ -196,12 +217,17 @@ func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.File
 		}
 
 		goods := shop.Goods{
+			GoodsArea:  utils.Pointer(0),
+			SpecType:   utils.Pointer(0),
+			Sort:       utils.Pointer(50),
 			Name:       name,
 			CategoryId: utils.Pointer(int(category.ID)),
 			BrandId:    utils.Pointer(int(brand.ID)),
 			CostPrice:  utils.Pointer(costPriceFloat),
 			Price:      utils.Pointer(priceFloat),
 			MinCount:   utils.Pointer(minCountInt),
+			Weight:     utils.Pointer(weightInt),
+			Unit:       unit,
 			Origin:     origin,
 			IsHot:      utils.Pointer(isHotInt),
 			IsNew:      utils.Pointer(isNewInt),
@@ -223,31 +249,72 @@ func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.File
 			global.SugarLog.Errorf(log+"创建商品详情失败 goodsDetails: %v, err:%v", goodsDetails, err)
 			return errors.New(log + "创建商品详情失败")
 		}
-
+		var images []shop.GoodsImage
 		// 获取图片信息
-
-		txDB.Commit()
+		img1, err := f.GetPictures("Sheet1", fmt.Sprintf("N%d", rowIndex))
+		if err != nil {
+			txDB.Callback()
+			global.SugarLog.Errorf(log+"获取图片1信息失败 N%d, err:%v", rowIndex, err)
+			return errors.New(log + "获取图片1信息失败！")
+		}
+		if len(img1) == 0 {
+			txDB.Callback()
+			global.SugarLog.Errorf(log+"获取图片1信息失败 N%d, err:%v", rowIndex, err)
+			return errors.New(log + "请上传商品图片1！")
+		}
+		filePath, _, uploadErr := localOss.UploadFileByBytes(&img1[0].File, img1[0].Extension)
+		if uploadErr != nil {
+			txDB.Callback()
+			global.SugarLog.Errorf(log+"上传图片1信息失败 N%d, err:%v", rowIndex, err)
+			return errors.New(log + "上传图片1失败！")
+		}
+		images = append(images, shop.GoodsImage{
+			GoodsId: utils.Pointer(int(goods.ID)),
+			Url:     filePath,
+			Sort:    utils.Pointer(50),
+		})
+		imgCell := []string{"O", "P", "Q", "R", "S"} // 图片2 - 5单元格
+		for _, c := range imgCell {
+			getExcelGoodsImages(f, &images, int(goods.ID), c, rowIndex)
+		}
+		if err := txDB.Create(&images).Error; err != nil {
+			txDB.Callback()
+			global.SugarLog.Errorf(log+"创建商品图片信息失败 images: %v, err:%v", images, err)
+			return errors.New(log + "创建商品图片信息失败")
+		}
 		fmt.Println()
 	}
-	pics, err := f.GetPictures("Sheet1", "A3")
-	if err != nil {
-		fmt.Println(err)
-	}
-	for idx, pic := range pics {
-		name := fmt.Sprintf("D:\\Code\\fresh-shop-group\\fresh-shop\\server\\uploads\\file\\excel\\image%d%s", idx+1, pic.Extension)
-		if err := os.WriteFile(name, pic.File, 0644); err != nil {
-			fmt.Println(err)
-		}
-	}
-	//if err := f.SaveAs("D:\\Code\\fresh-shop-group\\fresh-shop\\server\\uploads\\file\\excel\\goodsImportTemplate2.xlsx"); err != nil {
-	//	fmt.Println(err)
-	//}
+	txDB.Commit()
 	return
+}
+
+func getExcelGoodsImages(f *excelize.File, list *[]shop.GoodsImage, goodsId int, cell string, rowIndex int) {
+	log := fmt.Sprintf("正在获取%s%d图片", cell, rowIndex)
+	localOss := upload.Local{}
+	img1, err := f.GetPictures("Sheet1", fmt.Sprintf("%s%d", cell, rowIndex))
+	if err != nil {
+		global.SugarLog.Errorf(log+"获取图片信息失败 N%d, err:%v", rowIndex, err)
+		return
+	}
+	if len(img1) == 0 {
+		return
+	}
+	filePath, _, uploadErr := localOss.UploadFileByBytes(&img1[0].File, img1[0].Extension)
+	if uploadErr != nil {
+		global.SugarLog.Errorf(log+"上传图片信息失败 %s%d, err:%v", cell, rowIndex, uploadErr)
+		return
+	}
+	img := shop.GoodsImage{
+		GoodsId: utils.Pointer(goodsId),
+		Url:     filePath,
+		Sort:    utils.Pointer(50),
+	}
+	*list = append(*list, img)
 }
 
 // 验证是否为空
 func paramCheckEmpty(rowIndex int, name, categoryName, constPrice, uint, weight, store string) error {
-	msg := fmt.Sprintf("第 %d 行, ", rowIndex)
+	msg := ""
 	if name == "" {
 		msg = msg + "商品名称、"
 	}
@@ -266,8 +333,11 @@ func paramCheckEmpty(rowIndex int, name, categoryName, constPrice, uint, weight,
 	if store == "" {
 		msg = msg + "商品库存、"
 	}
-	msg = strings.TrimRight(msg, "、")
-	return errors.New(msg + "不能为空")
+	if msg != "" {
+		msg = strings.TrimRight(msg, "、")
+		return fmt.Errorf("第 %d 行, %s 不能为空", rowIndex, msg)
+	}
+	return nil
 }
 
 // CreateGoods 创建Goods记录

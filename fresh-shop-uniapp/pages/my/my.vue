@@ -17,9 +17,9 @@
 <!--                        <text style="margin-right: 4px;">推荐码：{{ user.invitationCode ? user.invitationCode : '' }}</text>-->
 <!--                        <u-icon name="file-text" color="#fff"></u-icon>-->
 <!--                    </view>-->
-                    <!--					<view class="integral">
-                                积分：{{ user.point ? user.point : 0 }}
-                              </view>-->
+                    <view class="integral">
+                      积分：{{ user.point ? user.point : 0 }}
+                    </view>
                 </view>
             </view>
             <view class="setting">
@@ -130,7 +130,7 @@ export default {
             ],
             severList: [
                 [
-                    // { name: '积分商品', icon: 'point_shop.png', handle: this.showPhone },
+                    { name: '积分兑换', icon: 'point_shop.png', handle: this.toPointGoods },
                     // { name: '积分明细', icon: 'finance.png', handle: this.showPhone },
                     {name: '收货地址', icon: 'address.png', handle: this.toAddress},
                     {name: '清除缓存', icon: 'clear.png', handle: this.clearStorage},
@@ -173,6 +173,11 @@ export default {
             }
             this.showChangeNickName = false
             this.$message(this.$refs.toast).success("修改成功")
+        },
+        toPointGoods(){
+						uni.navigateTo({
+							url: '/pages/goods/pointGoods'
+						})
         },
         toAddress() {
             uni.navigateTo({

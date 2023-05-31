@@ -212,7 +212,13 @@ func (ag *AccountGroupApi) GetAccountGroupList(c *gin.Context) {
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
 // @Router /userAccountGroup/getAccountGroupListAll [get]
 func (ag *AccountGroupApi) GetAccountGroupListAll(c *gin.Context) {
-	if list, err := userAccountGroupService.GetAccountGroupInfoListAll(); err != nil {
+	var g account.AccountGroup
+	err := c.ShouldBindQuery(&g)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if list, err := userAccountGroupService.GetAccountGroupInfoListAll(g); err != nil {
 		global.Log.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 	} else {

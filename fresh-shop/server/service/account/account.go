@@ -71,7 +71,29 @@ func (accountService *AccountService) GetAccountInfoList(info accountReq.Account
 		db = db.Where("User.phone like ?", "%"+info.Phone+"%")
 	}
 	err = db.Limit(limit).Offset(offset).Find(&accounts).Error
-	err = db.Count(&total).Error
+	if err != nil {
+		return
+	}
+
+	// 解决 count 也附带 limit 的问题
+	dbCount := global.DB.Debug().Model(&account.Account{}).
+		Joins("User").
+		//Preload("User").
+		Preload("Group")
+	// 如果有条件搜索 下方会自动创建搜索语句
+	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
+		dbCount = dbCount.Where("user_account.created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
+	}
+	if info.GroupId != nil {
+		dbCount = dbCount.Where("user_account.group_id = ?", info.GroupId)
+	}
+	if info.Username != "" {
+		dbCount = dbCount.Where("User.userName like ?", "%"+info.Username+"%")
+	}
+	if info.Phone != "" {
+		dbCount = dbCount.Where("User.phone like ?", "%"+info.Phone+"%")
+	}
+	err = dbCount.Count(&total).Error
 	if err != nil {
 		return
 	}
