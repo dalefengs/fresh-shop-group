@@ -19,7 +19,7 @@ type Order struct {
 	Total           float64        `json:"total" form:"total" gorm:"column:total;comment:订单商品总金额;size:14;"`
 	Postage         float64        `json:"postage" form:"postage" gorm:"column:postage;comment:邮费;size:14;"`
 	Finish          float64        `json:"finish" form:"finish" gorm:"column:finish;comment:实付金额;size:14;"`
-	Payment         *int           `json:"payment" form:"payment" gorm:"column:payment;comment:支付方式(1余额 2微信);"`
+	Payment         *int           `json:"payment" form:"payment" gorm:"column:payment;comment:支付方式(1余额 2微信 3支付宝 4积分);"`
 	PaymentInfo     string         `json:"paymentInfo" form:"paymentInfo" gorm:"column:payment_info;comment:支付详情信息;size:255;"`
 	PaymentOpenid   string         `json:"paymentOpenid" form:"paymentOpenid" gorm:"column:payment_openid;comment:支付openId;size:255;"`
 	TransationId    string         `json:"transationId" form:"transationId" gorm:"column:transation_id;comment:支付流水订单号;size:255;"`
@@ -32,10 +32,11 @@ type Order struct {
 	ReceiveTime     *time.Time     `json:"receiveTime" form:"receiveTime" gorm:"column:receive_time;comment:收货时间;"`
 	CancelTime      *time.Time     `json:"cancelTime" form:"cancelTime" gorm:"column:cancel_time;comment:取消时间;"`
 	GiftPoints      float64        `json:"giftPoints" form:"giftPoints" gorm:"column:gift_points;comment:赠送积分数量;size:10;"`
-	AddressId       int            `json:"addressId" form:"addressId" gorm:"-"` // 收货地址id
-	OrderDetails    []OrderDetails `json:"details"`                             // 订单详情
-	OrderReturn     OrderReturn    `json:"return"`                              // 订单售后
-	OrderDelivery   OrderDelivery  `json:"delivery" gorm:"foreignKey:order_id"` // 订单发货信息
+	AddressId       int            `json:"addressId" form:"addressId" gorm:"-"`       // 收货地址id
+	OrderDetails    []OrderDetails `json:"details"`                                   // 订单详情
+	OrderReturn     OrderReturn    `json:"return"`                                    // 订单售后
+	OrderDelivery   OrderDelivery  `json:"delivery" gorm:"foreignKey:order_id"`       // 订单发货信息
+	PointGoodsId    int            `json:"pointGoodsId" form:"pointGoodsId" gorm:"-"` // 积分商品id 下单用
 }
 
 // TableName Order 表名

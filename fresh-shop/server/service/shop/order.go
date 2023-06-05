@@ -8,12 +8,14 @@ import (
 	"fresh-shop/server/model/shop"
 	shopReq "fresh-shop/server/model/shop/request"
 	shopResp "fresh-shop/server/model/shop/response"
+	sysModel "fresh-shop/server/model/system"
 	systemReq "fresh-shop/server/model/system/request"
 	"fresh-shop/server/model/wechat/response"
 	"fresh-shop/server/service/common"
 	"fresh-shop/server/service/wechat"
 	"fresh-shop/server/utils"
 	"github.com/gin-gonic/gin"
+	orderPay "github.com/silenceper/wechat/v2/pay/order"
 	"gorm.io/gorm"
 	"strconv"
 	"strings"
@@ -26,18 +28,52 @@ type OrderService struct {
 // CreateOrder 创建Order记录
 // Author [likfees](https://github.com/likfees)
 func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *systemReq.CustomClaims, clientIP string) (resp *response.CreateOrderResp, err error) {
+	var user sysModel.SysUser
+	if err := global.DB.Where("id = ?", order.UserId).First(&user).Error; err != nil {
+		global.SugarLog.Errorf("创建订单时查询用户信息异常, err:%v \n", err)
+		return nil, errors.New("用户查询失败")
+	}
+
 	// 获取收货地址信息
-	var address shop.UserAddress
-	if errors.Is(global.DB.Where("id = ?", order.AddressId).First(&address).Error, gorm.ErrRecordNotFound) {
-		return nil, errors.New("收货地址不存在")
+	address := shop.UserAddress{}
+	addressName := ""
+	if order.AddressId > 0 {
+		if errors.Is(global.DB.Where("id = ?", order.AddressId).First(&address).Error, gorm.ErrRecordNotFound) {
+			return nil, errors.New("收货地址不存在")
+		}
+		if *address.Sex == 1 {
+			addressName = addressName + "先生"
+		} else {
+			addressName = addressName + "女士"
+		}
 	}
-	// 获取购物车已选中的商品数据
 	var cartList []shop.Cart
-	global.DB.Where("user_id = ? and checked = 1", order.UserId).Preload("Goods.Images").Find(&cartList)
-	if len(cartList) <= 0 {
-		return nil, errors.New("商品查询失败")
-	}
 	var orderDetailList []shop.OrderDetails
+
+	if order.PointGoodsId != 0 { // 积分商品
+		var goodsInfo shop.Goods
+		if err := global.DB.Where("id = ? and goods_area = 1", order.PointGoodsId).First(&goodsInfo).Error; err != nil {
+			global.SugarLog.Errorf("创建订单时查询积分商品信息异常, err:%v \n", err)
+			return nil, errors.New("商品查询失败")
+		}
+		c := shop.Cart{
+			GoodsId:    utils.Pointer(order.PointGoodsId),
+			UserId:     order.UserId,
+			SpecType:   0,
+			SpecItemId: 0,
+			Num:        1,
+			Checked:    utils.Pointer(1),
+		}
+		cartList = append(cartList, c)
+
+	} else { // 普通商品
+		// 获取购物车已选中的商品数据
+		global.DB.Where("user_id = ? and checked = 1", order.UserId).Preload("Goods.Images").Find(&cartList)
+		if len(cartList) <= 0 {
+			global.SugarLog.Errorf("创建订单时查询商品信息异常, err:%v \n", err)
+			return nil, errors.New("商品查询失败")
+		}
+	}
 	pointCfg, err := common.GetSysConfig("point")
 	pointSwitch := true
 	if err != nil {
@@ -48,6 +84,7 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 			return
 		}
 	}
+
 	// 判断库存是否充足  以后可以上锁，解决高并发
 	for _, c := range cartList {
 		// 购物车数量大于库存
@@ -57,13 +94,17 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 		}
 		// 计算总数量
 		order.Num = order.Num + c.Num
-
-		// 计算总金额 如果优惠价小于成本价
-		if *c.Goods.Price > 0 && *c.Goods.Price < *c.Goods.CostPrice {
-			order.Total += float64(c.Num) * *c.Goods.Price
+		if order.PointGoodsId != 0 { // 积分商品
+			order.Total = *c.Goods.CostPrice
 		} else {
-			order.Total += float64(c.Num) * *c.Goods.CostPrice
+			// 计算总金额 如果优惠价小于成本价
+			if *c.Goods.Price > 0 && *c.Goods.Price < *c.Goods.CostPrice {
+				order.Total += float64(c.Num) * *c.Goods.Price
+			} else {
+				order.Total += float64(c.Num) * *c.Goods.CostPrice
+			}
 		}
+
 		// 组织订单详情数据
 		imgUrl := ""
 		if len(c.Goods.Images) > 0 {
@@ -77,12 +118,17 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 		orderDetail.Num = c.Num
 		orderDetail.Price = *c.Goods.Price
 		orderDetail.Total = 0
-		// 计算单个商品多个数量的总金额
-		if *c.Goods.Price > 0 && *c.Goods.Price < *c.Goods.CostPrice {
-			orderDetail.Total = float64(c.Num) * *c.Goods.Price
+		if order.PointGoodsId != 0 { // 积分商品
+			orderDetail.Total = *c.Goods.CostPrice
 		} else {
-			orderDetail.Total = float64(c.Num) * *c.Goods.CostPrice
+			// 计算单个商品多个数量的总金额
+			if *c.Goods.Price > 0 && *c.Goods.Price < *c.Goods.CostPrice {
+				orderDetail.Total = float64(c.Num) * *c.Goods.Price
+			} else {
+				orderDetail.Total = float64(c.Num) * *c.Goods.CostPrice
+			}
 		}
+
 		// 规格id 现在只开发了单规格订单，多规格以后在支持
 		orderDetail.SpecId = 0
 		spec := ""
@@ -96,7 +142,7 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 		}
 		orderDetail.SpecKeyName = spec
 		// 计算赠送积分
-		if pointSwitch {
+		if pointSwitch && order.PointGoodsId == 0 {
 			point, err := strconv.Atoi(pointCfg)
 			if err != nil {
 				global.SugarLog.Errorf("创建订单详情信息时转换积分配置参数异常, err:%v \n", err)
@@ -107,26 +153,26 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 		orderDetailList = append(orderDetailList, orderDetail)
 	}
 
-	addressName := address.Name
-	if *address.Sex == 1 {
-		addressName = addressName + "先生"
-	} else {
-		addressName = addressName + "女士"
-	}
-
 	// 设置订单基本信息
 	order.OrderSn = utils.GenerateOrderNumber("SN")
 	// 商品区域默认为普通商品
-	order.GoodsArea = utils.Pointer(0)
+	if order.PointGoodsId > 0 {
+		order.GoodsArea = utils.Pointer(1)
+		order.Payment = utils.Pointer(4) // 积分支付
+		order.Status = utils.Pointer(1)  // 已付款状态
+
+	} else {
+		order.GoodsArea = utils.Pointer(0)
+		order.Payment = utils.Pointer(2) // 默认是微信支付
+		order.Status = utils.Pointer(0)  // 未付款状态
+	}
 	order.ShipmentName = addressName
 	order.ShipmentMobile = address.Mobile
 	order.ShipmentAddress = address.Address + address.Title + address.Detail
-	order.Status = utils.Pointer(0)  // 未付款状态
-	order.Payment = utils.Pointer(2) // 默认是微信支付
 	order.StatusCancel = utils.Pointer(0)
 	order.StatusRefund = utils.Pointer(0)
 	// 计算总赠送积分
-	if pointSwitch {
+	if pointSwitch && order.PointGoodsId == 0 {
 		point, err := strconv.Atoi(pointCfg)
 		if err != nil {
 			global.SugarLog.Errorf("创建订单时转换积分配置参数异常, err:%v \n", err)
@@ -168,20 +214,36 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 			return nil, errors.New("库存扣减失败")
 		}
 	}
-	// 删除购物车列表
-	if err = global.DB.Delete(&cartList).Error; err != nil {
-		txDB.Rollback()
-		global.SugarLog.Errorf("log:%s,err:%v \n", log, err)
-		return nil, errors.New("购物车删除失败")
+	if order.PointGoodsId == 0 {
+		// 删除购物车列表
+		if err = global.DB.Delete(&cartList).Error; err != nil {
+			txDB.Rollback()
+			global.SugarLog.Errorf("log:%s,err:%v \n", log, err)
+			return nil, errors.New("购物车删除失败")
+		}
 	}
+
+	if order.PointGoodsId > 0 {
+		// 扣减积分
+		f := common.NewFinance(common.OptionTypeCASH, 1, user.ID, user.Username, order.Total, order.OrderSn, user.ID, user.Username, "购买积分商品")
+		err := common.AccountUnifyDeduction(common.POINT, f)
+		if err != nil {
+			txDB.Rollback()
+			global.SugarLog.Errorf("log:%s, 积分扣减失败 err:%v \n", log, err)
+			return nil, errors.New("积分扣减失败")
+		}
+	}
+
 	// 提交事务
 	txDB.Commit()
-
-	// 发起 JSAIP 支付返回参数
-	err, jsApiData := wechat.JSAPIPay(userClaims.OpenId, order.OrderSn, order.ID, order.Total, clientIP)
-	if err != nil {
-		global.SugarLog.Errorf("log:%s, 微信 JsApi 发起调用异常, err: %v \n", log, err)
-		return
+	jsApiData := &orderPay.Config{}
+	if order.PointGoodsId != 0 {
+		// 发起 JSAIP 支付返回参数
+		err, jsApiData = wechat.JSAPIPay(userClaims.OpenId, order.OrderSn, order.ID, order.Total, clientIP)
+		if err != nil {
+			global.SugarLog.Errorf("log:%s, 微信 JsApi 发起调用异常, err: %v \n", log, err)
+			return
+		}
 	}
 	resp = &response.CreateOrderResp{
 		Order: order,

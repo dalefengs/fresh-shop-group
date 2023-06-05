@@ -95,12 +95,14 @@ func (orderDeliveryService *OrderDeliveryService) UpdateOrderDelivery(orderDeliv
 		if err != nil {
 			return err
 		}
-		// 发放积分
-		f := common.NewFinance(0, 6, user.ID, user.Username, order.GiftPoints, order.OrderSn, user.ID, user.Username, "确认收货发放积分")
-		err = common.AccountUnifyDeduction(common.POINT, f)
-		if err != nil {
-			global.SugarLog.Errorf("发放积分失败 UserFinance:%v, error: %v", f, err)
-			return err
+		if *order.GoodsArea == 0 { // 普通商品才能发放积分
+			// 发放积分
+			f := common.NewFinance(0, 6, user.ID, user.Username, order.GiftPoints, order.OrderSn, user.ID, user.Username, "确认收货发放积分")
+			err = common.AccountUnifyDeduction(common.POINT, f)
+			if err != nil {
+				global.SugarLog.Errorf("发放积分失败 UserFinance:%v, error: %v", f, err)
+				return err
+			}
 		}
 		return nil
 	})
@@ -129,7 +131,7 @@ func (orderDeliveryService *OrderDeliveryService) GetOrderDeliveryInfoList(info 
 	offset := info.PageSize * (info.Page - 1)
 	// 创建db
 	db := global.DB.Model(&shop.OrderDelivery{})
-	var orderDeliverys []shop.OrderDelivery
+	var orderDelivers []shop.OrderDelivery
 	// 如果有条件搜索 下方会自动创建搜索语句
 	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
 		db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
@@ -151,6 +153,6 @@ func (orderDeliveryService *OrderDeliveryService) GetOrderDeliveryInfoList(info 
 		return
 	}
 
-	err = db.Limit(limit).Offset(offset).Find(&orderDeliverys).Error
-	return orderDeliverys, total, err
+	err = db.Limit(limit).Offset(offset).Find(&orderDelivers).Error
+	return orderDelivers, total, err
 }

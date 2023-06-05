@@ -25,6 +25,16 @@ var (
 	OptionTypeLock = optionType(1) // 操作锁仓
 )
 
+// NewFinance 构造函数
+// optionType 操作类型(0余额 1冻结 2锁仓)
+// typeId 流水类型ID
+// userId 用户ID
+// username 用户名
+// amount 操作金额
+// fromId 操作来源ID
+// fromUserId 操作来源用户ID
+// fromUsername 操作来源用户名
+// remark 备注
 func NewFinance(optionType optionType, typeId int, userId uint, username string, amount float64, fromId string, fromUserId uint, fromUsername string, remark string) account.UserFinance {
 	finance := account.UserFinance{
 		TypeId:     utils.Pointer(typeId),

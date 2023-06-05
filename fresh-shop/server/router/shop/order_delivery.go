@@ -17,7 +17,7 @@ func (s *OrderDeliveryRouter) InitOrderDeliveryRouter(Router *gin.RouterGroup) {
 	{
 		orderDeliveryRouter.DELETE("deleteOrderDelivery", orderDeliveryApi.DeleteOrderDelivery)           // 删除OrderDelivery
 		orderDeliveryRouter.DELETE("deleteOrderDeliveryByIds", orderDeliveryApi.DeleteOrderDeliveryByIds) // 批量删除OrderDelivery
-		orderDeliveryRouter.PUT("updateOrderDelivery", orderDeliveryApi.UpdateOrderDelivery)              // 更新OrderDelivery
+		orderDeliveryRouter.PUT("updateOrderDelivery", orderDeliveryApi.UpdateOrderDelivery)              // 确认收货
 	}
 	{
 		orderDeliveryRouterWithoutRecord.POST("createOrderDelivery", orderDeliveryApi.CreateOrderDelivery)  // 新建OrderDelivery   因为时间预计时间格式化问题，不记录发货日志

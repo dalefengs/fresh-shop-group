@@ -33,7 +33,7 @@ func (orderApi *OrderApi) CreateOrder(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	if order.AddressId == 0 {
+	if order.AddressId == 0 && *order.ShipmentType == 0 {
 		response.FailWithMessage("请选择收货地址", c)
 		return
 	}
