@@ -13,7 +13,7 @@
 					<text class="search-btn" @click="search" style="border: 1rpx solid; color: #2979ff">搜索</text>
 				</view>
 			</view>
-			<filterDropdown style="z-index: 1000" ref="dropdown" :itemArr="itemArr" @finish="finish" @clear="clearWhere"></filterDropdown>
+<!--			<filterDropdown style="z-index: 1000" ref="dropdown" :itemArr="itemArr" @finish="finish" @clear="clearWhere"></filterDropdown>-->
 		</view>
 		<view class="king-mx-10 king-my-5 king-bg-white king-radius10">
 			<scroll-view v-if="goodsArr.length > 0" :scroll-top="scrollTop" scroll-y="true" @scroll="scrollTopHandle"
@@ -21,13 +21,13 @@
 				:refresher-triggered="triggered" @refresherrefresh="onRefresh" @scrolltolower="scrollTolower"
 				:scroll-anchoring="true">
 				<!-- 商品列表 -->
-				<GoodsList :lists="goodsArr" price-type="￥"></GoodsList>
+				<GoodsList :lists="goodsArr" :isPoint="true"></GoodsList>
 				<view class="king-py-40" @click="scrollTolower">
 					<u-loadmore :status="loadMore" loading-text="努力加载中，请喝杯茶" loadmore-text="上拉加载更多" nomore-text="实在是没有了" />
 				</view>
 			</scroll-view>
 			<u-empty v-else :style="{ height: scrollViewHeight / 1.6 + 'px' }" width="220" height="220" textSize="16"
-				text="暂无商品" mode="data" icon="http://cdn.uviewui.com/uview/empty/data.png" />
+				text="暂无积分商品" mode="data" icon="http://cdn.uviewui.com/uview/empty/data.png" />
 				<!-- 返回顶部 -->
 			<u-back-top :scroll-top="scrollTop" @click="toTop"></u-back-top>
 		</view>
@@ -164,7 +164,7 @@ export default {
 				})
 				console.log("ids", this.tagsIds);
 			}
-			this.getGoodsListData(0)
+			this.getGoodsListData(1)
 		},
 		async init() {
 			const category = []

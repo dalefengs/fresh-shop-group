@@ -503,7 +503,14 @@ func (b *BaseApi) GetUserInfo(c *gin.Context) {
 		response.FailWithMessage("获取失败", c)
 		return
 	}
-	response.OkWithDetailed(gin.H{"userInfo": ReqUser}, "获取成功", c)
+	// 获取用户积分账户信息
+	account, err := common.GetUserAccountInfo(int(ReqUser.ID), 2)
+	if err != nil {
+		global.Log.Error("获取积分账户失败!", zap.Error(err))
+		response.FailWithMessage("获取积分账户失败", c)
+		return
+	}
+	response.OkWithDetailed(gin.H{"userInfo": ReqUser, "point": account.Amount}, "获取成功", c)
 }
 
 // ResetPassword

@@ -21,6 +21,13 @@
 			}
 		},
 		{
+			"path": "pages/goods/pointGoods",
+			"style": {
+				"navigationBarTitleText": "积分兑换",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
 			"path": "pages/goods/detail",
 			"style": {
 				"navigationBarTitleText": "商品详情",

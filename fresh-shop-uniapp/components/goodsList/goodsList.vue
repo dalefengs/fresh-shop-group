@@ -10,8 +10,9 @@
 					<view class="title">{{ item.name }}</view>
 					<view class="bottom-txt">
 						<view>
-							<text class="price">{{ priceType }}{{ item.costPrice || '0' }}</text>
-							<text v-if="item.price < item.costPrice" class="del-price">{{ priceType }}{{ item.price || '0'
+							<text class="price king-font17" v-if="isPoint">{{ item.costPrice || '0' }}积分</text>
+							<text class="price" v-else>{{ priceType }}{{ item.costPrice || '0' }}</text>
+							<text v-if="item.price < item.costPrice && !isPoint" class="del-price">{{ priceType }}{{ item.price || '0'
 							}}</text>
 						</view>
 						<view class="sale-num"><text>已售 {{ item.sale }}</text></view>
@@ -39,7 +40,6 @@
 							<text v-if="item.price < item.costPrice" class="del-price">{{ priceType }}{{ item.price || '0'
 							}}</text>
 						</view>
-
 						<view class="sale-num"><text>已售 {{ item.sale }}</text></view>
 						<view class="add-cart-button" v-if="item.store > 0">
 							<u-icon name="shopping-cart" color="#ffffff" size="24"></u-icon>
@@ -75,6 +75,11 @@ export default {
 		},
 		// 禁用商品点击默认跳转， 自定义监听 @onGoods
 		disableJump: {
+			type: Boolean,
+			default: false
+		},
+		// 是否是积分商品
+		isPoint: {
 			type: Boolean,
 			default: false
 		}
@@ -185,6 +190,7 @@ $radius: 20rpx;
     .item-img {
       width: 100%;
       border-radius: 10px;
+	    height: 180px;
     }
 
     .item-cover-mask {

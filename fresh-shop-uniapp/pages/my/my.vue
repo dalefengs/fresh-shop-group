@@ -18,7 +18,7 @@
 <!--                        <u-icon name="file-text" color="#fff"></u-icon>-->
 <!--                    </view>-->
                     <view class="integral">
-                      积分：{{ user.point ? user.point : 0 }}
+                      积分：{{ point ? point : 0 }}
                     </view>
                 </view>
             </view>
@@ -114,6 +114,7 @@ export default {
             isH5Plus: false,
             //#endif
             user: {},
+	          point: 0, // 积分余额
             orderStatusCount: {},
             token: '',
             showLoginDialog: false, // 登录
@@ -151,6 +152,7 @@ export default {
             if (this.token) {
                 const res = await getUserInfo()
                 this.user = res.data.userInfo
+	              this.point = res.data.point
                 setUser(this.user)
                 // 获取订单状态数量
                 const orderStatusRes = await getOrderStatusCount()

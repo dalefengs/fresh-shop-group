@@ -205,7 +205,9 @@ export default {
 		// 获取商品列表
 		// type = 1加载 其他为刷新
 		async getGoodsListData(tabId, type) {
-			const data = {}
+			const data = {
+				goodsArea: 0
+			}
 			if (type == 0) {
 				this.hotPage.page = 1
 				this.newPage.page = 1
