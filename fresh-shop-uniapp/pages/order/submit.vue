@@ -1,7 +1,7 @@
 <template>
     <pageWrapper>
-        <view class="select-address" @click="addressShow">
-            <view class="address">
+        <view class="select-address">
+            <view class="address" v-if="shipmentType === '0'" @click="addressShow">
                 <view class="icon">
                     <u-icon name="map" color="#2979ff" size="36"></u-icon>
                 </view>
@@ -21,6 +21,7 @@
                 <u-radio-group
                         v-model="shipmentType"
                         placement="row"
+                        @change="shipmentTypeChange"
                 >
                     <u-radio :customStyle="radioLeftStyle" size="24" iconSize="18" labelSize="18" label="配送"
                              name="0"></u-radio>
@@ -280,7 +281,17 @@ export default {
                 this.address = res.data
                 this.addressId = res.data.ID
             })
-        }
+        },
+		    // 选择框切换
+		    shipmentTypeChange(e) {
+			    console.log('shipmentTypeChange', e)
+			    if (e === '1') {
+				    this.address = {}
+				    this.addressId = 0
+			    }else {
+						this.getAddressInfo()
+			    }
+		    }
     }
 }
 </script>
@@ -303,10 +314,11 @@ page {
     align-items: center;
     padding-bottom: 14px;
     border-bottom: 1px solid #F2F2F2;
+		margin-bottom: 20px;
   }
 
   .food-type {
-    margin: 20px 0 2px 0;
+    margin: 0px 0 2px 0;
   }
 
   .icon {
