@@ -17,9 +17,10 @@
         <view class="box" v-show="Object.keys(goods).length > 0">
             <view class="price-box">
                 <view>
-                    <text class="price">￥{{ goods.costPrice || '0' }}</text>
+                    <text class="price" v-if="goods.goodsArea === 1">{{ goods.costPrice || '0' }} 积分 </text>
+                    <text class="price" v-else>￥{{ goods.costPrice || '0' }}</text>
                     <text class="unit">/{{ goods.unit }}</text>
-                    <text v-if="goods.price < goods.costPrice" class="del-price">￥{{
+                    <text v-if="goods.price < goods.costPrice && goods.goodsArea === 0" class="del-price">￥{{
                             goods.price || '0'
                         }}
                     </text>
@@ -69,7 +70,12 @@
                 </view>
             </view>
             <view class="right">
-                <view v-if="goods.cartNum > 0" class="addCartBtnSelect">
+	              <view class="addCartBtn" v-if="goods.goodsArea === 1" @click="submitPointOrder">
+		              <text v-if="goods.store <= 0"> 库存不足 </text>
+		              <text v-else-if="pointAmount < goods.costPrice" >积分不足</text>
+		              <text v-else>立即兑换</text>
+	              </view>
+                <view v-else-if="goods.cartNum > 0" class="addCartBtnSelect">
                     <view class="symbol" @click="addCartClick(2)">
                         -
                     </view>
@@ -99,9 +105,12 @@ import {getGoodsInfo} from '@/api/goods.js'
 import {favorites} from '@/api/favorites.js'
 import config from '@/config/config.js'
 import {addCart} from "@/api/cart";
+import {getAccountInfo} from "@/api/account.js";
+import UviewUi from "../../uni_modules/uview-ui/components/uview-ui/uview-ui";
 
 export default {
     components: {
+	    UviewUi,
         loginSuspend
     },
     data() {
@@ -117,7 +126,8 @@ export default {
             },
             addCartBtnStyle: {
                 borderRadius: '20px',
-            }
+            },
+	          pointAmount: 0, // 积分数量
         }
     },
     onLoad(options) {
@@ -149,28 +159,43 @@ export default {
     mounted() {
     },
     methods: {
+			  // 积分订单提交
+		    submitPointOrder() {
+					if (this.pointAmount < this.goods.costPrice) {
+						this.$message(this.$refs.toast).error("积分不足")
+						return
+					}
+					uni.navigateTo({
+						url: '/pages/order/submit?pointGoodsId=' + this.id
+					})
+		    },
         // 登陆成功
         loginSuccess() {
             this.loginSuspendShow = false
         },
-        getGoods() {
+        async getGoods() {
             const data = {
                 ID: this.id,
             }
-            getGoodsInfo(data, this.$refs.toast).then(res => {
-                res.data.regoods.images.forEach((item, index) => {
-                    if (item.url.slice(0, 4) !== 'http') {
-                        res.data.regoods.images[index].url = config.baseUrl + "/" + item.url
-                    }
-                })
-                if (res.data.regoods.weight > 1000) {
-                    res.data.regoods.weight = res.data.regoods.weight / 1000 + 'kg'
-                } else {
-                    res.data.regoods.weight = res.data.regoods.weight + 'g'
-                }
-                this.goods = res.data.regoods
-
-            })
+            const res = await getGoodsInfo(data, this.$refs.toast)
+		        res.data.regoods.images.forEach((item, index) => {
+			        if (item.url.slice(0, 4) !== 'http') {
+				        res.data.regoods.images[index].url = config.baseUrl + "/" + item.url
+			        }
+		        })
+		        if (res.data.regoods.weight > 1000) {
+			        res.data.regoods.weight = res.data.regoods.weight / 1000 + 'kg'
+		        } else {
+			        res.data.regoods.weight = res.data.regoods.weight + 'g'
+		        }
+		        this.goods = res.data.regoods
+	          // 积分商品需要获取积分余额
+						if (this.goods.goodsArea === 1) {
+							const accRes = await getAccountInfo(2, this.$refs.toast)
+							if (accRes.code === 0) {
+								this.pointAmount = accRes.data.account.amount
+							}
+						}
         },
         // 收藏商品
         favoritesClick() {

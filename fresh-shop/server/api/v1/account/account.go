@@ -7,6 +7,8 @@ import (
 	"fresh-shop/server/model/common/request"
 	"fresh-shop/server/model/common/response"
 	"fresh-shop/server/service"
+	"fresh-shop/server/service/common"
+	"fresh-shop/server/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -133,6 +135,32 @@ func (accountApi *AccountApi) FindAccount(c *gin.Context) {
 		response.FailWithMessage("查询失败", c)
 	} else {
 		response.OkWithData(gin.H{"reaccount": reaccount}, c)
+	}
+}
+
+// FindUserAccount 获取当前用户指定 Account 信息
+// @Tags Account
+// @Summary 获取当前用户指定 Account
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query account.Account true "获取当前用户指定 Account"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"查询成功"}"
+// @Router /account/findUserAccount [get]
+func (accountApi *AccountApi) FindUserAccount(c *gin.Context) {
+	var ac account.Account
+	err := c.ShouldBindQuery(&ac)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	userId := utils.GetUserID(c)
+	accInfo, err := common.GetUserAccountInfo(int(userId), int(ac.ID))
+	if err != nil {
+		global.Log.Error("查询账户失败!", zap.Error(err))
+		response.FailWithMessage("查询账户失败", c)
+	} else {
+		response.OkWithData(gin.H{"account": accInfo}, c)
 	}
 }
 

@@ -43,17 +43,21 @@
                                 cart.goods.unit
                             }}
                         </text>
-                        <text class="spe">单价：{{
+                        <text class="spe">
+	                        单价：{{
                                 cart.goods.price > 0 && cart.goods.price < cart.goods.costPrice ? cart.goods.price : cart.goods.costPrice
-                            }} 元
+                            }}
+	                        <text v-if="pointGoodsId === 0">元</text>
+	                        <text v-if="pointGoodsId > 0"> 积分</text>
                         </text>
                     </view>
                     <view class="goods-box">
                         <text class="goods-price">
-                            <text class="goods-symbol">¥</text>
+                            <text class="goods-symbol" v-if="pointGoodsId === 0">¥</text>
                             {{
                                 cart.goods.price > 0 && cart.goods.price < cart.goods.costPrice ? cart.goods.price * cart.num : cart.goods.costPrice * cart.num
                             }}
+	                          <text v-if="pointGoodsId > 0">积分</text>
                             <!--                            <text class="goods-unit"> / {{ cart.goods.unit }}</text>-->
                         </text>
                         <view class="goods-num-box">
@@ -75,13 +79,30 @@
         <view style="height: 70px"></view>
         <view class="statistics-box">
             <text class="total">合计：</text>
-            <text class="text-color">¥{{ total }}</text>
-            <view class="btn" @tap="submit">
+            <text class="text-color"><text v-if="pointGoodsId === 0">¥</text>
+	            {{ total }}
+	            <text class="text-color" style="font-size: 20px; margin-left: 3px" v-if="pointGoodsId > 0">积分</text>
+            </text>
+		        <view v-if="pointGoodsId > 0" class="btn" @tap="showPointPayDialog">
+			        <text>积分支付</text>
+		        </view>
+            <view v-else class="btn" @tap="submit">
                 <text>提交订单</text>
             </view>
         </view>
         <addressPop :show="showLoginDialog" @close="addressClose" :addressId="addressId"
                     @checked="addressChecked"></addressPop>
+		    <u-modal :show="showPointPay" title="确认购买" @confirm="submit"
+		             @cancel="() => showPointPay = false"
+		             @close="() => showPointPay = false"
+		             :showCancelButton="true"
+		             :closeOnClickOverlay="true"
+		             confirmText="支付">
+			    <view class="king-center king-black6">
+				    积分余额：{{ pointAmount }}<br>
+				    您确认购买该商品么？
+			    </view>
+		    </u-modal>
         <u-toast ref="toast" style="z-index: 9999"></u-toast>
     </pageWrapper>
 </template>
@@ -93,6 +114,8 @@ import {getToken} from '@/store/storage.js'
 import {getDefaultAddressInfo} from '@/api/address';
 import {createOrder, getOrderStatus} from '@/api/order';
 import addressPop from '@/components/addressPop/addressPop'
+import {getAccountInfo} from "@/api/account.js";
+import {getGoodsInfo} from '@/api/goods.js'
 
 export default {
     components: {
@@ -102,6 +125,7 @@ export default {
         return {
             token: '',
             list: [],
+	          pointGoodsId: 0,
             addressId: 0, // 用户地址ID
             address: {}, // 用户收货地址
             total: 0,
@@ -116,10 +140,17 @@ export default {
             radioRightStyle: {
                 "width": "50%",
                 "justify-content": "center",
-            }
-
+            },
+		        showPointPay: false, // 积分购买提示框
+		        pointAmount: 0, // 积分数量
         }
     },
+		onLoad(options) {
+			if (options.pointGoodsId) {
+				this.pointGoodsId = parseInt(options.pointGoodsId)
+			}
+			console.log('pointGoodsId', this.pointGoodsId)
+		},
     mounted() {
         this.token = getToken()
         if (!this.token) {
@@ -130,10 +161,24 @@ export default {
             })
             return
         }
-        this.getCartListData()
+				if (this.pointGoodsId > 0) {
+					  this.getPointGoodsData()
+				}else {
+					  this.getCartListData()
+				}
         this.getAddressInfo()
     },
     methods: {
+	    // 显示积分支付
+	    async showPointPayDialog() {
+		    this.showPointPay = true
+		    const res = await getAccountInfo(2, this.$refs.toast) // 积分
+		    if (res.code !== 0){
+			    this.showPointPay = false
+			    return false
+		    }
+		    this.pointAmount = res.data.account.amount
+	    },
         // 订单提交
         async submit() {
             const res = await createOrder({
@@ -144,6 +189,15 @@ export default {
             if (res.code !== 0) {
                 return false
             }
+						// 如果是积分商品
+						if (this.pointGoodsId > 0) {
+							this.$message(this.$refs.toast).success("兑换成功").then(() => {
+								uni.redirectTo({
+									url: '/pages/order/detail?id=' + orderId
+								})
+							})
+							return true
+						}
             if (!res.data.pay) {
                 this.$message(this.$refs.toast).error("交易失败，请重试")
                 return false
@@ -245,6 +299,31 @@ export default {
         addressClose() {
             this.showLoginDialog = false
         },
+	      async getPointGoodsData() {
+		      const data = {
+			      ID: this.pointGoodsId,
+		      }
+		      const res = await getGoodsInfo(data, this.$refs.toast)
+		      res.data.regoods.images.forEach((item, index) => {
+			      if (item.url.slice(0, 4) !== 'http') {
+				      res.data.regoods.images[index].url = config.baseUrl + "/" + item.url
+			      }
+		      })
+		      if (res.data.regoods.weight > 1000) {
+			      res.data.regoods.weight = res.data.regoods.weight / 1000 + 'kg'
+		      } else {
+			      res.data.regoods.weight = res.data.regoods.weight + 'g'
+		      }
+					const g = res.data.regoods
+					const c = {
+						goodsId: g.ID,
+						specType: 0,
+						num: 1,
+						goods: g
+					}
+					this.list.push(c)
+		      this.total = g.costPrice.toFixed(2)
+	      },
         async getCartListData() {
             const res = await getCheckedCartList(this.$refs.toast)
             if (res.code !== 0) {
@@ -413,7 +492,7 @@ page {
         }
 
         .goods-price {
-          font-size: 22px;
+          font-size: 20px;
           font-weight: 400;
           color: rgb(50, 38, 38);
           margin-right: 2px;

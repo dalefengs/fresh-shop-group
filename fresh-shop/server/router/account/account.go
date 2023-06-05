@@ -21,7 +21,8 @@ func (s *AccountRouter) InitAccountRouter(Router *gin.RouterGroup) {
 		accountRouter.PUT("updateAccount", accountApi.UpdateAccount)              // 更新Account
 	}
 	{
-		accountRouterWithoutRecord.GET("findAccount", accountApi.FindAccount)       // 根据ID获取Account
-		accountRouterWithoutRecord.GET("getAccountList", accountApi.GetAccountList) // 获取Account列表
+		accountRouterWithoutRecord.GET("findAccount", accountApi.FindAccount)         // 根据ID获取Account
+		accountRouterWithoutRecord.GET("findUserAccount", accountApi.FindUserAccount) // 获取当前用户指定 Account
+		accountRouterWithoutRecord.GET("getAccountList", accountApi.GetAccountList)   // 获取Account列表
 	}
 }
