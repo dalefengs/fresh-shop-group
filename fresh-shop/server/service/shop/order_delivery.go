@@ -7,6 +7,8 @@ import (
 	"fresh-shop/server/model/common/request"
 	"fresh-shop/server/model/shop"
 	shopReq "fresh-shop/server/model/shop/request"
+	sysModel "fresh-shop/server/model/system"
+	"fresh-shop/server/service/common"
 	"fresh-shop/server/utils"
 	"gorm.io/gorm"
 )
@@ -52,13 +54,18 @@ func (orderDeliveryService *OrderDeliveryService) DeleteOrderDeliveryByIds(ids r
 	return err
 }
 
-// UpdateOrderDelivery 更新OrderDelivery记录
+// UpdateOrderDelivery 订单收货
 // Author [likfees](https://github.com/likfees)
 func (orderDeliveryService *OrderDeliveryService) UpdateOrderDelivery(orderDelivery shop.OrderDelivery) (err error) {
 	var order shop.Order
 	err = global.DB.Where("id = ? and status = 2 and status_cancel = 0", orderDelivery.OrderId).First(&order).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	if err != nil {
 		global.SugarLog.Errorf("获取订单信息失败 orderId:%d, error: %v", orderDelivery.OrderId, err)
+		return err
+	}
+	var user sysModel.SysUser
+	if err = global.DB.Where("id = ?", order.UserId).First(&user).Error; err != nil {
+		global.SugarLog.Errorf("获取用户信息失败 userId:%d, error: %v", order.UserId, err)
 		return err
 	}
 	var deliver business.UserDelivery
@@ -86,6 +93,13 @@ func (orderDeliveryService *OrderDeliveryService) UpdateOrderDelivery(orderDeliv
 		}
 		err = tx.Save(&orderDelivery).Error
 		if err != nil {
+			return err
+		}
+		// 发放积分
+		f := common.NewFinance(0, 6, user.ID, user.Username, order.GiftPoints, order.OrderSn, user.ID, user.Username, "确认收货发放积分")
+		err = common.AccountUnifyDeduction(common.POINT, f)
+		if err != nil {
+			global.SugarLog.Errorf("发放积分失败 UserFinance:%v, error: %v", f, err)
 			return err
 		}
 		return nil

@@ -25,7 +25,7 @@ var (
 	OptionTypeLock = optionType(1) // 操作锁仓
 )
 
-func NewFinance(optionType optionType, typeId int, userId uint, username string, amount float64, fromId string, fromUserId uint, fromUsername string, remark string) *account.UserFinance {
+func NewFinance(optionType optionType, typeId int, userId uint, username string, amount float64, fromId string, fromUserId uint, fromUsername string, remark string) account.UserFinance {
 	finance := account.UserFinance{
 		TypeId:     utils.Pointer(typeId),
 		Username:   username,
@@ -37,7 +37,7 @@ func NewFinance(optionType optionType, typeId int, userId uint, username string,
 		FromName:   fromUsername,
 		Remarks:    remark,
 	}
-	return &finance
+	return finance
 }
 
 // AccountUnifyDeduction 账户统一扣减
