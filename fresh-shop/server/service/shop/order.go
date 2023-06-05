@@ -84,6 +84,16 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 			return
 		}
 	}
+	// 获取取餐号码
+	if *order.ShipmentType == 1 {
+		// 获取到最后一条有取餐号码的订单
+		var pickOrder shop.Order
+		if pickErr := global.DB.Select("pick_up_number").Where("pick_up_number is not null").Order("id desc").First(&pickOrder).Error; pickErr == nil {
+			order.PickUpNumber = pickOrder.PickUpNumber + 1
+		} else {
+			order.PickUpNumber = 101
+		}
+	}
 
 	// 判断库存是否充足  以后可以上锁，解决高并发
 	for _, c := range cartList {
