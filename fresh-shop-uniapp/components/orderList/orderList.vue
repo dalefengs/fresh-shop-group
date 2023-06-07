@@ -49,11 +49,17 @@
                             <view class="single-goods-title">
                                 <view class="king-ellipsis2 king-black">{{ order.details[0].goodsName }}</view>
                                 <view class="single-goods-price">
-                                    <text>¥ {{ order.total }}</text>
+                                    <text>
+	                                    <text v-if="order.goodsArea === 0">¥</text> {{ order.total }}
+	                                    <text v-if="order.goodsArea === 1" style="margin-left: 3px">积分</text>
+                                    </text>
                                 </view>
                             </view>
                             <view class="king-font12 king-black6">
-                                <text >单价：¥{{ order.details[0].price }}</text>
+                                <text >单价：
+	                                <text v-if="order.goodsArea === 0">¥</text>{{ order.details[0].price }}
+	                                <text v-if="order.goodsArea === 1" style="margin-left: 3px">积分</text>
+                                </text>
                             </view>
                             <view class="king-font12 king-black6">
                                 <text>规格：{{ order.details[0].specKeyName }}</text>
@@ -63,7 +69,10 @@
                     </view>
                     <view class="order-bottom">
                         <text>共 {{ order.num }} 件商品</text>
-                        <text class="king-ml-10" v-if="order.status !== 0">实付 <text class="order-bottom-price">¥{{ order.finish }}</text></text>
+                        <text class="king-ml-10" v-if="order.status !== 0">实付 <text class="order-bottom-price">
+	                        <text v-if="order.goodsArea === 0">¥</text>{{ order.finish }}</text>
+	                        <text v-if="order.goodsArea === 1" style="margin-left: 3px">积分</text>
+                        </text>
                     </view>
                     <view class="order-btn">
                         <view class="btn" v-if="order.statusCancel === 0 && order.status === 0" @tap.stop="showCancelOrderDailog(order.ID)">取消订单</view>
@@ -430,7 +439,7 @@ export default {
         justify-content: space-between;
 
         .single-goods-price {
-          width: 50px;
+          width: 80px;
           flex-shrink: 0;
           text-align: right;
         }

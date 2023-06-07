@@ -17,6 +17,7 @@
                         <text v-if="order.statusCancel > 0">已取消</text>
                         <text v-else-if="order.status === 0">待付款</text>
                         <text v-else-if="order.status === 1">备货中</text>
+                        <text v-else-if="order.status === 2 && order.shipmentType === 1" class="king-font20">取货号：A{{ order.pickUpNumber }} </text>
                         <text v-else-if="order.status === 2">配送中</text>
                         <text v-else-if="order.status === 3">已完成</text>
                     </view>
@@ -30,7 +31,7 @@
                 </view>
             </view>
         </view>
-        <view class="address">
+        <view class="address" v-if="order.addressId !== 0">
             <view>
                 <text class="king-mr-20">{{ order.shipmentName }}</text>
                 <text>{{ order.shipmentMobile }}</text>
@@ -49,7 +50,10 @@
                         <view class="king-flex king-space-between-col">
                             <view class="goods-name">{{ item.goodsName }}</view>
                             <view class="goods-spec">规格：{{ item.specKeyName }}</view>
-                            <view class="goods-price">¥{{ item.total }}</view>
+                            <view class="goods-price">
+	                            <text v-if="order.goodsArea === 0">¥</text>{{ item.total }}
+	                            <text v-if="order.goodsArea === 1" style="margin-left: 3px">积分</text>
+                            </view>
                         </view>
                     </view>
                     <view class="king-flex king-flex-row king-space-between-col goods-right ">

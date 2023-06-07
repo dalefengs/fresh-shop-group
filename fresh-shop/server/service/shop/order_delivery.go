@@ -11,6 +11,7 @@ import (
 	"fresh-shop/server/service/common"
 	"fresh-shop/server/utils"
 	"gorm.io/gorm"
+	"time"
 )
 
 type OrderDeliveryService struct {
@@ -26,7 +27,7 @@ func (orderDeliveryService *OrderDeliveryService) CreateOrderDelivery(orderDeliv
 		return err
 	}
 	order.Status = utils.Pointer(2)
-	order.ShipmentTime = &orderDelivery.ScheduledTime
+	order.ShipmentTime = utils.Pointer(time.Now()) //发货时间
 	err = global.DB.Transaction(func(tx *gorm.DB) error {
 		if txErr := tx.Save(&order).Error; txErr != nil {
 			return txErr

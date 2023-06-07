@@ -106,7 +106,7 @@ func AccountUnifyDeduction(groupId int, finance account.UserFinance) error {
 
 	switch *finance.OptionType {
 	case 0: // 操作余额
-		if *finance.Amount < 0 && *accountInfo.Amount < *finance.Amount+*finance.FeeAmount { //  减操作且余额不足
+		if *finance.Amount < 0 && *accountInfo.Amount < math.Abs(*finance.Amount)+*finance.FeeAmount { //  减操作且余额不足
 			global.SugarLog.Errorf(log+" %s不足，当前%s为：%f", group.NameCn, group.NameCn, *accountInfo.Amount)
 			return errors.New(group.NameCn + "不足")
 		}

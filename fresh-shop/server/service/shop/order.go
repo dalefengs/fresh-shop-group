@@ -52,7 +52,7 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 
 	if order.PointGoodsId != 0 { // 积分商品
 		var goodsInfo shop.Goods
-		if err := global.DB.Where("id = ? and goods_area = 1", order.PointGoodsId).First(&goodsInfo).Error; err != nil {
+		if err := global.DB.Where("id = ? and goods_area = 1", order.PointGoodsId).Preload("Images").First(&goodsInfo).Error; err != nil {
 			global.SugarLog.Errorf("创建订单时查询积分商品信息异常, err:%v \n", err)
 			return nil, errors.New("商品查询失败")
 		}
@@ -63,6 +63,7 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 			SpecItemId: 0,
 			Num:        1,
 			Checked:    utils.Pointer(1),
+			Goods:      goodsInfo,
 		}
 		cartList = append(cartList, c)
 
@@ -88,7 +89,7 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 	if *order.ShipmentType == 1 {
 		// 获取到最后一条有取餐号码的订单
 		var pickOrder shop.Order
-		if pickErr := global.DB.Select("pick_up_number").Where("pick_up_number is not null").Order("id desc").First(&pickOrder).Error; pickErr == nil {
+		if pickErr := global.DB.Select("pick_up_number").Where("pick_up_number is not null and pick_up_number <> 0").Order("id desc").First(&pickOrder).Error; pickErr == nil {
 			order.PickUpNumber = pickOrder.PickUpNumber + 1
 		} else {
 			order.PickUpNumber = 101
@@ -165,13 +166,13 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 
 	// 设置订单基本信息
 	order.OrderSn = utils.GenerateOrderNumber("SN")
-	// 商品区域默认为普通商品
-	if order.PointGoodsId > 0 {
+	if order.PointGoodsId > 0 { // 积分商品
 		order.GoodsArea = utils.Pointer(1)
 		order.Payment = utils.Pointer(4) // 积分支付
 		order.Status = utils.Pointer(1)  // 已付款状态
-
-	} else {
+		order.Finish = order.Total
+		order.PayTime = utils.Pointer(time.Now())
+	} else { // 普通商品
 		order.GoodsArea = utils.Pointer(0)
 		order.Payment = utils.Pointer(2) // 默认是微信支付
 		order.Status = utils.Pointer(0)  // 未付款状态
@@ -235,12 +236,12 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 
 	if order.PointGoodsId > 0 {
 		// 扣减积分
-		f := common.NewFinance(common.OptionTypeCASH, 1, user.ID, user.Username, order.Total, order.OrderSn, user.ID, user.Username, "购买积分商品")
+		f := common.NewFinance(common.OptionTypeCASH, 1, user.ID, user.Username, -order.Total, order.OrderSn, user.ID, user.Username, "购买积分商品")
 		err := common.AccountUnifyDeduction(common.POINT, f)
 		if err != nil {
 			txDB.Rollback()
 			global.SugarLog.Errorf("log:%s, 积分扣减失败 err:%v \n", log, err)
-			return nil, errors.New("积分扣减失败")
+			return nil, err
 		}
 	}
 

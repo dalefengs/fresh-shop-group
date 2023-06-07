@@ -103,7 +103,7 @@
 				    您确认购买该商品么？
 			    </view>
 		    </u-modal>
-        <u-toast ref="toast" style="z-index: 9999"></u-toast>
+        <u-toast ref="toast" style="z-index: 9999 !important"></u-toast>
     </pageWrapper>
 </template>
 
@@ -181,20 +181,25 @@ export default {
 	    },
         // 订单提交
         async submit() {
-            const res = await createOrder({
-                remarks: this.remark,
-                addressId: this.addressId,
-                shipmentType: parseInt(this.shipmentType)
-            }, this.$refs.toast)
+						const data = {
+							remarks: this.remark,
+							addressId: this.addressId,
+							shipmentType: parseInt(this.shipmentType)
+						}
+						if (this.pointGoodsId) {
+							data.pointGoodsId = this.pointGoodsId
+						}
+            const res = await createOrder(data, this.$refs.toast)
             if (res.code !== 0) {
+							  this.showPointPay = false
                 return false
             }
 						// 如果是积分商品
 						if (this.pointGoodsId > 0) {
-							this.$message(this.$refs.toast).success("兑换成功").then(() => {
-								uni.redirectTo({
-									url: '/pages/order/detail?id=' + orderId
-								})
+							this.showPointPay = false
+							await this.$message(this.$refs.toast).success("兑换成功")
+							uni.redirectTo({
+								url: '/pages/order/detail?id=' + res.data.order.ID
 							})
 							return true
 						}
