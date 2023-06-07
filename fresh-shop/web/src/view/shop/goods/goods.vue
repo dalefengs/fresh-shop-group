@@ -24,7 +24,7 @@
     <div class="gva-table-box">
       <div class="gva-btn-list">
         <el-button type="primary" icon="plus" @click="openGoodsFrom('新增商品')">新增</el-button>
-        <el-button type="primary" icon="Upload" @click="importGoodsShowClick">Excel 导入</el-button>
+        <el-button type="primary" icon="Download" @click="importGoodsShowClick">Excel 导入</el-button>
         <el-popover v-model:visible="deleteVisible" placement="top" width="160">
           <p>确定要删除吗？</p>
           <div style="text-align: right; margin-top: 8px;">
@@ -76,12 +76,15 @@
         <el-table-column align="left" label="详情信息" prop="name" width="250">
           <template #default="scope">
             <div class="table-multi-line">
-              <div>
+              <div v-if="scope.row.goodsArea === 1">
+                商品价格：<span style="color: #f56c6c; font-weight: bold">{{ scope.row.costPrice }} 积分</span>
+              </div>
+              <div v-else>
                 商品价格：<span style="color: #f56c6c; font-weight: bold">{{ scope.row.costPrice }} 元</span><el-divider direction="vertical" />
                 优惠价格: <span v-if="scope.row.price > 0" style="color: #f56c6c; font-weight: bold">{{ scope.row.price }} 元</span>
                 <span v-else style="color: #f56c6c; font-weight: bold">无优惠</span>
               </div>
-              <span>商品库存：{{ scope.row.price }}</span><el-divider direction="vertical" />
+              <span>商品库存：{{ scope.row.store }}</span><el-divider direction="vertical" />
               <span>商品单位：{{ scope.row.unit }}</span><br>
               <span>最低购买数量：{{ scope.row.minCount }} {{ scope.row.unit }}</span><el-divider direction="vertical" />
               <span>总销量：{{ scope.row.sale }}</span><br>
@@ -95,8 +98,8 @@
             <div class="table-multi-line">
               <span>状态：{{ filterDict(scope.row.status, goodsStatusOptions) }}</span><br>
               <!--              <span>是否首页：{{ filterDict(scope.row.isFirst,whetherOptions) }}</span><br>-->
-              <span>是否热销：{{ filterDict(scope.row.isHot,whetherOptions) }}</span><br>
-              <span>是否上新：{{ filterDict(scope.row.isNew,whetherOptions) }}</span><br>
+              <span v-if="scope.row.goodsArea === 0">是否热销：{{ filterDict(scope.row.isHot,whetherOptions) }}</span><br>
+              <span v-if="scope.row.goodsArea === 0">是否上新：{{ filterDict(scope.row.isNew,whetherOptions) }}</span><br>
             </div>
           </template>
         </el-table-column>
@@ -154,7 +157,7 @@
         </div>
         <div v-if="importGoodsMsg">
           <div v-for="(msg, index) in importGoodsMsg" :key="index" style="margin-top: 5px">
-            <el-alert :title="msg" type="error"/>
+            <el-alert :title="msg" type="error" />
           </div>
         </div>
       </template>

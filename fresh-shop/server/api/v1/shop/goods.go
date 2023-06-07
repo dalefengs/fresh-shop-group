@@ -81,8 +81,11 @@ func checkGoodsFrom(f *shopReq.GoodsSubmitFrom) error {
 	if len(f.Images) <= 0 {
 		return errors.New("请上传商品图片")
 	}
-	if *f.GoodsInfo.Price <= 0 {
-		return errors.New("请填写合法的价格")
+	if *f.GoodsInfo.CostPrice <= 0 {
+		return errors.New("请填写合法的价格或积分")
+	}
+	if *f.GoodsInfo.Price < 0 {
+		return errors.New("请填写合法的优惠价格")
 	}
 	if f.GoodsInfo.GoodsArea == nil {
 		return errors.New("请选择商品区域")

@@ -15,11 +15,11 @@
                 <el-option v-for="(item,key) in goodsAreaOptions" :key="key" :label="item.label" :value="item.value" />
               </el-select>
             </el-form-item>
-            <el-form-item label="商品产地:" prop="origin">
-              <el-input v-model="formData.origin" :clearable="true" placeholder="请输入产地" />
-            </el-form-item>
+            <!--            <el-form-item label="商品产地:" prop="origin">-->
+            <!--              <el-input v-model="formData.origin" :clearable="true" placeholder="请输入产地" />-->
+            <!--            </el-form-item>-->
             <!-- 积分商品只能是单规格， 普通商品才有多规格 -->
-              <!--            <el-form-item v-if="formData.goodsArea === 0" label="规格类型:" prop="specType">
+            <!--            <el-form-item v-if="formData.goodsArea === 0" label="规格类型:" prop="specType">
               <el-radio-group v-model="formData.specType" class="ml-4">
                 <el-radio v-for="(item,key) in specTypeOptions" :key="key" :label="item.value" size="large">{{ item.label }}</el-radio>
               </el-radio-group>
@@ -52,7 +52,7 @@
               <el-input-number v-model="formData.price" :precision="2" :clearable="true" />
               <div style="margin-left: 20px">0 为不优惠</div>
             </el-form-item>
-            <el-form-item label="最低购买数量:" prop="minCount">
+            <el-form-item v-if="formData.goodsArea === 0" label="最低购买数量:" prop="minCount">
               <el-input-number v-model.number="formData.minCount" :precision="0" :clearable="true" placeholder="请输入" />
             </el-form-item>
             <el-form-item label="商品单位:" prop="unit">
@@ -77,12 +77,12 @@
                 <el-radio v-for="(item,key) in whetherOptions" :key="key" :label="item.value" size="large">{{ item.label }}</el-radio>
               </el-radio-group>
             </el-form-item>-->
-            <el-form-item label="是否热销:" prop="isHot">
+            <el-form-item v-if="formData.goodsArea === 0" label="是否热销:" prop="isHot">
               <el-radio-group v-model="formData.isHot" class="ml-4">
                 <el-radio v-for="(item,key) in whetherOptions" :key="key" :label="item.value" size="large">{{ item.label }}</el-radio>
               </el-radio-group>
             </el-form-item>
-            <el-form-item label="是否上新:" prop="isNew">
+            <el-form-item v-if="formData.goodsArea === 0" label="是否上新:" prop="isNew">
               <el-radio-group v-model="formData.isNew" class="ml-4">
                 <el-radio v-for="(item,key) in whetherOptions" :key="key" :label="item.value" size="large">{{ item.label }}</el-radio>
               </el-radio-group>
@@ -266,11 +266,6 @@ const rule = reactive({
     message: '',
     trigger: ['input', 'blur'],
   }],
-  brandId: [{
-    required: true,
-    message: '',
-    trigger: ['input', 'blur'],
-  }],
   goodsArea: [{
     required: true,
     message: '',
@@ -282,6 +277,11 @@ const rule = reactive({
     trigger: ['input', 'blur'],
   }],
   unit: [{
+    required: true,
+    message: '',
+    trigger: ['input', 'blur'],
+  }],
+  weight: [{
     required: true,
     message: '',
     trigger: ['input', 'blur'],
@@ -623,6 +623,9 @@ const save = async() => {
       }
     }
     const goodsInfo = formData.value
+    if (formData.value.brandId === '') {
+      goodsInfo.brandId = 0
+    }
     goodsInfo.spec = null
     goodsInfo.specValue = null
     goodsInfo.images = null
