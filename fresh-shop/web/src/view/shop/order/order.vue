@@ -76,7 +76,7 @@
         row-key="ID"
         @selection-change="handleSelectionChange"
       >
-        <el-table-column align="left" label="基本信息" prop="orderInfo" width="270">
+        <el-table-column align="left" label="基本信息" prop="orderInfo" width="300">
           <template #default="scope">
             <div class="table-multi-line">
               <div style="display:inline-block;">
@@ -117,8 +117,8 @@
                 </span>
               </span> <br>
 
-              <span>订单金额：{{ scope.row.total }} 元</span><el-divider direction="vertical" />
-              <span>实付金额：{{ scope.row.finish }} 元</span><br>
+              <span>订单金额：{{ scope.row.total }} {{ scope.row.goodsArea === 1 ? '积分' : '元' }}</span><el-divider direction="vertical" />
+              <span>实付金额：{{ scope.row.finish }} {{ scope.row.goodsArea === 1 ? '积分' : '元' }}</span><br>
             </div>
           </template>
         </el-table-column>
@@ -141,8 +141,8 @@
                   <span class="king-ml-10">数量：{{ scope.row.details[0].num }}</span>
                 </div>
                 <div>
-                  <span>商品单价：{{ scope.row.details[0].price }} 元</span><el-divider direction="vertical" />
-                  <span>商品总价：{{ scope.row.total }} 元</span>
+                  <span>商品单价：{{ scope.row.details[0].price }} {{ scope.row.goodsArea === 1 ? '积分' : '元' }}</span><el-divider direction="vertical" />
+                  <span>商品总价：{{ scope.row.total }} {{ scope.row.goodsArea === 1 ? '积分' : '元' }}</span>
                 </div>
               </div>
             </div>
@@ -171,10 +171,15 @@
         <el-table-column align="left" label="收货人信息" prop="orderInfo" width="280">
           <template #default="scope">
             <div class="table-multi-line">
-              <span>提货方式：{{ scope.row.shipmentType === 1 ? '自提': '配送' }}</span> <br>
-              <span>姓名：{{ scope.row.shipmentName }}</span><el-divider direction="vertical" />
-              <span>手机号：{{ scope.row.shipmentMobile }}</span><br>
-              <span>地址：{{ scope.row.shipmentAddress }}</span><br>
+              <span>提货方式：{{ scope.row.shipmentType === 1 ? '自提': '配送' }}</span>
+              <div v-if="scope.row.shipmentType === 1">
+                <span>取货号：<span  style="color: #00afff">A{{ scope.row.pickUpNumber }}</span></span>
+              </div>
+              <div v-else>
+                <span>姓名：{{ scope.row.shipmentName }}</span><el-divider direction="vertical" />
+                <span>手机号：{{ scope.row.shipmentMobile }}</span><br>
+                <span>地址：{{ scope.row.shipmentAddress }}</span><br>
+              </div>
             </div>
           </template>
         </el-table-column>
@@ -417,6 +422,7 @@ import { createOrderDelivery, findOrderDelivery, updateOrderDelivery } from '@/a
 import { getDictFunc, formatDate, filterDict } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive, watch } from 'vue'
+import { useRouter } from 'vue-router'
 
 const path = ref(import.meta.env.VITE_BASE_API + '/')
 
@@ -451,7 +457,16 @@ const formData = ref({
   receiveTime: new Date(),
   cancelTime: new Date(),
 })
-
+const route = useRouter()
+watch(
+  () => route.currentRoute.value.query.goodsArea,
+  (n, o) => {
+    console.log('监听路由 goodsArea', n)
+    if (n) {
+      getTableData()
+    }
+  }
+)
 // 验证规则
 const rule = reactive({
 })
@@ -490,9 +505,9 @@ const handleCurrentChange = (val) => {
   page.value = val
   getTableData()
 }
-
 // 查询
 const getTableData = async() => {
+  searchInfo.value.goodsArea = route.currentRoute.value.query.goodsArea
   const table = await getOrderList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
   if (table.code === 0) {
     tableData.value = table.data.list

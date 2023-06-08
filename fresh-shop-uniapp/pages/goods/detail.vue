@@ -165,6 +165,10 @@ export default {
 						this.$message(this.$refs.toast).error("积分不足")
 						return
 					}
+                      if (this.goods.store <= 0) {
+                        this.$message(this.$refs.toast).error("库存不足")
+                        return
+                      }
 					uni.navigateTo({
 						url: '/pages/order/submit?pointGoodsId=' + this.id
 					})

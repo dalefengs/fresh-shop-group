@@ -131,7 +131,7 @@ export default {
             ],
             severList: [
                 [
-                    { name: '积分兑换', icon: 'point_shop.png', handle: this.toPointGoods },
+                    { name: '积分兑换', icon: 'point_shop.png', handle: this.toPointGoods, isLogin: true},
                     // { name: '积分明细', icon: 'finance.png', handle: this.showPhone },
                     {name: '收货地址', icon: 'address.png', handle: this.toAddress},
                     {name: '清除缓存', icon: 'clear.png', handle: this.clearStorage},
@@ -151,6 +151,11 @@ export default {
             //如果登录了，则获取用户信息
             if (this.token) {
                 const res = await getUserInfo()
+                if (res.code === 401) {
+                  this.user = ""
+                  this.point = 0
+                  this.token = ""
+                }
                 this.user = res.data.userInfo
 	              this.point = res.data.point
                 setUser(this.user)
@@ -161,11 +166,14 @@ export default {
             }
         },
         // 登录成功
-        loginSuccess(u) {
+        async loginSuccess(u) {
             console.log("loginSuccess", u);
             this.hideLogin();
             this.token = getToken()
             this.user = u
+            // 获取积分
+            const res = await getUserInfo()
+            this.point = res.data.point
             this.$message(this.$refs.toast).success("登录成功")
         },
         async changeNickName() {

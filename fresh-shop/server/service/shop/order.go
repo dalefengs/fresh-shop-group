@@ -411,6 +411,9 @@ func (orderService *OrderService) GetOrderInfoList(info shopReq.OrderSearch) (li
 	if info.UserId != nil {
 		db = db.Where("shop_order.user_id = ?", info.UserId)
 	}
+	if info.GoodsArea != nil {
+		db = db.Where("shop_order.goods_area = ?", info.GoodsArea)
+	}
 	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
 		db = db.Where("shop_order.created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
 	}
