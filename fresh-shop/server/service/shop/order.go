@@ -248,7 +248,7 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 	// 提交事务
 	txDB.Commit()
 	jsApiData := &orderPay.Config{}
-	if order.PointGoodsId != 0 {
+	if order.PointGoodsId == 0 {
 		// 发起 JSAIP 支付返回参数
 		err, jsApiData = wechat.JSAPIPay(userClaims.OpenId, order.OrderSn, order.ID, order.Total, clientIP)
 		if err != nil {

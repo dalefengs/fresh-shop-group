@@ -118,7 +118,7 @@ const accountGroupList = ref({})
 
 // 获取账户列表
 const getAccountGroupTab = async() => {
-  const res = await getAccountGroupList({status: 1})
+  const res = await getAccountGroupList({ status: 1 })
   accountGroupList.value = res.data.list
   if (accountGroupList.value.length === 0) {
     ElMessage.error('获取账户配置失败')

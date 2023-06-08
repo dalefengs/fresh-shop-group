@@ -64,8 +64,21 @@ func (userFinanceCashService *UserFinanceCashService) GetUserFinanceInfoList(inf
 	if info.UserSearch.Phone != "" {
 		db = db.Where("User.phone like ?", "%"+info.UserSearch.Phone+"%")
 	}
-	err = db.Limit(limit).Offset(offset).Find(&list).Error
-	err = db.Count(&total).Error
+	err = db.Limit(limit).Offset(offset).Order("id desc").Find(&list).Error
+
+	dbCount := global.DB.Table("user_finance_" + info.GroupNameEn).
+		Joins("User")
+	// 如果有条件搜索 下方会自动创建搜索语句
+	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
+		dbCount = dbCount.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
+	}
+	if info.UserSearch.Username != "" {
+		dbCount = dbCount.Where("User.username like ?", "%"+info.UserSearch.Username+"%")
+	}
+	if info.UserSearch.Phone != "" {
+		dbCount = dbCount.Where("User.phone like ?", "%"+info.UserSearch.Phone+"%")
+	}
+	err = dbCount.Count(&total).Error
 	if err != nil {
 		return
 	}
