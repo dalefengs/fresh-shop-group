@@ -30,7 +30,7 @@
         :data="tableData"
         row-key="ID"
       >
-        <el-table-column align="left" label="编号" prop="ID" width="120" />
+        <el-table-column align="left" label="编号" prop="ID" width="80" />
         <el-table-column align="left" label="用户信息" prop="user" width="200">
           <template #default="scope">
             <div class="table-multi-line">
@@ -39,12 +39,12 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column align="left" label="流水类型" prop="typeId" width="120">
+        <el-table-column align="left" label="流水类型" prop="typeId" width="100">
           <template #default="scope">
             {{ scope.row.financeType.name }}
           </template>
         </el-table-column>
-        <el-table-column align="left" label="操作类型" prop="optionType" width="120">
+        <el-table-column align="left" label="操作类型" prop="optionType" width="100">
           <template #default="scope">
             {{ filterDict(scope.row.optionType,finance_option_typeOptions) }}
           </template>
@@ -54,11 +54,11 @@
             <div class="table-multi-line">
               <span>变动数额：{{ scope.row.amount }}</span><br>
               <span>变动后余额：{{ scope.row.balance }}</span><br>
-              <span>手续费：{{ scope.row.feeAmount }}</span><br>
+              <!--              <span>手续费：{{ scope.row.feeAmount }}</span><br>-->
             </div>
           </template>
         </el-table-column>
-        <el-table-column align="left" label="来源信息" width="120">
+        <el-table-column align="left" label="来源信息" width="220">
           <template #default="scope">
             <div class="table-multi-line">
               <span>来源Id: {{ scope.row.fromId ? scope.row.fromId : '无' }}</span><br>
