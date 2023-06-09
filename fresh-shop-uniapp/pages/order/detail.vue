@@ -46,7 +46,8 @@
                 <view v-for="item in order.details" :key="item.ID" class="goods" @click="toGoodsDetail(item.goodsId)">
                     <view class="king-flex">
                         <view class="goods-image-box">
-                            <img class="goods-image" :src="item.goodsImage">
+                            <img v-if="item.goodsImage" class="goods-image" :src="item.goodsImage">
+                            <img v-else class="goods-image" src="/static/nopicture.jpg">
                         </view>
                         <view class="king-flex king-space-between-col">
                             <view class="goods-name">{{ item.goodsName }}</view>

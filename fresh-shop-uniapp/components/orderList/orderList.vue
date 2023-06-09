@@ -37,14 +37,16 @@
                     <!-- 订单内容 -->
                     <view v-if="order.details && order.details.length > 1" class="goods-list">
                         <view class="list-box" v-for="(item, index) in order.details" :key="index">
-                            <image v-if="index <= 3" class="box-goods-img" :src="item.goodsImage"  ></image>
+                            <image v-if="index <= 3 && !item.goodsImage" class="box-goods-img" src="/static/nopicture.jpg"  ></image>
+                            <image v-else-if="index <= 3 " class="box-goods-img" :src="item.goodsImage"  ></image>
                             <view v-if="index === 4" class="box-goods-ellipsis">
                                 ...
                             </view>
                         </view>
                     </view>
                     <view class="single-goods" v-else-if="order.details && order.details.length === 1">
-                        <image class="single-goods-img" :src="order.details[0].goodsImage"></image>
+                      <image v-if="order.details[0].goodsImage" class="single-goods-img" :src="order.details[0].goodsImage"></image>
+                        <image v-else class="single-goods-img" src="/static/nopicture.jpg"></image>
                         <view class="single-goods-info">
                             <view class="single-goods-title">
                                 <view class="king-ellipsis2 king-black">{{ order.details[0].goodsName }}</view>
@@ -272,7 +274,7 @@ export default {
                     return false
                 }
                 item.details.forEach((dItem, index) => {
-                    if (dItem.goodsImage.slice(0, 4) !== 'http') {
+                    if (dItem.goodsImage && dItem.goodsImage.slice(0, 4) !== 'http') {
                         item.details[index].goodsImage = config.baseUrl + "/" + dItem.goodsImage
                     }
                 })

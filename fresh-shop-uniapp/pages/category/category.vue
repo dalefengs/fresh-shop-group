@@ -87,7 +87,7 @@ export default {
             loginSuspendShow: false, // 显示底部登录
             categoryList: [{
                 ID: 0,
-                title: "全部分类",
+                title: "全部",
             }],
             brandList: [],
             goods: [],

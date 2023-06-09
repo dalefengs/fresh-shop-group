@@ -114,7 +114,7 @@ export default {
                 return false
             }
             res.data.list.forEach(item => {
-                if (item.goods.images && item.goods.images[0].url.slice(0, 4) !== 'http') {
+                if (item.goods.images && item.goods.images.length > 0 && item.goods.images[0].url.slice(0, 4) !== 'http') {
                     item.goods.images[0].url = config.baseUrl + "/" + item.goods.images[0].url
                 }
             })

@@ -33,7 +33,10 @@
         <view class="goods-list">
             <view>订单详情</view>
             <view class="goods-info" v-for="cart in list" :key="cart.ID">
-                <image :src="cart.goods.images ? cart.goods.images[0].url : ''"
+                <image v-if="cart.goods.images && cart.goods.images.length > 0" :src="cart.goods.images && cart.goods.images.length > 0 ? cart.goods.images[0].url : ''"
+                       class="goods-image king-radius10"
+                       mode=""></image>
+                <image v-else src="/static/nopicture.jpg"
                        class="goods-image king-radius10"
                        mode=""></image>
                 <view class="goods-info-box">
@@ -309,7 +312,7 @@ export default {
 			      ID: this.pointGoodsId,
 		      }
 		      const res = await getGoodsInfo(data, this.$refs.toast)
-		      res.data.regoods.images.forEach((item, index) => {
+          res.data.regoods.images && res.data.regoods.images.length > 0 && res.data.regoods.images.forEach((item, index) => {
 			      if (item.url.slice(0, 4) !== 'http') {
 				      res.data.regoods.images[index].url = config.baseUrl + "/" + item.url
 			      }
@@ -344,7 +347,7 @@ export default {
                 return
             }
             res.data.list.forEach(item => {
-                if (item.goods.images && item.goods.images[0].url.slice(0, 4) !== 'http') {
+                if (item.goods.images && item.goods.images.length > 0 && item.goods.images[0].url.slice(0, 4) !== 'http') {
                     item.goods.images[0].url = config.baseUrl + "/" + item.goods.images[0].url
                 }
                 // 计算总价格

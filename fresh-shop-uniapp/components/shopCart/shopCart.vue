@@ -41,7 +41,10 @@
                                     补货中
                                 </view>
                             </view>
-                            <image :src="cart.goods.images ? cart.goods.images[0].url : ''"
+                            <image v-if="cart.goods.images && cart.goods.images.length > 0" :src="cart.goods.images && cart.goods.images.length > 0 ? cart.goods.images[0].url : ''"
+                                   class="goods-image king-radius10"
+                                   mode=""></image>
+                            <image v-else src="/static/nopicture.jpg"
                                    class="goods-image king-radius10"
                                    mode=""></image>
                             <view class="goodsInfo-box">

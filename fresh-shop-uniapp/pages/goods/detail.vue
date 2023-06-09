@@ -20,7 +20,7 @@
                     <text class="price" v-if="goods.goodsArea === 1">{{ goods.costPrice || '0' }} 积分 </text>
                     <text class="price" v-else>￥{{ goods.costPrice || '0' }}</text>
                     <text class="unit">/{{ goods.unit }}</text>
-                    <text v-if="goods.price < goods.costPrice && goods.goodsArea === 0" class="del-price">￥{{
+                    <text v-if="goods.price > 0 && goods.price < goods.costPrice && goods.goodsArea === 0" class="del-price">￥{{
                             goods.price || '0'
                         }}
                     </text>
@@ -193,6 +193,11 @@ export default {
 			        res.data.regoods.weight = res.data.regoods.weight + 'g'
 		        }
 		        this.goods = res.data.regoods
+            if (this.goods.images.length === 0) {
+              this.goods.images.push({
+                url: '/static/nopicture.jpg'
+              })
+            }
 	          // 积分商品需要获取积分余额
 						if (this.goods.goodsArea === 1) {
 							const accRes = await getAccountInfo(2, this.$refs.toast)
