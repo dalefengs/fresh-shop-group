@@ -2,7 +2,7 @@
     <pageWrapper>
         <u-sticky class="king-bg-white">
             <view class="king-p-5 king-bg-white" style="height: 35px;">
-                <u-search search-icon="scan" disabled :show-action="false" placeholder="日照香炉生紫烟"
+                <u-search search-icon="search" disabled :show-action="false" placeholder="请输入商品名称"
                           @click="searchClick">
                 </u-search>
             </view>
@@ -19,7 +19,7 @@
             </scroll-view>
             <!-- 右侧滚动 -->
             <view style="width: 78%;">
-                <view v-if="brandList.length > 0" class="king-pt-10 king-px-20 king-bg-white">
+                <view v-if="brandList.length > 0" class="king-pt-10 king-px-10 king-bg-white">
                     <u-scroll-list :indicator="brandList.length > 4" indicatorColor="#fff0f0"
                                    indicatorActiveColor="#00A0DC">
                         <view class="scroll-list" style="flex-direction: row;">
@@ -175,7 +175,7 @@ export default {
         async getBrandListData() {
             const allBrand = [{
                 ID: 0,
-                name: "全部分类",
+                name: "全部",
                 logo: "https://minio.fungs.cn/picture/images/avatar/face.png",
             }]
             // 获取品牌列表
