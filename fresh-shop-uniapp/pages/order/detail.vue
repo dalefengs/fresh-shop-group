@@ -26,8 +26,8 @@
                     <!-- TODO 售后时间 -->
                     <text v-if="order.statusCancel > 0">{{ order.cancelTime | parseDate }}</text>
                     <text v-else-if="order.status === 1">{{ order.payTime | parseDate }}</text>
-<!--                    <text v-else-if="order.status === 2">{{ order.shipmentTime | parseDate }}</text>-->
-                    <text v-else-if="order.status === 2">预计送达：{{ order.delivery.scheduledTime | parseDate }}</text>
+                    <text v-else-if="order.status === 2 && order.shipmentType === 0">预计送达：{{ order.delivery.scheduledTime | parseDate }}</text>
+                    <text v-else-if="order.status === 2">{{ order.shipmentTime | parseDate }}</text>
                     <text v-else-if="order.status === 3">{{ order.receiveTime | parseDate }}</text>
                 </view>
             </view>

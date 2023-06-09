@@ -90,8 +90,6 @@ func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.File
 		global.SugarLog.Errorf("未在 Excel 表中查询到记录, len(rows) = %d", len(rows))
 		return errors.New("未在 Excel 表中查询到记录")
 	}
-	// 如果做线上图片服务器需要配置接口使用 oss 包
-	localOss := upload.Local{}
 	txDB := global.DB.Begin()
 	for key, row := range rows {
 		rowIndex := key + 1
@@ -251,37 +249,18 @@ func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.File
 		}
 		var images []shop.GoodsImage
 		// 获取图片信息
-		img1, err := f.GetPictures("Sheet1", fmt.Sprintf("N%d", rowIndex))
-		if err != nil {
-			txDB.Callback()
-			global.SugarLog.Errorf(log+"获取图片1信息失败 N%d, err:%v", rowIndex, err)
-			return errors.New(log + "获取图片1信息失败！")
-		}
-		if len(img1) == 0 {
-			txDB.Callback()
-			global.SugarLog.Errorf(log+"获取图片1信息失败 N%d, err:%v", rowIndex, err)
-			return errors.New(log + "请上传商品图片1！")
-		}
-		filePath, _, uploadErr := localOss.UploadFileByBytes(&img1[0].File, img1[0].Extension)
-		if uploadErr != nil {
-			txDB.Callback()
-			global.SugarLog.Errorf(log+"上传图片1信息失败 N%d, err:%v", rowIndex, err)
-			return errors.New(log + "上传图片1失败！")
-		}
-		images = append(images, shop.GoodsImage{
-			GoodsId: utils.Pointer(int(goods.ID)),
-			Url:     filePath,
-			Sort:    utils.Pointer(50),
-		})
-		imgCell := []string{"O", "P", "Q", "R", "S"} // 图片2 - 5单元格
+		imgCell := []string{"N", "O", "P", "Q", "R", "S"} // 图片2 - 5单元格
 		for _, c := range imgCell {
 			getExcelGoodsImages(f, &images, int(goods.ID), c, rowIndex)
 		}
-		if err := txDB.Create(&images).Error; err != nil {
-			txDB.Callback()
-			global.SugarLog.Errorf(log+"创建商品图片信息失败 images: %v, err:%v", images, err)
-			return errors.New(log + "创建商品图片信息失败")
+		if len(images) > 0 {
+			if err := txDB.Create(&images).Error; err != nil {
+				txDB.Callback()
+				global.SugarLog.Errorf(log+"创建商品图片信息失败 images: %v, err:%v", images, err)
+				return errors.New(log + "创建商品图片信息失败")
+			}
 		}
+
 		fmt.Println()
 	}
 	txDB.Commit()
@@ -290,6 +269,7 @@ func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.File
 
 func getExcelGoodsImages(f *excelize.File, list *[]shop.GoodsImage, goodsId int, cell string, rowIndex int) {
 	log := fmt.Sprintf("正在获取%s%d图片", cell, rowIndex)
+	// 如果做线上图片服务器需要配置接口使用 oss 包
 	localOss := upload.Local{}
 	img1, err := f.GetPictures("Sheet1", fmt.Sprintf("%s%d", cell, rowIndex))
 	if err != nil {

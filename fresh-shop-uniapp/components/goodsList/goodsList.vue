@@ -5,7 +5,8 @@
                 <view class="item-cover-mask" v-if="item.store <= 0">
                     <view class="item-cover-mask-text">补货中</view>
                 </view>
-                <img class="item-img" :src="item.images.length > 0 ? item.images[0].url : ''" alt="">
+                <img v-if="item.images[0]" class="item-img" :src="item.images.length > 0 ? item.images[0].url : ''" alt="">
+                <img v-else class="item-img" src="/static/nopicture.jpg" alt="">
 				<view class="item-content">
 					<view class="title">{{ item.name }}</view>
 					<view class="bottom-txt">
@@ -26,8 +27,12 @@
                 <view class="item-cover-mask" v-if="item.store <= 0">
                     <view class="item-cover-mask-text">补货中</view>
                 </view>
-				<view class="item-cover"
+				<view class="item-cover" v-if="item.images[0]"
 					:style="{ backgroundImage: 'url(' + (item.images.length > 0 ? item.images[0].url : '') + ')' }" />
+
+				<view class="item-cover" v-else
+					:style="{ backgroundImage: 'url(/static/nopicture.jpg)'}" />
+
 				<view class="item-content">
 					<text class="title">{{ item.name }}</text>
                     <view class="store">

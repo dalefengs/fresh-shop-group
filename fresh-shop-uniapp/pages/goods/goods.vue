@@ -203,7 +203,7 @@ export default {
 		// type = 1加载 其他为刷新
 		async getGoodsListData(type) {
 			const data = {
-				goodsArea: 1
+				goodsArea: 0
 			}
 			if (this.keyword) {
 				data.name = this.keyword

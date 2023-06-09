@@ -602,10 +602,10 @@ const save = async() => {
   if (formData.value.goodsArea === 1) {
     formData.value.specType = 0
   }
-  if (goodsImages.value.length === 0) {
-    ElMessage.error('请上传商品图片')
-    return
-  }
+  // if (goodsImages.value.length === 0) {
+  //   ElMessage.error('请上传商品图片')
+  //   return
+  // }
   console.log('goodsImages.value', goodsImages.value)
   elFormRef.value?.validate(async(valid) => {
     if (!valid) {

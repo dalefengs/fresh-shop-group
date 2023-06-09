@@ -78,9 +78,9 @@ func checkGoodsFrom(f *shopReq.GoodsSubmitFrom) error {
 	if f.GoodsInfo.Name == "" {
 		return errors.New("请填写商品名称")
 	}
-	if len(f.Images) <= 0 {
-		return errors.New("请上传商品图片")
-	}
+	//if len(f.Images) <= 0 {
+	//	return errors.New("请上传商品图片")
+	//}
 	if *f.GoodsInfo.CostPrice <= 0 {
 		return errors.New("请填写合法的价格或积分")
 	}
