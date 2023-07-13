@@ -357,7 +357,7 @@ const importGoodsShowClose = () => {
 }
 const importGoodsDownload = () => {
   console.log('importGoodsDownload')
-  const url = 'api/uploads/file/excel/goodsImportTemplate.xlsx'
+  const url = 'goapi/uploads/file/excel/goodsImportTemplate.xlsx'
   window.location.href = url
 }
 
