@@ -29,13 +29,13 @@ const fullscreenLoading = ref(false)
 const checkFile = (file) => {
   fullscreenLoading.value = true
   const isExcel = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-  const isLt2M = file.size / 1024 / 1024 < 3
+  const isLt2M = file.size / 1024 / 1024 < 150
   if (!isExcel) {
     ElMessage.error('上传文件只能是 Excel 格式!')
     fullscreenLoading.value = false
   }
   if (!isLt2M) {
-    ElMessage.error('上传文件大小不能超过 3MB')
+    ElMessage.error('上传文件大小不能超过 150MB')
     fullscreenLoading.value = false
   }
   return isExcel && isLt2M
