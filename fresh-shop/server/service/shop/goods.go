@@ -193,6 +193,12 @@ func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.File
 			global.SugarLog.Errorf(log+"转换重量失败 weight: %s, err:%v", weight, err)
 			return errors.New(log + "商品重量必须为数字")
 		}
+		storeInt, err := strconv.Atoi(store)
+		if err != nil {
+			txDB.Callback()
+			global.SugarLog.Errorf(log+"转换库存失败 store: %s, err:%v", store, err)
+			return errors.New(log + "商品库存必须为数字")
+		}
 
 		isHotInt := 0
 		if isHot != "" {
@@ -227,6 +233,7 @@ func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.File
 			Weight:     utils.Pointer(weightInt),
 			Unit:       unit,
 			Origin:     origin,
+			Store:      utils.Pointer(storeInt),
 			IsHot:      utils.Pointer(isHotInt),
 			IsNew:      utils.Pointer(isNewInt),
 		}
