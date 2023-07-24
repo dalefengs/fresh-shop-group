@@ -172,17 +172,17 @@ func (goodsService *GoodsService) ExportGoods(goodsIdsReq shopReq.GoodsIdsReq) (
 		ex.SetCellValue(Sheet1, joinCellIndex("isNew", rowIndex), *g.IsNew)
 		ex.SetCellValue(Sheet1, joinCellIndex("details", rowIndex), g.Desc.Details)
 		// 插入图片
-		for imgIndex, img := range g.Images {
-			// 在工作表中插入图片，并设置图片的缩放比例
-			imgErr := ex.AddPicture(Sheet1, joinCellIndex(fmt.Sprintf("image%d", imgIndex+1), rowIndex), img.Url,
-				&excelize.GraphicOptions{
-					AutoFit: true,
-				})
-			if imgErr != nil {
-				global.SugarLog.Errorf("在工作表中插入图片失败 cell:image%d; err:%v", imgIndex+1, imgErr)
-				continue
-			}
-		}
+		//for imgIndex, img := range g.Images {
+		//	// 在工作表中插入图片，并设置图片的缩放比例
+		//	imgErr := ex.AddPicture(Sheet1, joinCellIndex(fmt.Sprintf("image%d", imgIndex+1), rowIndex), img.Url,
+		//		&excelize.GraphicOptions{
+		//			AutoFit: true,
+		//		})
+		//	if imgErr != nil {
+		//		global.SugarLog.Errorf("在工作表中插入图片失败 cell:image%d; err:%v", imgIndex+1, imgErr)
+		//		continue
+		//	}
+		//}
 
 		ex.SetCellValue(Sheet1, joinCellIndex("id", rowIndex), g.ID)
 		ex.SetCellValue(Sheet1, joinCellIndex("isChange", rowIndex), "0")
@@ -405,26 +405,26 @@ func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.File
 		}
 
 		if isChange == "1" {
-			var goodsInfo shop.Goods
-			err = global.DB.Where("id = ?", goodsIdInt).First(&goodsInfo).Error
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				txDB.Callback()
-				global.SugarLog.Errorf(log+"商品不存在 goodsId: %v, err:%v", goodsId, err)
-				return errors.New(log + "商品不存在，goodsId" + goodsId)
-			} else if err != nil {
-				global.SugarLog.Errorf(log+"查找商品失败 goodsId: %v, err:%v", goodsId, err)
-				return errors.New(log + "查找商品失败，goodsId" + goodsId)
-			}
-			goods.Sale = goodsInfo.Sale
-			goods.Sort = goodsInfo.Sort
-			goods.Status = goodsInfo.Status
-			goods.IsFirst = goodsInfo.IsFirst
-			goods.ID = uint(goodsIdInt)
-			if err := txDB.Save(&goods).Error; err != nil {
-				txDB.Callback()
-				global.SugarLog.Errorf(log+"更新商品信息失败 goods: %v, err:%v", goods, err)
-				return errors.New(log + "更新商品信息失败")
-			}
+			//var goodsInfo shop.Goods
+			//err = global.DB.Where("id = ?", goodsIdInt).First(&goodsInfo).Error
+			//if errors.Is(err, gorm.ErrRecordNotFound) {
+			//	txDB.Callback()
+			//	global.SugarLog.Errorf(log+"商品不存在 goodsId: %v, err:%v", goodsId, err)
+			//	return errors.New(log + "商品不存在，goodsId" + goodsId)
+			//} else if err != nil {
+			//	global.SugarLog.Errorf(log+"查找商品失败 goodsId: %v, err:%v", goodsId, err)
+			//	return errors.New(log + "查找商品失败，goodsId" + goodsId)
+			//}
+			//goods.Sale = goodsInfo.Sale
+			//goods.Sort = goodsInfo.Sort
+			//goods.Status = goodsInfo.Status
+			//goods.IsFirst = goodsInfo.IsFirst
+			//goods.ID = uint(goodsIdInt)
+			//if err := txDB.Save(&goods).Error; err != nil {
+			//	txDB.Callback()
+			//	global.SugarLog.Errorf(log+"更新商品信息失败 goods: %v, err:%v", goods, err)
+			//	return errors.New(log + "更新商品信息失败")
+			//}
 		} else {
 			if err := txDB.Create(&goods).Error; err != nil {
 				txDB.Callback()
@@ -473,11 +473,11 @@ func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.File
 			getExcelGoodsImages(f, &images, int(goods.ID), c, rowIndex)
 		}
 		if isChange == "1" {
-			if err := txDB.Where("goods_id = ?", goodsIdInt).Delete(&shop.GoodsImage{}); err.Error != nil {
-				txDB.Callback()
-				global.SugarLog.Errorf(log+"删除商品图片信息失败 goods_id: %v, err:%v", goodsIdInt, err)
-				return errors.New(log + "删除商品图片信息失败")
-			}
+			//if err := txDB.Where("goods_id = ?", goodsIdInt).Delete(&shop.GoodsImage{}); err.Error != nil {
+			//	txDB.Callback()
+			//	global.SugarLog.Errorf(log+"删除商品图片信息失败 goods_id: %v, err:%v", goodsIdInt, err)
+			//	return errors.New(log + "删除商品图片信息失败")
+			//}
 		}
 		if len(images) > 0 {
 			if err := txDB.Create(&images).Error; err != nil {

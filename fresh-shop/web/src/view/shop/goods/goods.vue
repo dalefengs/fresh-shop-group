@@ -383,7 +383,7 @@ const exportGoodsShowClick = async() => {
   ElMessage({
     type: 'warning',
     message: '正在导出，请耐心等待，不要切换页面。',
-    duration: 8000,
+    duration: 50000,
   })
   const res = await exportGoods({})
   if (res.code && res.code !== 0) {
