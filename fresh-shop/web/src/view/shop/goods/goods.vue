@@ -386,11 +386,33 @@ const exportGoodsShowClick = async() => {
     duration: 8000,
   })
   const res = await exportGoods({})
-  if (res.code !== 0) {
+  if (res.code && res.code !== 0) {
     ElMessage({
       type: 'error',
       message: res.msg
     })
+  }
+  ElMessage({
+    type: 'success',
+    message: '导出完成请保存文件!'
+  })
+  fileDownload(res, '启运冻品-商品信息列表.xlsx')
+}
+
+const fileDownload = (res, filename) => {
+  const blob = new Blob([res.data]) // 将返回的数据通过Blob的构造方法，创建Blob对象
+  if ('msSaveOrOpenBlob' in navigator) {
+    window.navigator.msSaveOrOpenBlob(blob, filename) // 针对浏览器
+  } else {
+    const elink = document.createElement('a') // 创建a标签
+    elink.download = filename
+    elink.style.display = 'none'
+    // 创建一个指向blob的url，这里就是点击可以下载文件的根结
+    elink.href = URL.createObjectURL(blob)
+    document.body.appendChild(elink)
+    elink.click()
+    URL.revokeObjectURL(elink.href) // 移除链接
+    document.body.removeChild(elink) // 移除a标签
   }
 }
 
