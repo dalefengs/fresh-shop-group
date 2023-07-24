@@ -115,6 +115,7 @@ const handleCurrentChange = (val) => {
 
 // 查询
 const getTableData = async() => {
+  tableData.value = []
   const table = await getFileList({ page: page.value, pageSize: pageSize.value, ...search.value })
   if (table.code === 0) {
     tableData.value = table.data.list

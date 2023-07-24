@@ -73,6 +73,30 @@ func (goodsApi *GoodsApi) BatchCreateGoodsByExcel(c *gin.Context) {
 	}
 }
 
+// ExportGoods 批量导入商品信息
+// @Tags Goods
+// @Summary 批量导入商品信息
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body shop.Goods true "批量导出商品信息"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /goods/batchCreateGoodsByExcel [post]
+func (goodsApi *GoodsApi) ExportGoods(c *gin.Context) {
+	var goodsIds shopReq.GoodsIdsReq
+	err := c.ShouldBindJSON(&goodsIds)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if err := goodsService.ExportGoods(goodsIds); err != nil {
+		global.Log.Error("导出失败!", zap.Error(err))
+		response.FailWithMessage(err.Error(), c)
+	} else {
+		response.OkWithMessage("导出成功", c)
+	}
+}
+
 // 基本的字段验证
 func checkGoodsFrom(f *shopReq.GoodsSubmitFrom) error {
 	if f.GoodsInfo.Name == "" {

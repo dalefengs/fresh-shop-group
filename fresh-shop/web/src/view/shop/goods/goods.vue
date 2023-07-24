@@ -25,6 +25,7 @@
       <div class="gva-btn-list">
         <el-button type="primary" icon="plus" @click="openGoodsFrom('新增商品')">新增</el-button>
         <el-button type="primary" icon="Download" @click="importGoodsShowClick">Excel 导入</el-button>
+        <el-button type="primary" icon="Upload" @click="exportGoodsShowClick">导出所有商品</el-button>
         <el-popover v-model:visible="deleteVisible" placement="top" width="160">
           <p>确定要删除吗？</p>
           <div style="text-align: right; margin-top: 8px;">
@@ -180,7 +181,8 @@ export default {
 import {
   deleteGoods,
   deleteGoodsByIds,
-  getGoodsList
+  getGoodsList,
+  exportGoods
 } from '@/api/goods'
 
 // 全量引入格式化工具 请按需保留
@@ -375,6 +377,21 @@ const importGoodsSuccess = (data) => {
   })
   importGoodsShow.value = true
   getTableData()
+}
+
+const exportGoodsShowClick = async() => {
+  ElMessage({
+    type: 'warning',
+    message: '正在导出，请耐心等待，不要切换页面。',
+    duration: 8000,
+  })
+  const res = await exportGoods({})
+  if (res.code !== 0) {
+    ElMessage({
+      type: 'error',
+      message: res.msg
+    })
+  }
 }
 
 </script>

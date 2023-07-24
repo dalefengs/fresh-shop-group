@@ -45,3 +45,7 @@ type specValue struct {
 	Sort      *int     `json:"sort" from:"sort"`
 	Store     *int     `json:"store" from:"store"`
 }
+
+type GoodsIdsReq struct {
+	GoodsIds []string
+}
