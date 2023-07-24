@@ -29,6 +29,6 @@ func (s *GoodsRouter) InitGoodsPublicRouter(Router *gin.RouterGroup) {
 		goodsRouterWithoutRecord.GET("findGoods", goodsApi.FindGoods)                              // 根据ID获取Goods
 		goodsRouterWithoutRecord.GET("getGoodsList", goodsApi.GetGoodsList)                        // 获取Goods列表
 		goodsRouterWithoutRecord.POST("batchCreateGoodsByExcel", goodsApi.BatchCreateGoodsByExcel) // 批量导入商品信息
-
+		goodsRouterWithoutRecord.POST("exportGoods", goodsApi.ExportGoods)                         // 批量导入商品信息
 	}
 }

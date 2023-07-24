@@ -16,6 +16,15 @@ export const createGoods = (data) => {
   })
 }
 
+// 导出商品
+export const exportGoods = (data) => {
+  return service({
+    url: '/goods/exportGoods',
+    method: 'post',
+    data
+  })
+}
+
 // @Tags Goods
 // @Summary 批量导入Goods
 // @Security ApiKeyAuth

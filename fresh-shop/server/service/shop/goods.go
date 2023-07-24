@@ -11,6 +11,8 @@ import (
 	"fresh-shop/server/utils/upload"
 	"github.com/xuri/excelize/v2"
 	"gorm.io/gorm"
+	_ "image/gif"
+	_ "image/jpeg"
 	_ "image/png"
 	"mime/multipart"
 	"strconv"
@@ -22,7 +24,7 @@ type GoodsService struct {
 
 // 字段与单元格位置映射
 var excelGoods = map[string]string{
-	"name":         "",  // 商品名称
+	"name":         "A", // 商品名称
 	"categoryName": "B", // 分类名称
 	"brandName":    "C", // 品牌名称
 	"costPrice":    "D", // 原价
@@ -41,6 +43,32 @@ var excelGoods = map[string]string{
 	"image4":       "Q", //
 	"image5":       "R", //
 	"image6":       "S", //
+	"id":           "T", // 商品ID
+	"isChange":     "U", // 是否编辑(0不操作 1修改 2添加)
+}
+
+var excelGoodsHeader = map[string]string{
+	"A": "商品名称*",              // name
+	"B": "分类名称*",              // categoryName
+	"C": "品牌名称",               // brandName
+	"D": "商品原价*",              // costPrice
+	"E": "优惠价格",               // price
+	"F": "最小购买数量",             // minCount
+	"G": "产地",                 // origin
+	"H": "商品单位*(盒、件、克等)",      // unit
+	"I": "商品重量(g)*",           // weight
+	"J": "库存*",                // store
+	"K": "是否热销(0否 1是)",        // isHot
+	"L": "是否上新(0否 1是)",        // isNew
+	"M": "商品详情信息",             // details
+	"N": "商品图片1*",             // image1
+	"O": "商品图片2",              // image2
+	"P": "商品图片3",              // image3
+	"Q": "商品图片4",              // image4
+	"R": "商品图片5",              // image5
+	"S": "商品图片6",              // image6
+	"T": "商品ID(不可修改)",         // id
+	"U": "是否编辑(0不操作 1修改 2添加)", // isChange 是否编辑(0不操作 1修改 2添加)
 }
 
 // 字段与单元格位置映射
@@ -56,8 +84,119 @@ var excelGoodsIndex = map[string]int{
 	"weight":       8,  // 重量
 	"store":        9,  // 库存
 	"isHot":        10, // 是否热销
-	"isNew":        10, // 是否上心
+	"isNew":        11, // 是否上新
 	"details":      12, // 详情
+	"id":           19, // Id
+	"isChange":     20, // 是否修改
+}
+
+// 图片单元格
+var imgCell = []string{"N", "O", "P", "Q", "R", "S"} // 图片2 - 5单元格
+
+const Sheet1 = "Sheet1"
+
+// ExportGoods 批量导出商品信息
+// Author [likfees](https://github.com/likfees)
+func (goodsService *GoodsService) ExportGoods(goodsIdsReq shopReq.GoodsIdsReq) (err error) {
+	if goodsIdsReq.GoodsIds != nil {
+		return nil
+	}
+	var list []shop.Goods
+	err = global.DB.Preload("Images").Preload("Desc").Preload("Category").Preload("Brand").Find(&list).Error
+	if err != nil {
+		global.SugarLog.Errorf("查询商品异常 %v", err)
+		return errors.New("查询商品异常：" + err.Error())
+	}
+	ex := excelize.NewFile()
+	defer func() {
+		if err := ex.Close(); err != nil {
+			global.SugarLog.Errorf("excelize.close %v", err)
+		}
+	}()
+
+	style, err := ex.NewStyle(&excelize.Style{
+		Alignment: &excelize.Alignment{
+			WrapText:   true,
+			Vertical:   "center",
+			Horizontal: "left",
+		},
+	})
+
+	err = ex.SetRowHeight(Sheet1, 1, 100)
+	if err != nil {
+		global.SugarLog.Errorf("设置首行行高失败 %v", err)
+		return err
+	}
+	ex.SetRowHeight(Sheet1, 2, 50)
+	// 设置每行高
+	for i := 0; i < len(list); i++ {
+		index := i + 3
+		ex.SetRowHeight(Sheet1, index, 80)
+	}
+	err = ex.SetColWidth("Sheet1", "A", "U", 17)
+	if err != nil {
+		global.SugarLog.Errorf("设置列宽失败 %v", err)
+		return err
+	}
+	ex.SetCellStyle(Sheet1, "A1", "A1", style)
+	ex.SetRowStyle(Sheet1, 2, len(list)+3, style)
+
+	// 合并
+	ex.MergeCell("Sheet1", "A1", "K1")
+	ex.SetCellValue(Sheet1, "A1", `
+注意事项：
+1. *号是必填选项
+2. 图片必须在表格内
+3. 表格第一、第二行不允许修改
+4. 请勿使用 WPS 进行编辑 Excel 表格`)
+
+	for k, v := range excelGoodsHeader {
+		ex.SetCellValue(Sheet1, k+"2", v) // 第二行
+	}
+
+	// 从第3行开始
+	rowIndex := 3
+	for _, g := range list {
+		ex.SetCellValue(Sheet1, joinCellIndex("name", rowIndex), g.Name)
+		ex.SetCellValue(Sheet1, joinCellIndex("categoryName", rowIndex), g.Category.Title)
+		ex.SetCellValue(Sheet1, joinCellIndex("brandName", rowIndex), g.Brand.Name)
+		ex.SetCellValue(Sheet1, joinCellIndex("costPrice", rowIndex), *g.CostPrice)
+		ex.SetCellValue(Sheet1, joinCellIndex("price", rowIndex), *g.Price)
+		ex.SetCellValue(Sheet1, joinCellIndex("minCount", rowIndex), *g.MinCount)
+		ex.SetCellValue(Sheet1, joinCellIndex("origin", rowIndex), g.Origin)
+		ex.SetCellValue(Sheet1, joinCellIndex("unit", rowIndex), g.Unit)
+		ex.SetCellValue(Sheet1, joinCellIndex("weight", rowIndex), *g.Weight)
+		ex.SetCellValue(Sheet1, joinCellIndex("store", rowIndex), *g.Store)
+		ex.SetCellValue(Sheet1, joinCellIndex("isHot", rowIndex), *g.IsHot)
+		ex.SetCellValue(Sheet1, joinCellIndex("isNew", rowIndex), *g.IsNew)
+		ex.SetCellValue(Sheet1, joinCellIndex("details", rowIndex), g.Desc.Details)
+		// 插入图片
+		for imgIndex, img := range g.Images {
+			// 在工作表中插入图片，并设置图片的缩放比例
+			imgErr := ex.AddPicture(Sheet1, joinCellIndex(fmt.Sprintf("image%d", imgIndex+1), rowIndex), img.Url,
+				&excelize.GraphicOptions{
+					AutoFit: true,
+				})
+			if imgErr != nil {
+				global.SugarLog.Errorf("在工作表中插入图片失败 cell:image%d; err:%v", imgIndex+1, imgErr)
+				continue
+			}
+		}
+
+		ex.SetCellValue(Sheet1, joinCellIndex("id", rowIndex), g.ID)
+		ex.SetCellValue(Sheet1, joinCellIndex("isChange", rowIndex), "0")
+		rowIndex++
+	}
+	// 根据指定路径保存文件
+	if err := ex.SaveAs("Book1.xlsx"); err != nil {
+		global.SugarLog.Errorf("保存导出商品失败 %v", err)
+		return errors.New("导出商品失败")
+	}
+	return nil
+}
+
+func joinCellIndex(rowName string, colIndex int) string {
+	return fmt.Sprintf("%s%d", excelGoods[rowName], colIndex)
 }
 
 // BatchCreateGoodsByExcel 批量导入商品信息
@@ -256,7 +395,6 @@ func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.File
 		}
 		var images []shop.GoodsImage
 		// 获取图片信息
-		imgCell := []string{"N", "O", "P", "Q", "R", "S"} // 图片2 - 5单元格
 		for _, c := range imgCell {
 			getExcelGoodsImages(f, &images, int(goods.ID), c, rowIndex)
 		}
