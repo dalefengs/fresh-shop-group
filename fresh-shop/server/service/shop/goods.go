@@ -1,6 +1,7 @@
 package shop
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"fresh-shop/server/global"
@@ -97,15 +98,15 @@ const Sheet1 = "Sheet1"
 
 // ExportGoods 批量导出商品信息
 // Author [likfees](https://github.com/likfees)
-func (goodsService *GoodsService) ExportGoods(goodsIdsReq shopReq.GoodsIdsReq) (err error) {
+func (goodsService *GoodsService) ExportGoods(goodsIdsReq shopReq.GoodsIdsReq) (r *bytes.Reader, err error) {
 	if goodsIdsReq.GoodsIds != nil {
-		return nil
+		return nil, nil
 	}
 	var list []shop.Goods
 	err = global.DB.Preload("Images").Preload("Desc").Preload("Category").Preload("Brand").Find(&list).Error
 	if err != nil {
 		global.SugarLog.Errorf("查询商品异常 %v", err)
-		return errors.New("查询商品异常：" + err.Error())
+		return nil, errors.New("查询商品异常：" + err.Error())
 	}
 	ex := excelize.NewFile()
 	defer func() {
@@ -125,7 +126,7 @@ func (goodsService *GoodsService) ExportGoods(goodsIdsReq shopReq.GoodsIdsReq) (
 	err = ex.SetRowHeight(Sheet1, 1, 100)
 	if err != nil {
 		global.SugarLog.Errorf("设置首行行高失败 %v", err)
-		return err
+		return nil, err
 	}
 	ex.SetRowHeight(Sheet1, 2, 50)
 	// 设置每行高
@@ -136,7 +137,7 @@ func (goodsService *GoodsService) ExportGoods(goodsIdsReq shopReq.GoodsIdsReq) (
 	err = ex.SetColWidth("Sheet1", "A", "U", 17)
 	if err != nil {
 		global.SugarLog.Errorf("设置列宽失败 %v", err)
-		return err
+		return nil, err
 	}
 	ex.SetCellStyle(Sheet1, "A1", "A1", style)
 	ex.SetRowStyle(Sheet1, 2, len(list)+3, style)
@@ -188,11 +189,16 @@ func (goodsService *GoodsService) ExportGoods(goodsIdsReq shopReq.GoodsIdsReq) (
 		rowIndex++
 	}
 	// 根据指定路径保存文件
-	if err := ex.SaveAs("Book1.xlsx"); err != nil {
-		global.SugarLog.Errorf("保存导出商品失败 %v", err)
-		return errors.New("导出商品失败")
+	//if err := ex.SaveAs("Book1.xlsx"); err != nil {
+	//	global.SugarLog.Errorf("保存导出商品失败 %v", err)
+	//	return errors.New("导出商品失败")
+	//}
+	buffer, err := ex.WriteToBuffer()
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	r = bytes.NewReader(buffer.Bytes())
+	return r, nil
 }
 
 func joinCellIndex(rowName string, colIndex int) string {
@@ -240,6 +246,16 @@ func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.File
 			fmt.Print(colCell, "\t")
 		}
 		log := fmt.Sprintf("第 %d 行, ", rowIndex)
+		goodsId := ""
+		isChange := "0"
+		if len(row) >= 19 {
+			goodsId = row[excelGoodsIndex["id"]]
+			isChange = row[excelGoodsIndex["isChange"]]
+			if isChange == "0" { // (0不操作 1修改 2添加)
+				fmt.Println("isChange = 0 无需操作")
+				continue
+			}
+		}
 		name := row[excelGoodsIndex["name"]]
 		categoryName := row[excelGoodsIndex["categoryName"]]
 		brandName := row[excelGoodsIndex["brandName"]]
@@ -301,6 +317,16 @@ func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.File
 				return errors.New(log + "品牌查询失败")
 			}
 		}
+		// region 类型转换
+		goodsIdInt := 0
+		if goodsId != "" {
+			goodsIdInt, err = strconv.Atoi(goodsId)
+			if err != nil {
+				txDB.Callback()
+				global.SugarLog.Errorf(log+"商品 id 失败 goodsId: %s, err:%v", goodsId, err)
+				return errors.New(log + "商品Id 必须为数字")
+			}
+		}
 
 		costPriceFloat, err := strconv.ParseFloat(costPrice, 64)
 		if err != nil {
@@ -358,6 +384,7 @@ func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.File
 				return errors.New(log + "是否上新必须为数字")
 			}
 		}
+		// endregion
 
 		goods := shop.Goods{
 			GoodsArea:  utils.Pointer(0),
@@ -377,10 +404,33 @@ func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.File
 			IsNew:      utils.Pointer(isNewInt),
 		}
 
-		if err := txDB.Create(&goods).Error; err != nil {
-			txDB.Callback()
-			global.SugarLog.Errorf(log+"创建商品信息失败 goods: %v, err:%v", goods, err)
-			return errors.New(log + "创建商品信息失败")
+		if isChange == "1" {
+			var goodsInfo shop.Goods
+			err = global.DB.Where("id = ?", goodsIdInt).First(&goodsInfo).Error
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				txDB.Callback()
+				global.SugarLog.Errorf(log+"商品不存在 goodsId: %v, err:%v", goodsId, err)
+				return errors.New(log + "商品不存在，goodsId" + goodsId)
+			} else if err != nil {
+				global.SugarLog.Errorf(log+"查找商品失败 goodsId: %v, err:%v", goodsId, err)
+				return errors.New(log + "查找商品失败，goodsId" + goodsId)
+			}
+			goods.Sale = goodsInfo.Sale
+			goods.Sort = goodsInfo.Sort
+			goods.Status = goodsInfo.Status
+			goods.IsFirst = goodsInfo.IsFirst
+			goods.ID = uint(goodsIdInt)
+			if err := txDB.Save(&goods).Error; err != nil {
+				txDB.Callback()
+				global.SugarLog.Errorf(log+"更新商品信息失败 goods: %v, err:%v", goods, err)
+				return errors.New(log + "更新商品信息失败")
+			}
+		} else {
+			if err := txDB.Create(&goods).Error; err != nil {
+				txDB.Callback()
+				global.SugarLog.Errorf(log+"创建商品信息失败 goods: %v, err:%v", goods, err)
+				return errors.New(log + "创建商品信息失败")
+			}
 		}
 
 		// 商品详情
@@ -388,15 +438,46 @@ func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.File
 			GoodsId: utils.Pointer(int(goods.ID)),
 			Details: details,
 		}
-		if err := txDB.Create(&goodsDetails).Error; err != nil {
-			txDB.Callback()
-			global.SugarLog.Errorf(log+"创建商品详情失败 goodsDetails: %v, err:%v", goodsDetails, err)
-			return errors.New(log + "创建商品详情失败")
+		if isChange == "1" {
+			var desc shop.GoodsDescription
+			dbErr := global.DB.Where("goods_id = ?", goodsIdInt).First(&desc)
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				if err := txDB.Create(&goodsDetails).Error; err != nil {
+					txDB.Callback()
+					global.SugarLog.Errorf(log+"创建商品详情失败 goodsDetails: %v, err:%v", goodsDetails, err)
+					return errors.New(log + "创建商品详情失败")
+				}
+			} else if err != nil {
+				txDB.Callback()
+				global.SugarLog.Errorf(log+"创建商品详情失败 goodsDetails: %v, dbErr:%v", goodsDetails, dbErr)
+				return errors.New(log + "查询商品详情信息失败")
+			}
+			// 更新
+			desc.Details = details
+			if err := txDB.Save(&desc).Error; err != nil {
+				txDB.Callback()
+				global.SugarLog.Errorf(log+"更新商品详情失败 goodsDetails: %v, err:%v", desc, err)
+				return errors.New(log + "更新商品详情失败")
+			}
+		} else {
+			if err := txDB.Create(&goodsDetails).Error; err != nil {
+				txDB.Callback()
+				global.SugarLog.Errorf(log+"创建商品详情失败 goodsDetails: %v, err:%v", goodsDetails, err)
+				return errors.New(log + "创建商品详情失败")
+			}
 		}
+
 		var images []shop.GoodsImage
 		// 获取图片信息
 		for _, c := range imgCell {
 			getExcelGoodsImages(f, &images, int(goods.ID), c, rowIndex)
+		}
+		if isChange == "1" {
+			if err := txDB.Where("goods_id = ?", goodsIdInt).Delete(&shop.GoodsImage{}); err.Error != nil {
+				txDB.Callback()
+				global.SugarLog.Errorf(log+"删除商品图片信息失败 goods_id: %v, err:%v", goodsIdInt, err)
+				return errors.New(log + "删除商品图片信息失败")
+			}
 		}
 		if len(images) > 0 {
 			if err := txDB.Create(&images).Error; err != nil {
@@ -405,7 +486,6 @@ func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.File
 				return errors.New(log + "创建商品图片信息失败")
 			}
 		}
-
 		fmt.Println()
 	}
 	txDB.Commit()

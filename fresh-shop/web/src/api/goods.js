@@ -21,6 +21,7 @@ export const exportGoods = (data) => {
   return service({
     url: '/goods/exportGoods',
     method: 'post',
+    responseType: 'blob',
     data
   })
 }

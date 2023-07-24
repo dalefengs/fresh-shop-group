@@ -89,11 +89,11 @@ func (goodsApi *GoodsApi) ExportGoods(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	if err := goodsService.ExportGoods(goodsIds); err != nil {
+	if r, err := goodsService.ExportGoods(goodsIds); err != nil {
 		global.Log.Error("导出失败!", zap.Error(err))
 		response.FailWithMessage(err.Error(), c)
 	} else {
-		response.OkWithMessage("导出成功", c)
+		c.DataFromReader(200, r.Size(), "application/octet-stream", r, nil) // fileContent是文件的字节流
 	}
 }
 
