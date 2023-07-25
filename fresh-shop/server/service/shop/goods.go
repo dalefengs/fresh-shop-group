@@ -405,26 +405,28 @@ func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.File
 		}
 
 		if isChange == "1" {
-			//var goodsInfo shop.Goods
-			//err = global.DB.Where("id = ?", goodsIdInt).First(&goodsInfo).Error
-			//if errors.Is(err, gorm.ErrRecordNotFound) {
-			//	txDB.Callback()
-			//	global.SugarLog.Errorf(log+"商品不存在 goodsId: %v, err:%v", goodsId, err)
-			//	return errors.New(log + "商品不存在，goodsId" + goodsId)
-			//} else if err != nil {
-			//	global.SugarLog.Errorf(log+"查找商品失败 goodsId: %v, err:%v", goodsId, err)
-			//	return errors.New(log + "查找商品失败，goodsId" + goodsId)
-			//}
-			//goods.Sale = goodsInfo.Sale
-			//goods.Sort = goodsInfo.Sort
-			//goods.Status = goodsInfo.Status
-			//goods.IsFirst = goodsInfo.IsFirst
-			//goods.ID = uint(goodsIdInt)
-			//if err := txDB.Save(&goods).Error; err != nil {
-			//	txDB.Callback()
-			//	global.SugarLog.Errorf(log+"更新商品信息失败 goods: %v, err:%v", goods, err)
-			//	return errors.New(log + "更新商品信息失败")
-			//}
+			var goodsInfo shop.Goods
+			err = global.DB.Where("id = ?", goodsIdInt).First(&goodsInfo).Error
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				txDB.Callback()
+				global.SugarLog.Errorf(log+"商品不存在 goodsId: %v, err:%v", goodsId, err)
+				return errors.New(log + "商品不存在，goodsId" + goodsId)
+			} else if err != nil {
+				global.SugarLog.Errorf(log+"查找商品失败 goodsId: %v, err:%v", goodsId, err)
+				return errors.New(log + "查找商品失败，goodsId" + goodsId)
+			}
+			goods.Sale = goodsInfo.Sale
+			goods.Sort = goodsInfo.Sort
+			goods.Status = goodsInfo.Status
+			goods.IsFirst = goodsInfo.IsFirst
+			goods.ID = uint(goodsIdInt)
+			goods.CreatedAt = goodsInfo.CreatedAt
+			goods.DeletedAt = goodsInfo.DeletedAt
+			if err := txDB.Save(&goods).Error; err != nil {
+				txDB.Callback()
+				global.SugarLog.Errorf(log+"更新商品信息失败 goods: %v, err:%v", goods, err)
+				return errors.New(log + "更新商品信息失败")
+			}
 		} else {
 			if err := txDB.Create(&goods).Error; err != nil {
 				txDB.Callback()
@@ -451,14 +453,16 @@ func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.File
 				txDB.Callback()
 				global.SugarLog.Errorf(log+"创建商品详情失败 goodsDetails: %v, dbErr:%v", goodsDetails, dbErr)
 				return errors.New(log + "查询商品详情信息失败")
+			} else {
+				// 更新
+				desc.Details = details
+				if err := txDB.Save(&desc).Error; err != nil {
+					txDB.Callback()
+					global.SugarLog.Errorf(log+"更新商品详情失败 goodsDetails: %v, err:%v", desc, err)
+					return errors.New(log + "更新商品详情失败")
+				}
 			}
-			// 更新
-			desc.Details = details
-			if err := txDB.Save(&desc).Error; err != nil {
-				txDB.Callback()
-				global.SugarLog.Errorf(log+"更新商品详情失败 goodsDetails: %v, err:%v", desc, err)
-				return errors.New(log + "更新商品详情失败")
-			}
+
 		} else {
 			if err := txDB.Create(&goodsDetails).Error; err != nil {
 				txDB.Callback()
