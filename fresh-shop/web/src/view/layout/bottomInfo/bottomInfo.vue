@@ -11,6 +11,10 @@
       <span>
         <a href="https://github.com/flipped-aurora">flipped-aurora团队</a>
       </span>
+      <el-divider direction="vertical" />
+      <span>
+        渝ICP备2023007060号-1
+      </span>
     </div>
   </div>
 </template>
