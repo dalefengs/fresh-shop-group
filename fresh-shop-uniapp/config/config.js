@@ -13,7 +13,6 @@ export default {
     // 其他使用 url
     // #ifndef H5
      // baseUrl: 'http://localhost:48888',
-    // baseUrl: 'https://qiyun.fungs.cn/api',
-    baseUrl: 'https://qiyundongpin.cn/api',
+    baseUrl: 'https://qiyundongpin.cn/goapi',
     // #endif
 }

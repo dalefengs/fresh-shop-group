@@ -18,10 +18,10 @@
             <view class="price-box">
                 <view>
                     <text class="price" v-if="goods.goodsArea === 1">{{ goods.costPrice || '0' }} 积分 </text>
-                    <text class="price" v-else>￥{{ goods.costPrice || '0' }}</text>
+                    <text class="price" v-else>￥{{ goods.price > 0 && goods.price < goods.costPrice ? goods.price : goods.costPrice || '0' }}</text>
                     <text class="unit">/{{ goods.unit }}</text>
                     <text v-if="goods.price > 0 && goods.price < goods.costPrice && goods.goodsArea === 0" class="del-price">￥{{
-                            goods.price || '0'
+                            goods.costPrice || '0'
                         }}
                     </text>
                 </view>
