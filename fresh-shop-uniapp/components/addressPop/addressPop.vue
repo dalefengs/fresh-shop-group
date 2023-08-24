@@ -108,6 +108,7 @@ export default {
             this.$emit("close");
         },
         toCreateAddress() {
+            this.close()
             uni.navigateTo({
                 url: '/pages/address/addressForm?submit=1'
             })
