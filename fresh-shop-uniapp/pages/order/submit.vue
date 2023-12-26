@@ -210,90 +210,97 @@ export default {
                 this.$message(this.$refs.toast).error("交易失败，请重试")
                 return false
             }
-            this.toPay(res.data.pay, res.data.order)
+			// 直接提交订单，不调用支付模块
+			else
+			    this.$message(this.$refs.toast).success("订单已提交，等待配送")
+				uni.redirectTo({
+					url: '/pages/order/detail?id=' + res.data.order.ID
+				})
+			    return true
+            // this.toPay(res.data.pay, res.data.order)
         },
         // 发起微信支付
-        toPay(pay, order) {
-            this.$message(this.$refs.toast).loading('正在支付中...')
-            const payment = {
-                provider: 'wxpay', // 服务提供商，通过 uni.getProvider 获取。
-                timeStamp: pay.timestamp,
-                nonceStr: pay.nonceStr,
-                orderInfo: pay.order,
-                package: 'prepay_id=' + pay.prePayId,
-                signType: pay.signType,
-                paySign: pay.paySign,
-                success: res => {
-                    console.log('success', res)
-                    this.$message(this.$refs.toast).hide()
-                    this.paySuccess(order.ID)
-                },
-                fail: res => {
-                    console.log('fail', res)
-                    this.$message(this.$refs.toast).hide()
-                    if (res.errMsg === 'requestPayment:fail cancel') {
-                        this.$message(this.$refs.toast).error("取消支付").then(() => {
-                            uni.redirectTo({
-                                url: '/pages/order/detail?id=' + order.ID
-                            })
-                        })
-                        return false
-                    }
-                    this.$message(this.$refs.toast).error("支付失败").then(() => {
-                        uni.redirectTo({
-                            url: '/pages/order/detail?id=' + order.ID
-                        })
-                    })
-                }
-            }
-            console.log('payment', payment)
-            uni.requestPayment(payment)
-        },
-        // 支付成功回调
-        paySuccess(orderId) {
-            this.$message(this.$refs.toast).loading('正在获取支付结果...')
-            let count = 0
-            let errCount = 0
-            const statusInterval = setInterval(async () => {
-                const res = await getOrderStatus(orderId);
-                if (res.code !== 0) {
-                    errCount ++
-                    // 只允许错误重试 30 次 30秒
-                    if (errCount > 30) {
-                        clearInterval(statusInterval); // 清除定时器
-                        this.$message(this.$refs.toast).hide()
-                        this.$message(this.$refs.toast).error("获取交易结果超时，请稍后查看").then(() => {
-                            uni.redirectTo({
-                                url: '/pages/order/detail?id=' + orderId
-                            })
-                        })
-                    }
-                    return false;
-                }
-                count++
-                // 只允许重试获取状态 30 次 30秒
-                if (count > 30) {
-                    clearInterval(statusInterval); // 清除定时器
-                    this.$message(this.$refs.toast).hide()
-                    this.$message(this.$refs.toast).error("获取交易结果超时，请稍后查看").then(() => {
-                        uni.redirectTo({
-                            url: '/pages/order/detail?id=' + orderId
-                        })
-                    })
-                    return
-                }
-                if (res.data.status === 1) {
-                    clearInterval(statusInterval); // 清除定时器
-                    this.$message(this.$refs.toast).hide()
-                    // 进行其他操作
-                    this.$message(this.$refs.toast).success("支付成功").then(() => {
-                        uni.redirectTo({
-                            url: '/pages/order/detail?id=' + orderId
-                        })
-                    })
-                }
-            }, 1000);
-        },
+        // toPay(pay, order) {
+        //     this.$message(this.$refs.toast).loading('正在支付中...')
+        //     const payment = {
+        //         provider: 'wxpay', // 服务提供商，通过 uni.getProvider 获取。
+        //         timeStamp: pay.timestamp,
+        //         nonceStr: pay.nonceStr,
+        //         orderInfo: pay.order,
+        //         package: 'prepay_id=' + pay.prePayId,
+        //         signType: pay.signType,
+        //         paySign: pay.paySign,
+        //         success: res => {
+        //             console.log('success', res)
+        //             this.$message(this.$refs.toast).hide()
+        //             this.paySuccess(order.ID)
+        //         },
+        //         fail: res => {
+        //             console.log('fail', res)
+        //             this.$message(this.$refs.toast).hide()
+        //             if (res.errMsg === 'requestPayment:fail cancel') {
+        //                 this.$message(this.$refs.toast).error("取消支付").then(() => {
+        //                     uni.redirectTo({
+        //                         url: '/pages/order/detail?id=' + order.ID
+        //                     })
+        //                 })
+        //                 return false
+        //             }
+        //             this.$message(this.$refs.toast).error("支付失败").then(() => {
+        //                 uni.redirectTo({
+        //                     url: '/pages/order/detail?id=' + order.ID
+        //                 })
+        //             })
+        //         }
+        //     }
+        //     console.log('payment', payment)
+        //     uni.requestPayment(payment)
+        // },
+        // // 支付成功回调
+        // paySuccess(orderId) {
+        //     this.$message(this.$refs.toast).loading('正在获取支付结果...')
+        //     let count = 0
+        //     let errCount = 0
+        //     const statusInterval = setInterval(async () => {
+        //         const res = await getOrderStatus(orderId);
+        //         if (res.code !== 0) {
+        //             errCount ++
+        //             // 只允许错误重试 30 次 30秒
+        //             if (errCount > 30) {
+        //                 clearInterval(statusInterval); // 清除定时器
+        //                 this.$message(this.$refs.toast).hide()
+        //                 this.$message(this.$refs.toast).error("获取交易结果超时，请稍后查看").then(() => {
+        //                     uni.redirectTo({
+        //                         url: '/pages/order/detail?id=' + orderId
+        //                     })
+        //                 })
+        //             }
+        //             return false;
+        //         }
+        //         count++
+        //         // 只允许重试获取状态 30 次 30秒
+        //         if (count > 30) {
+        //             clearInterval(statusInterval); // 清除定时器
+        //             this.$message(this.$refs.toast).hide()
+        //             this.$message(this.$refs.toast).error("获取交易结果超时，请稍后查看").then(() => {
+        //                 uni.redirectTo({
+        //                     url: '/pages/order/detail?id=' + orderId
+        //                 })
+        //             })
+        //             return
+        //         }
+        //         if (res.data.status === 1) {
+        //             clearInterval(statusInterval); // 清除定时器
+        //             this.$message(this.$refs.toast).hide()
+        //             // 进行其他操作
+        //             this.$message(this.$refs.toast).success("支付成功").then(() => {
+        //                 uni.redirectTo({
+        //                     url: '/pages/order/detail?id=' + orderId
+        //                 })
+        //             })
+        //         }
+        //     }, 1000);
+        // },
         // 地址选择
         addressChecked(addressInfo) {
             this.address = addressInfo

@@ -164,6 +164,22 @@ export default {
 		});
 	},
 	methods: {
+		//分享好友
+		onShareAppMessage() {
+		      return {
+		        title: '启运冻品',  // 分享标题
+		        path: '/pages/index/index',  // 分享路径，注意要写正确的页面路径
+		        imageUrl: '/static/qiyun_logo.png',// 分享图片的本地路径
+		      }
+		},
+		//分享到朋友圈
+		onShareTimeline() {
+			return {
+				title: '启运冻品',
+				link: '/pages/index/index',
+				imageUrl: '/static/qiyun_logo.png',
+			}
+		},
 		// 搜索框点击跳转到搜索页面
 		searchClick() {
 			console.log('跳转')

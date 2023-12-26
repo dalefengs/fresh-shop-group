@@ -119,7 +119,7 @@ export default {
             token: '',
             showLoginDialog: false, // 登录
             showPhoneDialog: false, // 拨号
-            relationPhone: "18899996666", // 联系人电话
+            relationPhone: "13527326320", // 联系人电话
             showChangeNickName: false, // 修改昵称模态框
             orderTypeLise: [
                 //name-标题 icon-图标 badge-角标
