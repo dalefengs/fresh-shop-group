@@ -45,23 +45,32 @@ type SetUserAuthorities struct {
 }
 
 type ChangeUserInfo struct {
-	ID           uint                  `gorm:"primarykey"`                                                                                  // 主键ID
-	NickName     string                `json:"nickName" gorm:"default:系统用户;comment:用户昵称"`                                                   // 用户昵称
-	Phone        string                `json:"phone"  gorm:"comment:用户手机号"`                                                                 // 用户手机号
-	AuthorityIds []uint                `json:"authorityIds" gorm:"-"`                                                                       // 角色ID
-	Email        string                `json:"email"  gorm:"comment:用户邮箱"`                                                                  // 用户邮箱
-	HeaderImg    string                `json:"headerImg" gorm:"default:https://minio.fungs.cn/picture/images/avatar/face.png;comment:用户头像"` // 用户头像
-	SideMode     string                `json:"sideMode"  gorm:"comment:用户侧边主题"`                                                             // 用户侧边主题
-	Enable       int                   `json:"enable" gorm:"comment:冻结用户"`                                                                  //冻结用户
-	Authorities  []system.SysAuthority `json:"-" gorm:"many2many:sys_user_authority;"`
+	ID                 uint   `gorm:"primarykey"`                                                                                    // 主键ID
+	NickName           string `json:"nickName" gorm:"default:系统用户;comment:用户昵称"`                                                     // 用户昵称
+	Phone              string `json:"phone"  gorm:"comment:用户手机号"`                                                                   // 用户手机号
+	AuthorityIds       []uint `json:"authorityIds" gorm:"-"`                                                                         // 角色ID
+	Email              string `json:"email"  gorm:"comment:用户邮箱"`                                                                    // 用户邮箱
+	HeaderImg          string `json:"headerImg" gorm:"default:https://minio.fungs.cn/picture/images/avatar/face.png;comment:用户头像"`   // 用户头像
+	SideMode           string `json:"sideMode"  gorm:"comment:用户侧边主题"`                                                               // 用户侧边主题
+	Enable             int    `json:"enable" gorm:"comment:冻结用户"`                                                                    //冻结用户
+	OriginContactName  string `json:"originContactName" gorm:"column:origin_contact_name;comment:联系人姓名"`                             // 联系人姓名
+	ChangeContactName  string `json:"changeContactName" gorm:"column:change_contact_name;comment:联系人姓名修改待审核"`                        // 联系人姓名修改待审核
+	OriginCustomerName string `json:"originCustomerName" gorm:"column:origin_customer_name;comment:客户名称、公司名称"`                       // 客户名称、公司名称
+	ChangeCustomerName string `json:"changeCustomerName" gorm:"column:change_customer_name;comment:客户名称、公司名称待审核"`                    // 客户名称、公司名称待审核
+	AuditStatus        int8   `json:"auditStatus" gorm:"column:audit_status;default:1;comment:审核状态 0新注册未填写信息 1已通过 2已填写未审核 3修改信息待审核"` // 审核状态 0新注册未填写信息 1已通过 2已填写未审核 3修改信息待审核 4已拒绝
+
+	Authorities []system.SysAuthority `json:"-" gorm:"many2many:sys_user_authority;"`
 }
 
 type UserList struct {
 	request.PageInfo
 	Username       string `json:"username"`
 	NickName       string `json:"nickName"`
+	ContactName    string `json:"contactName"`
+	CustomerName   string `json:"customerName"`
 	InvitationCode string `json:"invitationCode"`
 	Phone          string `json:"phone"`
 	OrderKey       string `json:"orderKey"` // 排序
 	Desc           bool   `json:"desc"`     // 排序方式:升序false(默认)|降序true
+	AuditStatus    *int8  `json:"auditStatus"`
 }

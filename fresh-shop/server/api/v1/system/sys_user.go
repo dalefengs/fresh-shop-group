@@ -420,12 +420,16 @@ func (b *BaseApi) SetUserInfo(c *gin.Context) {
 		DbModel: global.DbModel{
 			ID: user.ID,
 		},
-		NickName:  user.NickName,
-		HeaderImg: user.HeaderImg,
-		Phone:     user.Phone,
-		Email:     user.Email,
-		SideMode:  user.SideMode,
-		Enable:    user.Enable,
+		NickName:           user.NickName,
+		HeaderImg:          user.HeaderImg,
+		Phone:              user.Phone,
+		Email:              user.Email,
+		SideMode:           user.SideMode,
+		Enable:             user.Enable,
+		OriginContactName:  user.OriginContactName,
+		ChangeContactName:  user.ChangeContactName,
+		OriginCustomerName: user.OriginCustomerName,
+		ChangeCustomerName: user.ChangeCustomerName,
 	})
 	if err != nil {
 		global.Log.Error("设置失败!", zap.Error(err))

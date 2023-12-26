@@ -222,6 +222,12 @@ func (userService *UserService) GetUserInfoList(info sysReq.UserList, order stri
 	if info.Username != "" {
 		db = db.Where("username like ?", "%"+info.Username+"%")
 	}
+	if info.ContactName != "" {
+		db = db.Where("origin_contact_name like ?", "%"+info.ContactName+"%")
+	}
+	if info.CustomerName != "" {
+		db = db.Where("origin_customer_name like ?", "%"+info.CustomerName+"%")
+	}
 	if info.NickName != "" {
 		db = db.Where("nick_name like ?", "%"+info.NickName+"%")
 	}
@@ -230,6 +236,9 @@ func (userService *UserService) GetUserInfoList(info sysReq.UserList, order stri
 	}
 	if info.InvitationCode != "" {
 		db = db.Where("invitation_code like ?", "%"+info.InvitationCode+"%")
+	}
+	if info.AuditStatus != nil {
+		db = db.Where("audit_status = ?", info.AuditStatus)
 	}
 	// 不是超级管理员， id为1的用户不显示
 	if authorityId != 888 {

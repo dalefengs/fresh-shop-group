@@ -11,8 +11,19 @@
         <el-form-item label="手机号">
           <el-input v-model="searchInfo.phone" placeholder="手机号" />
         </el-form-item>
+        <el-form-item label="联系人名称">
+          <el-input v-model="searchInfo.contactName" placeholder="联系人名称" />
+        </el-form-item>
+        <el-form-item label="客户名称">
+          <el-input v-model="searchInfo.customerName" placeholder="客户名称" />
+        </el-form-item>
         <el-form-item label="推荐码">
           <el-input v-model="searchInfo.invitationCode" placeholder="推荐码" />
+        </el-form-item>
+        <el-form-item label="审核状态" prop="status">
+          <el-select v-model="searchInfo.auditStatus" clearable placeholder="请选择" @clear="()=>{searchInfo.auditStatus=undefined}">
+            <el-option v-for="(item,key) in auditStatusOptions" :key="key" :label="item.label" :value="item.value" />
+          </el-select>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="search" @click="getTableData">查询</el-button>
@@ -41,6 +52,23 @@
               <span>用户昵称：{{ scope.row.nickName }}</span><br>
               <span>手机号：{{ scope.row.phone ? scope.row.phone : '无' }}</span><br>
               <span>邀请码：{{ scope.row.invitationCode }}</span><br>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column align="left" label="会员信息" min-width="220" prop="userName" style="line-height: 10px">
+          <template #default="scope">
+            <div class="table-multi-line">
+              <div v-if="scope.row.auditStatus === 3">
+                <span>原始联系人名称：{{ scope.row.originContactName ? scope.row.originContactName : '无' }}</span><br>
+                <span>原始客户名称：{{ scope.row.originCustomerName ? scope.row.originCustomerName : '无' }}</span><br>
+                修改联系人名称：<span style="color: #039BE5">{{ scope.row.changeContactName ? scope.row.changeContactName : '无' }}</span><br>
+                修改客户名称：<span style="color: #039BE5">{{ scope.row.changeCustomerName ? scope.row.changeCustomerName : '无' }}</span><br>
+              </div>
+              <div v-else>
+                <span>联系人名称：{{ scope.row.originContactName ? scope.row.originContactName : '无' }}</span><br>
+                <span>客户名称：{{ scope.row.originCustomerName ? scope.row.originCustomerName : '无' }}</span><br>
+                状态：<span :class="getStatusColorClass(scope.row.auditStatus)">{{ filterDict(scope.row.auditStatus, auditStatusOptions) }}</span><br>
+              </div>
             </div>
           </template>
         </el-table-column>
@@ -143,6 +171,12 @@
           <el-form-item label="手机号" prop="phone">
             <el-input v-model="userInfo.phone" />
           </el-form-item>
+          <el-form-item label="联系人名称" prop="originContactName">
+            <el-input v-model="userInfo.originContactName" />
+          </el-form-item>
+          <el-form-item label="客户名称" prop="originCustomerName">
+            <el-input v-model="userInfo.originCustomerName" />
+          </el-form-item>
           <!--          <el-form-item label="邮箱" prop="email">
             <el-input v-model="userInfo.email" />
           </el-form-item>-->
@@ -209,7 +243,7 @@ import { nextTick, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { toSQLLine } from '@/utils/stringFun'
 import { useUserStore } from '@/pinia/modules/user'
-import { formatDate } from '@/utils/format'
+import { formatDate, getDictFunc, filterDict } from '@/utils/format'
 const path = ref(import.meta.env.VITE_BASE_API + '/')
 // 初始化相关
 const setAuthorityOptions = (AuthorityData, optionsData) => {
@@ -347,9 +381,11 @@ const openHeaderChange = () => {
 }
 
 const authOptions = ref([])
-const setOptions = (authData) => {
+const auditStatusOptions = ref([])
+const setOptions = async(authData) => {
   authOptions.value = []
   setAuthorityOptions(authData, authOptions.value)
+  auditStatusOptions.value = await getDictFunc('auditStatus')
 }
 
 const deleteUserFunc = async(row) => {
@@ -483,6 +519,19 @@ const switchEnable = async(row) => {
   }
 }
 
+const getStatusColorClass = (auditStatus) => {
+  switch (auditStatus) {
+    case 1:
+      return 'green-text' // 定义绿色样式的 class
+    case 2:
+    case 3:
+      return 'yellow-text' // 定义黄色样式的 class
+    case 4:
+      return 'dark-red-text' // 定义暗红色样式的 class
+    default:
+      return 'default-text' // 默认样式
+  }
+}
 </script>
 
 <style lang="scss">
@@ -524,5 +573,20 @@ const switchEnable = async(row) => {
   cursor: pointer;
   font-size: 16px;
   margin-left: 2px;
+}
+/* 根据需要定义样式 */
+.green-text {
+  color: #66BB6A;
+}
+
+.yellow-text {
+  color: #FB8C00;
+}
+
+.dark-red-text {
+  color: #F4511E;
+}
+.default-text {
+  color: #78909C;
 }
 </style>
