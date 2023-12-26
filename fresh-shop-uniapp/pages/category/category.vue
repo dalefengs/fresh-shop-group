@@ -40,7 +40,7 @@
                              @scrolltolower="scrollTolower"
                              :scroll-anchoring="true">
                     <!-- 商品列表 -->
-                    <GoodsList :vertical="true" :lists="goodsArr" price-type="￥"></GoodsList>
+                    <GoodsList :vertical="true" :lists="goodsArr" price-type="￥" :is-audit="isAudit"></GoodsList>
                     <view class="king-py-20" @click="scrollTolower">
                         <u-loadmore :status="loadMore" loading-text="努力加载中，请喝杯茶" loadmore-text="上拉加载更多"
                                     nomore-text="实在是没有了"/>
@@ -73,7 +73,8 @@ import {
 import config from '@/config/config.js'
 import GoodsList from '@/components/goodsList/goodsList.vue'
 import loginSuspend from '@/components/loginPop/loginSuspend.vue'
-import {getUser, getToken} from '@/store/storage.js'
+import {getUser, getToken, setUser} from '@/store/storage.js'
+import { getUserAuditStatus } from '@/api/user';
 
 export default {
     components: {
@@ -84,6 +85,7 @@ export default {
     },
     data() {
         return {
+            isAudit: false,
             loginSuspendShow: false, // 显示底部登录
             categoryList: [{
                 ID: 0,
@@ -115,6 +117,20 @@ export default {
 
     },
     onLoad() {
+        let user = getUser()
+        if (user) {
+            if ( user.audit_status === 1) {
+                this.isAudit = true
+            }else {
+                getUserAuditStatus().then(res => {
+                    if (res.data.auditStatus === 1) {
+                        this.isAudit = true
+                        user.audit_status = 1
+                        setUser(user)
+                    }
+                })
+            }
+        }
         this.init()
         const t = getToken()
         if (!t) {

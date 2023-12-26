@@ -68,7 +68,7 @@
 							:refresher-triggered="hotTriggered" @refresherrefresh="onRefresh"
 							@scrolltolower="hotScrollTolower" :scroll-anchoring="true">
 							<!-- 商品列表 -->
-							<GoodsList :lists="goodsHotArr" price-type="￥" @onGoods="toGoodsInfo"></GoodsList>
+							<GoodsList :lists="goodsHotArr" price-type="￥" @onGoods="toGoodsInfo" :is-audit="isAudit"></GoodsList>
 							<view class="king-py-40" @click="hotScrollTolower">
 								<u-loadmore :status="hotLoadMore" loading-text="努力加载中，请喝杯茶" loadmore-text="上拉加载更多"
 									nomore-text="实在是没有了" />
@@ -82,7 +82,7 @@
 							:refresher-triggered="newTriggered" @refresherrefresh="onRefresh"
 							@scrolltolower="newScrollTolower" :scroll-anchoring="true">
 							<!-- 商品列表 -->
-							<GoodsList :lists="goodsNewArr" price-type="￥"></GoodsList>
+							<GoodsList :lists="goodsNewArr" price-type="￥" :is-audit="isAudit"></GoodsList>
 							<view class="king-py-40" @click="newScrollTolower">
 								<u-loadmore :status="newLoadMore" loading-text="努力加载中，请喝杯茶" loadmore-text="上拉加载更多"
 									nomore-text="实在是没有了" />
@@ -106,7 +106,9 @@ import config from '@/config/config.js'
 import { getBannerList } from '@/api/banner.js'
 import { getHomeCategoryList } from '@/api/category.js'
 import { getGoodsPageList } from '@/api/goods.js'
-import { getToken } from '@/store/storage.js'
+import { getToken, getUser } from '@/store/storage.js'
+import { getUserAuditStatus } from "@/api/user";
+import {setUser} from "../../store/storage";
 export default {
 	components: {
 		Tabbar,
@@ -115,6 +117,7 @@ export default {
 	},
 	data() {
 		return {
+            isAudit: false,
 			loginSuspendShow: false, // 是否显示底部登录
 			goodsTabsId: 0, // 商品标签切换
 			swiperHeight: 1000, // 商品栏目整体高度 页面大小
@@ -143,6 +146,21 @@ export default {
 		}
 	},
 	onLoad() {
+        let user = getUser()
+        if (user) {
+            if ( user.audit_status === 1) {
+                this.isAudit = true
+            }else {
+                getUserAuditStatus().then(res => {
+                    if (res.data.auditStatus === 1) {
+                        this.isAudit = true
+                        user.audit_status = 1
+                        setUser(user)
+                    }
+                })
+            }
+        }
+
 		this._freshing = false;
 		this.getBanner();
 		this.getHomeCategory();

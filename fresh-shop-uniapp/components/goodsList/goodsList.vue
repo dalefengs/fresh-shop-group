@@ -9,8 +9,8 @@
                 <img v-else class="item-img" src="/static/nopicture.jpg" alt="">
 				<view class="item-content">
 					<view class="title">{{ item.name }}</view>
-					<view class="bottom-txt">
-						<view>
+					<view v-if="isAudit" class="bottom-txt">
+						<view >
 							<text class="price king-font17" v-if="isPoint">{{ item.costPrice || '0' }}积分</text>
 							<text class="price" v-else>{{ priceType }}{{ item.price > 0 && item.price < item.costPrice ? item.price : item.costPrice || '0' }}</text>
 							<text v-if="item.price > 0 && item.price < item.costPrice && !isPoint" class="del-price">{{ priceType }}{{ item.costPrice || '0'
@@ -36,7 +36,7 @@
                     <view class="store">
                         <text>库存：{{ item.store }}</text>
                     </view>
-					<view class="bottom-txt">
+					<view v-if="isAudit"  class="bottom-txt">
 						<view>
 							<text class="price">{{ priceType }}{{ item.price > 0 && item.price < item.costPrice ? item.price : item.costPrice| '0' }}</text>
 							<text class="unit">/{{ item.unit }}</text>
@@ -85,9 +85,12 @@ export default {
 		isPoint: {
 			type: Boolean,
 			default: false
+		},
+		// 是否审核通过
+		isAudit: {
+			type: Boolean,
+			default: false
 		}
-	},
-	mounted() {
 	},
 	methods: {
 		// 商品点击 默认跳转详情

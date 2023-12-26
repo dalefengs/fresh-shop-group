@@ -21,7 +21,12 @@
           <el-input v-model="searchInfo.invitationCode" placeholder="推荐码" />
         </el-form-item>
         <el-form-item label="审核状态" prop="status">
-          <el-select v-model="searchInfo.auditStatus" clearable placeholder="请选择" @clear="()=>{searchInfo.auditStatus=undefined}">
+          <el-select
+            v-model="searchInfo.auditStatus"
+            clearable
+            placeholder="请选择"
+            @clear="()=>{searchInfo.auditStatus=undefined}"
+          >
             <el-option v-for="(item,key) in auditStatusOptions" :key="key" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
@@ -61,26 +66,35 @@
               <div v-if="scope.row.auditStatus === 3">
                 <span>原始联系人名称：{{ scope.row.originContactName ? scope.row.originContactName : '无' }}</span><br>
                 <span>原始客户名称：{{ scope.row.originCustomerName ? scope.row.originCustomerName : '无' }}</span><br>
-                修改联系人名称：<span style="color: #039BE5">{{ scope.row.changeContactName ? scope.row.changeContactName : '无' }}</span><br>
-                修改客户名称：<span style="color: #039BE5">{{ scope.row.changeCustomerName ? scope.row.changeCustomerName : '无' }}</span><br>
+                修改联系人名称：<span
+                  style="color: #039BE5"
+                >{{ scope.row.changeContactName ? scope.row.changeContactName : '无' }}</span><br>
+                修改客户名称：<span
+                  style="color: #039BE5"
+                >{{ scope.row.changeCustomerName ? scope.row.changeCustomerName : '无' }}</span><br>
+                <span v-if="scope.row.auditRemark">审核备注：{{ scope.row.auditRemark ? scope.row.auditRemark : '无' }}</span><br>
               </div>
+              <!--       默认状态       -->
               <div v-else>
                 <span>联系人名称：{{ scope.row.originContactName ? scope.row.originContactName : '无' }}</span><br>
                 <span>客户名称：{{ scope.row.originCustomerName ? scope.row.originCustomerName : '无' }}</span><br>
-                状态：<span :class="getStatusColorClass(scope.row.auditStatus)">{{ filterDict(scope.row.auditStatus, auditStatusOptions) }}</span><br>
+                状态：<span
+                  :class="getStatusColorClass(scope.row.auditStatus)"
+                >{{ filterDict(scope.row.auditStatus, auditStatusOptions) }}</span><br>
+                <span v-if="scope.row.auditRemark">审核备注：{{ scope.row.auditRemark ? scope.row.auditRemark : '无' }}</span><br>
               </div>
             </div>
           </template>
         </el-table-column>
-<!--        <el-table-column align="left" label="账户信息" min-width="130" prop="point" sortable="custom">-->
-<!--          <template #default="scope">-->
-<!--            <div class="table-multi-line">-->
-<!--              <div v-for="ac in scope.row.account" :key="ac.ID">-->
-<!--                <span>{{ ac.group.nameCn }}：{{ ac.amount }}</span>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--          </template>-->
-<!--        </el-table-column>-->
+        <!--        <el-table-column align="left" label="账户信息" min-width="130" prop="point" sortable="custom">-->
+        <!--          <template #default="scope">-->
+        <!--            <div class="table-multi-line">-->
+        <!--              <div v-for="ac in scope.row.account" :key="ac.ID">-->
+        <!--                <span>{{ ac.group.nameCn }}：{{ ac.amount }}</span>-->
+        <!--              </div>-->
+        <!--            </div>-->
+        <!--          </template>-->
+        <!--        </el-table-column>-->
         <el-table-column align="left" label="用户角色" min-width="200">
           <template #default="scope">
             <el-cascader
@@ -110,7 +124,7 @@
         </el-table-column>
         <el-table-column align="left" label="登录信息" min-width="250" style="line-height: 10px">
           <template #default="scope">
-            <div class="table-multi-line" v-if="scope.row.loginTime">
+            <div v-if="scope.row.loginTime" class="table-multi-line">
               <span>登录IP：{{ scope.row.loginIp }}</span><br>
               <span>最后登录时间：{{ scope.row.loginTime ? formatDate(scope.row.loginTime) : '无' }}</span><br>
             </div>
@@ -131,7 +145,8 @@
                 </template>
               </el-popover>
               <el-button type="primary" link icon="edit" @click="openEdit(scope.row)">编辑</el-button>
-              <el-button type="primary" link icon="magic-stick" @click="resetPasswordFunc(scope.row)">重置密码</el-button>
+              <el-button type="primary" link icon="magic-stick" @click="resetPasswordFunc(scope.row)">重置密码
+              </el-button>
             </div>
           </template>
         </el-table-column>
@@ -177,6 +192,25 @@
           <el-form-item label="客户名称" prop="originCustomerName">
             <el-input v-model="userInfo.originCustomerName" />
           </el-form-item>
+          <el-form-item v-if="userInfo.auditStatus === 3" label="修改联系人名称" prop="changeContactName">
+            <el-input v-model="userInfo.changeContactName" />
+          </el-form-item>
+          <el-form-item v-if="userInfo.auditStatus === 3" label="修改客户名称" prop="changeCustomerName">
+            <el-input v-model="userInfo.changeCustomerName" />
+          </el-form-item>
+          <el-form-item label="审核状态:" prop="auditStatus">
+            <el-select v-model="userInfo.auditStatus" filterable placeholder="Select">
+              <el-option
+                v-for="item in auditStatusOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="审核备注" prop="auditRemark">
+            <el-input v-model="userInfo.auditRemark" placeholder="审核备注" />
+          </el-form-item>
           <!--          <el-form-item label="邮箱" prop="email">
             <el-input v-model="userInfo.email" />
           </el-form-item>-->
@@ -200,7 +234,12 @@
           </el-form-item>
           <el-form-item label="头像" label-width="80px">
             <div style="display:inline-block" @click="openHeaderChange">
-              <img v-if="userInfo.headerImg" alt="头像" class="header-img-box" :src="(userInfo.headerImg && userInfo.headerImg.slice(0, 4) !== 'http')?path+userInfo.headerImg:userInfo.headerImg">
+              <img
+                v-if="userInfo.headerImg"
+                alt="头像"
+                class="header-img-box"
+                :src="(userInfo.headerImg && userInfo.headerImg.slice(0, 4) !== 'http')?path+userInfo.headerImg:userInfo.headerImg"
+              >
               <div v-else class="header-img-box">从媒体库选择</div>
             </div>
           </el-form-item>
@@ -231,7 +270,7 @@ import {
   getUserList,
   setUserAuthorities,
   register,
-  deleteUser
+  deleteUser,
 } from '@/api/user'
 
 import { getAuthorityList } from '@/api/authority'
@@ -244,27 +283,28 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { toSQLLine } from '@/utils/stringFun'
 import { useUserStore } from '@/pinia/modules/user'
 import { formatDate, getDictFunc, filterDict } from '@/utils/format'
+
 const path = ref(import.meta.env.VITE_BASE_API + '/')
 // 初始化相关
 const setAuthorityOptions = (AuthorityData, optionsData) => {
   AuthorityData &&
-        AuthorityData.forEach(item => {
-          if (item.children && item.children.length) {
-            const option = {
-              authorityId: item.authorityId,
-              authorityName: item.authorityName,
-              children: []
-            }
-            setAuthorityOptions(item.children, option.children)
-            optionsData.push(option)
-          } else {
-            const option = {
-              authorityId: item.authorityId,
-              authorityName: item.authorityName
-            }
-            optionsData.push(option)
-          }
-        })
+  AuthorityData.forEach(item => {
+    if (item.children && item.children.length) {
+      const option = {
+        authorityId: item.authorityId,
+        authorityName: item.authorityName,
+        children: [],
+      }
+      setAuthorityOptions(item.children, option.children)
+      optionsData.push(option)
+    } else {
+      const option = {
+        authorityId: item.authorityId,
+        authorityName: item.authorityName,
+      }
+      optionsData.push(option)
+    }
+  })
 }
 
 const userStore = useUserStore()
@@ -290,7 +330,7 @@ const getTableData = async() => {
   const data = {
     ...searchInfo.value,
     page: page.value,
-    pageSize: pageSize.value
+    pageSize: pageSize.value,
   }
   const table = await getUserList(data)
   if (table.code === 0) {
@@ -342,14 +382,11 @@ const initPage = async() => {
 initPage()
 
 const resetPasswordFunc = (row) => {
-  ElMessageBox.confirm(
-    '是否将此用户密码重置为123456?',
-    '警告',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning',
-    }
+  ElMessageBox.confirm('是否将此用户密码重置为123456?', '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  },
   ).then(async() => {
     const res = await resetPassword({
       ID: row.ID,
@@ -404,6 +441,12 @@ const userInfo = ref({
   nickName: '',
   headerImg: '',
   authorityId: '',
+  originContactName: '',
+  originCustomerName: '',
+  changeCustomerName: '',
+  changeContactName: '',
+  auditStatus: 0,
+  auditRemark: '',
   authorityIds: [1000],
   enable: 1,
 })
@@ -411,24 +454,36 @@ const userInfo = ref({
 const rules = ref({
   userName: [
     { message: '请输入用户名, 不填则随机生成', trigger: 'blur' },
-    { min: 5, message: '最低5位字符', trigger: 'blur' }
+    { min: 5, message: '最低5位字符', trigger: 'blur' },
   ],
   password: [
     { required: true, message: '请输入用户密码', trigger: 'blur' },
-    { min: 6, message: '最低6位字符', trigger: 'blur' }
+    { min: 6, message: '最低6位字符', trigger: 'blur' },
   ],
   nickName: [
-    { required: true, message: '请输入用户昵称', trigger: 'blur' }
+    { required: true, message: '请输入用户昵称', trigger: 'blur' },
+  ],
+  originContactName: [
+    { required: true, message: '请输入联系人名称', trigger: 'blur' },
   ],
   phone: [
-    { required: true, pattern: /^1([38][0-9]|4[014-9]|[59][0-35-9]|6[2567]|7[0-8])\d{8}$/, message: '请输入合法手机号', trigger: 'blur' },
+    {
+      required: true,
+      pattern: /^1([38][0-9]|4[014-9]|[59][0-35-9]|6[2567]|7[0-8])\d{8}$/,
+      message: '请输入合法手机号',
+      trigger: 'blur',
+    },
   ],
   email: [
-    { pattern: /^([0-9A-Za-z\-_.]+)@([0-9a-z]+\.[a-z]{2,3}(\.[a-z]{2})?)$/g, message: '请输入正确的邮箱', trigger: 'blur' },
+    {
+      pattern: /^([0-9A-Za-z\-_.]+)@([0-9a-z]+\.[a-z]{2,3}(\.[a-z]{2})?)$/g,
+      message: '请输入正确的邮箱',
+      trigger: 'blur',
+    },
   ],
   authorityId: [
-    { required: true, message: '请选择用户角色', trigger: 'blur' }
-  ]
+    { required: true, message: '请选择用户角色', trigger: 'blur' },
+  ],
 })
 const userForm = ref(null)
 const enterAddUserDialog = async() => {
@@ -436,7 +491,7 @@ const enterAddUserDialog = async() => {
   userForm.value.validate(async valid => {
     if (valid) {
       const req = {
-        ...userInfo.value
+        ...userInfo.value,
       }
       if (dialogFlag.value === 'add') {
         const res = await register(req)
@@ -484,7 +539,7 @@ const changeAuthority = async(row, flag, removeAuth) => {
   await nextTick()
   const res = await setUserAuthorities({
     ID: row.ID,
-    authorityIds: row.authorityIds
+    authorityIds: row.authorityIds,
   })
   if (res.code === 0) {
     ElMessage({ type: 'success', message: '角色设置成功' })
@@ -508,7 +563,7 @@ const switchEnable = async(row) => {
   userInfo.value = JSON.parse(JSON.stringify(row))
   await nextTick()
   const req = {
-    ...userInfo.value
+    ...userInfo.value,
   }
   const res = await setUserInfo(req)
   if (res.code === 0) {
@@ -537,17 +592,19 @@ const getStatusColorClass = (auditStatus) => {
 <style lang="scss">
 .user-dialog {
   .header-img-box {
-  width: 200px;
-  height: 200px;
-  border: 1px dashed #ccc;
-  border-radius: 20px;
-  text-align: center;
-  line-height: 200px;
-  cursor: pointer;
-}
+    width: 200px;
+    height: 200px;
+    border: 1px dashed #ccc;
+    border-radius: 20px;
+    text-align: center;
+    line-height: 200px;
+    cursor: pointer;
+  }
+
   .avatar-uploader .el-upload:hover {
     border-color: #409eff;
   }
+
   .avatar-uploader-icon {
     border: 1px dashed #d9d9d9 !important;
     border-radius: 6px;
@@ -558,22 +615,26 @@ const getStatusColorClass = (auditStatus) => {
     line-height: 178px;
     text-align: center;
   }
+
   .avatar {
     width: 178px;
     height: 178px;
     display: block;
   }
 }
-.nickName{
+
+.nickName {
   display: flex;
   justify-content: flex-start;
   align-items: center;
 }
-.pointer{
+
+.pointer {
   cursor: pointer;
   font-size: 16px;
   margin-left: 2px;
 }
+
 /* 根据需要定义样式 */
 .green-text {
   color: #66BB6A;
@@ -586,6 +647,7 @@ const getStatusColorClass = (auditStatus) => {
 .dark-red-text {
   color: #F4511E;
 }
+
 .default-text {
   color: #78909C;
 }

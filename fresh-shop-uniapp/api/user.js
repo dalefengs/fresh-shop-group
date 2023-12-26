@@ -15,6 +15,15 @@ export const getUserInfo = (refs) => {
     },refs)
 }
 
+// 获取所有已经选中购物车
+export const getUserAuditStatus= (refs) => {
+    return request({
+        url: `/user/getAuditStatus`,
+        method: 'GET',
+        loading: false,
+    },refs)
+}
+
 // 设置自身用户信息
 export const setSelfInfo = (data, refs) => {
     return request({

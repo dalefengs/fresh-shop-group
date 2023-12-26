@@ -8,7 +8,7 @@
     <view v-if="show">
         <view class="box" @click="showLogin">
             <view class="king-ml-20">
-                登陆后可享更多福利
+                登录查看专属价格及下单订货
             </view>
             <view class="king-mr-10">
                 <u-button type="primary" :customStyle="buttonStyle" text="立即登录"></u-button>

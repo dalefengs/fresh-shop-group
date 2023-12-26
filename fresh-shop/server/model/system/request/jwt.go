@@ -19,4 +19,5 @@ type BaseClaims struct {
 	NickName    string
 	AuthorityId uint
 	OpenId      string
+	AuditStatus int8
 }

@@ -127,6 +127,7 @@ func (b *BaseApi) TokenNext(c *gin.Context, user system.SysUser) {
 		Username:    user.Username,
 		AuthorityId: user.AuthorityId,
 		OpenId:      user.OpenId,
+		AuditStatus: user.AuditStatus,
 	})
 	token, err := j.CreateToken(claims)
 	if err != nil {
@@ -416,7 +417,7 @@ func (b *BaseApi) SetUserInfo(c *gin.Context) {
 			return
 		}
 	}
-	err = userService.SetUserInfo(system.SysUser{
+	userInfo := system.SysUser{
 		DbModel: global.DbModel{
 			ID: user.ID,
 		},
@@ -426,11 +427,24 @@ func (b *BaseApi) SetUserInfo(c *gin.Context) {
 		Email:              user.Email,
 		SideMode:           user.SideMode,
 		Enable:             user.Enable,
+		AuditStatus:        user.AuditStatus,
 		OriginContactName:  user.OriginContactName,
 		ChangeContactName:  user.ChangeContactName,
 		OriginCustomerName: user.OriginCustomerName,
 		ChangeCustomerName: user.ChangeCustomerName,
-	})
+		AuditRemark:        user.AuditRemark,
+	}
+	if user.AuditStatus == 1 {
+		if user.ChangeContactName != "" {
+			userInfo.OriginContactName = user.ChangeContactName
+			userInfo.ChangeContactName = ""
+		}
+		if user.ChangeCustomerName != "" {
+			userInfo.OriginCustomerName = user.ChangeCustomerName
+			userInfo.ChangeCustomerName = ""
+		}
+	}
+	err = userService.SetUserInfo(userInfo)
 	if err != nil {
 		global.Log.Error("设置失败!", zap.Error(err))
 		response.FailWithMessage("设置失败", c)
@@ -539,4 +553,21 @@ func (b *BaseApi) ResetPassword(c *gin.Context) {
 		return
 	}
 	response.OkWithMessage("重置成功", c)
+}
+
+func (b *BaseApi) GetAuditStatus(c *gin.Context) {
+	resp := map[string]int{}
+	userId := utils.GetUserID(c)
+	if userId == 0 {
+		resp["auditStatus"] = 0
+		return
+	}
+	status, err := userService.GetAuditStatus(userId)
+	if err != nil {
+		global.Log.Error("查询用户审核状态失败!", zap.Error(err))
+		response.FailWithMessage("重置失败"+err.Error(), c)
+		return
+	}
+	resp["auditStatus"] = status
+	response.OkWithData(resp, c)
 }

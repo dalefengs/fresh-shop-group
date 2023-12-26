@@ -16,7 +16,7 @@
         <!-- 商品头部 -->
         <view class="box" v-show="Object.keys(goods).length > 0">
             <view class="price-box">
-                <view>
+                <view v-if="isAudit">
                     <text class="price" v-if="goods.goodsArea === 1">{{ goods.costPrice || '0' }} 积分 </text>
                     <text class="price" v-else>￥{{ goods.price > 0 && goods.price < goods.costPrice ? goods.price : goods.costPrice || '0' }}</text>
                     <text class="unit">/{{ goods.unit }}</text>
@@ -71,7 +71,7 @@
             </view>
             <view class="right">
 	              <view class="addCartBtn" v-if="goods.goodsArea === 1" @click="submitPointOrder">
-		              <text v-if="goods.store <= 0"> 库存不足 </text>
+		              <text v-if="goods.store <= 0"> 暂时无货 </text>
 		              <text v-else-if="pointAmount < goods.costPrice" >积分不足</text>
 		              <text v-else>立即兑换</text>
 	              </view>
@@ -87,7 +87,7 @@
                     </view>
                 </view>
                 <view v-else class="addCartBtn" :style="{'background-color': goods.store <= 0 || goods.store <= goods.minCount ? '#f29100' : '#2979ff'}" @click="addCartClick(1)">
-                    <text v-if="goods.store <= 0 || goods.store <= goods.minCount"> 库存不足 </text>
+                    <text v-if="goods.store <= 0 || goods.store <= goods.minCount"> 暂时无货 </text>
                     <text v-else-if="goods.minCount > 1">最低 {{ goods.minCount }} 件起购</text>
                     <text v-else>加入购物车</text>
                 </view>
@@ -107,6 +107,8 @@ import config from '@/config/config.js'
 import {addCart} from "@/api/cart";
 import {getAccountInfo} from "@/api/account.js";
 import UviewUi from "../../uni_modules/uview-ui/components/uview-ui/uview-ui";
+import {getUser, setUser} from "@/store/storage";
+import {getUserAuditStatus} from "@/api/user";
 
 export default {
     components: {
@@ -118,6 +120,7 @@ export default {
             id: 0, // 商品id
             goods: {},
             token: '',
+            isAudit: false,
             num: 0,
             loginSuspendShow: false, // 是否显示底部登录
             currentImgIndex: 0,
@@ -152,6 +155,20 @@ export default {
         if (!token) {
             this.loginSuspendShow = true
         }
+        let user = getUser()
+        if (user) {
+            if ( user.audit_status === 1) {
+                this.isAudit = true
+            }else {
+                getUserAuditStatus().then(res => {
+                    if (res.data.auditStatus === 1) {
+                        this.isAudit = true
+                        user.audit_status = 1
+                        setUser(user)
+                    }
+                })
+            }
+        }
         this.getGoods()
     },
     onReady() {
@@ -166,7 +183,7 @@ export default {
 						return
 					}
                       if (this.goods.store <= 0) {
-                        this.$message(this.$refs.toast).error("库存不足")
+                        this.$message(this.$refs.toast).error("暂时无货")
                         return
                       }
 					uni.navigateTo({

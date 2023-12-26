@@ -38,7 +38,6 @@ func (userService *UserService) LoginWx(req request.LoginReq) (user *system.SysU
 		return nil, fmt.Errorf("获取的手机号为空")
 	}
 	var u system.SysUser
-	fmt.Println(d)
 	if errors.Is(global.DB.Where("phone = ?", d.PhoneNumber).First(&user).Error, gorm.ErrRecordNotFound) {
 		// 不存在则创建用户
 		var authorities []system.SysAuthority
@@ -55,6 +54,7 @@ func (userService *UserService) LoginWx(req request.LoginReq) (user *system.SysU
 			Enable:      1,
 			Phone:       d.PhoneNumber,
 			OpenId:      req.OpenId,
+			AuditStatus: user.AuditStatus,
 		}
 		regUser, err := userService.Register(u)
 		user = &regUser
@@ -336,16 +336,22 @@ func (userService *UserService) DeleteUser(id int) (err error) {
 
 func (userService *UserService) SetUserInfo(req system.SysUser) error {
 	return global.DB.Model(&system.SysUser{}).
-		Select("updated_at", "nick_name", "header_img", "phone", "email", "sideMode", "enable").
+		Select("updated_at", "nick_name", "header_img", "phone", "email", "sideMode", "enable", "origin_contact_name", "origin_customer_name", "audit_status", "change_contact_name", "change_customer_name", "audit_remark").
 		Where("id=?", req.ID).
 		Updates(map[string]interface{}{
-			"updated_at": time.Now(),
-			"nick_name":  req.NickName,
-			"header_img": req.HeaderImg,
-			"phone":      req.Phone,
-			"email":      req.Email,
-			"side_mode":  req.SideMode,
-			"enable":     req.Enable,
+			"updated_at":           time.Now(),
+			"nick_name":            req.NickName,
+			"header_img":           req.HeaderImg,
+			"phone":                req.Phone,
+			"email":                req.Email,
+			"side_mode":            req.SideMode,
+			"origin_customer_name": req.OriginCustomerName,
+			"origin_contact_name":  req.OriginContactName,
+			"change_contact_name":  req.ChangeContactName,
+			"change_customer_name": req.ChangeCustomerName,
+			"audit_status":         req.AuditStatus,
+			"audit_remark":         req.AuditRemark,
+			"enable":               req.Enable,
 		}).Error
 }
 
@@ -413,4 +419,15 @@ func (userService *UserService) FindUserByUuid(uuid string) (user *system.SysUse
 func (userService *UserService) ResetPassword(ID uint) (err error) {
 	err = global.DB.Model(&system.SysUser{}).Where("id = ?", ID).Update("password", utils.BcryptHash("123456")).Error
 	return err
+}
+
+func (userService *UserService) GetAuditStatus(userId uint) (status int, err error) {
+	var u system.SysUser
+	err = global.DB.Select("audit_status").Where("`id` = ? and audit_status = 1", userId).First(&u).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return 0, nil
+	} else if err != nil {
+		return 0, errors.New("用户不存在")
+	}
+	return 1, nil
 }

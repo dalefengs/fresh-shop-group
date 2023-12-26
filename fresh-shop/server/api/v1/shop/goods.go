@@ -280,7 +280,11 @@ func (goodsApi *GoodsApi) GetGoodsList(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	userId := utils.GetUserID(c)
+	var userId uint
+	userInfo := utils.GetUserInfo(c)
+	if userInfo != nil {
+		userId = userInfo.ID
+	}
 	if list, total, err := goodsService.GetGoodsInfoList(pageInfo, userId); err != nil {
 		global.Log.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
