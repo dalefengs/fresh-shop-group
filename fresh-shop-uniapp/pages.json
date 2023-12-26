@@ -47,7 +47,14 @@
 				"navigationBarTitleText": "个人中心",
 				"enablePullDownRefresh": false
 			}
-		}, 
+		},
+		{
+			"path": "pages/my/memberInfo",
+			"style": {
+				"navigationBarTitleText": "会员信息",
+				"enablePullDownRefresh": false
+			}
+		},
 		{
 			"path": "pages/cart/cart",
 			"style": {
@@ -55,7 +62,7 @@
 				"enablePullDownRefresh": false
 			}
 
-		}, 
+		},
 		{
 			"path": "pages/order/submit",
 			"style": {
@@ -83,7 +90,7 @@
 				"navigationBarTitleText": "收货地址",
 				"enablePullDownRefresh": false
 			}
-		}, 
+		},
 		{
 			"path": "pages/address/addressForm",
 			"style": {

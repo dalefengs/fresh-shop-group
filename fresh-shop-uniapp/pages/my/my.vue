@@ -131,6 +131,7 @@ export default {
             ],
             severList: [
                 [
+                    { name: '会员信息', icon: 'point_shop.png', handle: this.toMemberInformation, isLogin: true},
                     { name: '积分兑换', icon: 'point_shop.png', handle: this.toPointGoods, isLogin: true},
                     // { name: '积分明细', icon: 'finance.png', handle: this.showPhone },
                     {name: '收货地址', icon: 'address.png', handle: this.toAddress},
@@ -192,6 +193,11 @@ export default {
         toAddress() {
             uni.navigateTo({
                 url: '/pages/address/address'
+            })
+        },
+        toMemberInformation() {
+            uni.navigateTo({
+                url: '/pages/my/memberInfo'
             })
         },
         // 显示登录框
