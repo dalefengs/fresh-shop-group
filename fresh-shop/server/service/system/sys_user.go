@@ -421,13 +421,13 @@ func (userService *UserService) ResetPassword(ID uint) (err error) {
 	return err
 }
 
-func (userService *UserService) GetAuditStatus(userId uint) (status int, err error) {
+func (userService *UserService) GetAuditStatus(userId uint) (user *system.SysUser, err error) {
 	var u system.SysUser
-	err = global.DB.Select("audit_status").Where("`id` = ? and audit_status = 1", userId).First(&u).Error
+	err = global.DB.Select("audit_status,audit_remark").Where("`id` = ?", userId).First(&u).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return 0, nil
+		return &u, nil
 	} else if err != nil {
-		return 0, errors.New("用户不存在")
+		return &u, errors.New("用户不存在")
 	}
-	return 1, nil
+	return &u, nil
 }

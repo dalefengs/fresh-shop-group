@@ -112,13 +112,13 @@ export default {
 		}
         let user = getUser()
         if (user) {
-            if ( user.audit_status === 1) {
+            if ( user.auditStatus === 1) {
                 this.isAudit = true
             }else {
                 getUserAuditStatus().then(res => {
                     if (res.data.auditStatus === 1) {
                         this.isAudit = true
-                        user.audit_status = 1
+                        user.auditStatus = 1
                         setUser(user)
                     }
                 })

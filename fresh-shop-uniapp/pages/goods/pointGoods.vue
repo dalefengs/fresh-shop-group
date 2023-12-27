@@ -10,7 +10,7 @@
 					<image v-if="keyword" :src="delIcon" class="search-del-icon" @click="clearKeyword"></image>
 				</view>
 				<view class="right">
-					<text class="search-btn" @click="search" style="border: 1rpx solid; color: #2979ff">搜索</text>
+					<text class="search-btn" @click="search" style="border: 1px solid; color: #2979ff">搜索</text>
 				</view>
 			</view>
 <!--			<filterDropdown style="z-index: 1000" ref="dropdown" :itemArr="itemArr" @finish="finish" @clear="clearWhere"></filterDropdown>-->
@@ -21,7 +21,7 @@
 				:refresher-triggered="triggered" @refresherrefresh="onRefresh" @scrolltolower="scrollTolower"
 				:scroll-anchoring="true">
 				<!-- 商品列表 -->
-				<GoodsList :lists="goodsArr" :isPoint="true"></GoodsList>
+				<GoodsList :lists="goodsArr" :isPoint="true" :is-audit="isAudit"></GoodsList>
 				<view class="king-py-40" @click="scrollTolower">
 					<u-loadmore :status="loadMore" loading-text="努力加载中，请喝杯茶" loadmore-text="上拉加载更多" nomore-text="实在是没有了" />
 				</view>
@@ -43,6 +43,8 @@ import { getCategoryListAll } from '@/api/category.js'
 import { getTagsListAll } from '@/api/tags.js'
 import { getGoodsPageList, getGoodsPageListLoading } from '@/api/goods.js'
 import GoodsList from '@/components/goodsList/goodsList.vue'
+import {getUser, setUser} from "@/store/storage";
+import {getUserAuditStatus} from "@/api/user";
 export default {
 	components: {
 		filterDropdown,
@@ -60,6 +62,7 @@ export default {
 			tagsIds: '', // 标签 id
 			brandList: [], // 品牌列表
 			categoryList: [], // 分类列表
+            isAudit: false,
 			itemArr: [
 				[
 					{ text: '智能排序', value: 0 },
@@ -106,7 +109,20 @@ export default {
 		if (option.tagsId) {
 			this.tagsId = option.tagsId
 		}
-
+        let user = getUser()
+        if (user) {
+            if ( user.auditStatus === 1) {
+                this.isAudit = true
+            }else {
+                getUserAuditStatus().then(res => {
+                    if (res.data.auditStatus === 1) {
+                        this.isAudit = true
+                        user.auditStatus = 1
+                        setUser(user)
+                    }
+                })
+            }
+        }
 		this.init()
 	},
 	mounted() {

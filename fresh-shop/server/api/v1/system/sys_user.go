@@ -474,12 +474,17 @@ func (b *BaseApi) SetSelfInfo(c *gin.Context) {
 		DbModel: global.DbModel{
 			ID: user.ID,
 		},
-		NickName:  user.NickName,
-		HeaderImg: user.HeaderImg,
-		Phone:     user.Phone,
-		Email:     user.Email,
-		SideMode:  user.SideMode,
-		Enable:    user.Enable,
+		NickName:           user.NickName,
+		HeaderImg:          user.HeaderImg,
+		Phone:              user.Phone,
+		Email:              user.Email,
+		SideMode:           user.SideMode,
+		Enable:             user.Enable,
+		OriginCustomerName: user.OriginCustomerName,
+		OriginContactName:  user.OriginContactName,
+		ChangeContactName:  user.ChangeContactName,
+		ChangeCustomerName: user.ChangeCustomerName,
+		AuditStatus:        user.AuditStatus,
 	}
 	if info.HeaderImg != "" {
 		info.HeaderImg = user.HeaderImg
@@ -556,18 +561,20 @@ func (b *BaseApi) ResetPassword(c *gin.Context) {
 }
 
 func (b *BaseApi) GetAuditStatus(c *gin.Context) {
-	resp := map[string]int{}
+	resp := map[string]any{}
 	userId := utils.GetUserID(c)
 	if userId == 0 {
 		resp["auditStatus"] = 0
 		return
 	}
-	status, err := userService.GetAuditStatus(userId)
+	user, err := userService.GetAuditStatus(userId)
 	if err != nil {
 		global.Log.Error("查询用户审核状态失败!", zap.Error(err))
 		response.FailWithMessage("重置失败"+err.Error(), c)
 		return
 	}
-	resp["auditStatus"] = status
+	resp["auditStatus"] = user.AuditStatus
+	resp["auditRemark"] = user.AuditRemark
+
 	response.OkWithData(resp, c)
 }

@@ -1,36 +1,65 @@
 <template>
     <pageWrapper>
-        <view class="box">
-
+        <view class="box1">
+            <view class=user-info>
+                <view class="face">
+                    <image :src="user.headerImg"></image>
+                </view>
+            </view>
+            <view class="username">{{ user.nickName }}</view>
+            <view class="title">启运冻品欢迎您！填写会员信息加入我们！</view>
         </view>
-        <view class="box">
+        <view class="box2">
             <view class="con-bd-item">
-                <view class="con-bd-item-name"><span style="color: red; margin-right: 2px">* </span>联系人名称</view>
+                <view class="con-bd-item-name"><span style="color: red; margin-right: 2px">* </span>联系人</view>
                 <view class="con-bd-item-con">
                     <input type="text" v-model="formData.originContactName" placeholder="请输入您的姓名"
-                           placeholder-class="input-placeholder" />
+                           placeholder-class="input-placeholder"/>
                 </view>
             </view>
             <view class="con-bd-item">
                 <view class="con-bd-item-name">客户名称</view>
                 <view class="con-bd-item-con">
                     <input type="text" v-model="formData.originCustomerName" placeholder="请输入您所在公司/店铺名称"
-                           placeholder-class="input-placeholder" />
+                           placeholder-class="input-placeholder"/>
                 </view>
             </view>
+            <view v-if="auditStatus !== 0" class="con-bd-item">
+                <view class="con-bd-item-name">审核状态</view>
+                <view class="con-bd-item-con">
+                    <span v-if="auditStatus === 2 || auditStatus === 3">审核中</span>
+                    <span v-else-if="auditStatus === 4">不通过</span>
+                    <span v-else-if="auditStatus === 1">通过</span>
+                </view>
+            </view>
+            <view v-if="auditStatus === 4" class="con-bd-item">
+                <view class="con-bd-item-name">审核信息</view>
+                <view class="con-bd-item-con">
+                    <input type="text" v-model="user.auditRemark" disabled="disabled" placeholder="无" placeholder-class="input-placeholder"/>
+                </view>
+            </view>
+        </view>
+        <view class="btn-box" @click="submit">
+            <view v-if="auditStatus === 1" class="btn">修改</view>
+            <view v-else-if="[2,3].includes(auditStatus)" class="btn">等待审核</view>
+            <view v-else-if="auditStatus === 4" class="btn">重新提交</view>
+            <view v-else-if="auditStatus === 0" class="btn">提交</view>
         </view>
     </pageWrapper>
 
 </template>
 
 <script>
-import { getToken, setUser, getUser } from "@/store/storage";
+import {getToken, setUser, getUser} from "@/store/storage";
+import {setSelfInfo} from "@/api/user";
+import {getUserAuditStatus} from "@/api/user";
 
 export default {
     data() {
         return {
             token: '',
             user: null,
+            auditStatus: 0,
             formData: {}
         }
     },
@@ -45,47 +74,168 @@ export default {
             return
         }
         this.user = getUser()
-        this.formData.ID = this.user.ID
-        // TODO
+        if (this.user) {
+            if (this.user.auditStatus === 1) {
+                this.auditStatus = 1
+                this.formData.originContactName = this.user.originContactName
+                this.formData.originCustomerName = this.user.originCustomerName
+            }else {
+                getUserAuditStatus().then(res => {
+                    this.auditStatus = res.data.auditStatus
+                    this.user.auditStatus = res.data.auditStatus
+                    this.user.auditRemark = res.data.auditRemark
+                    if (this.auditStatus === 3) {
+                        this.formData.originContactName = this.user.changeContactName
+                        this.formData.originCustomerName = this.user.changeCustomerName
+                    }else {
+                        this.formData.originContactName = this.user.originContactName
+                        this.formData.originCustomerName = this.user.originCustomerName
+                    }
+                    setUser(this.user)
+                })
+            }
+        }
+
+
     },
+    methods:{
+        async submit() {
+            if (this.auditStatus === 2) {
+                this.$message(this.$refs.toast).error("您的信息正在审核中,请勿重复提交")
+                return false
+            }
+
+            if (this.formData.originContactName === "") {
+                this.$message(this.$refs.toast).error("请输入联系人姓名")
+                return false
+            }
+
+            // 修改原有信息
+            if (this.auditStatus === 1) {
+                this.auditStatus = 3
+                this.formData.changeContactName =  this.formData.originContactName
+                this.formData.changeCustomerName = this.formData.originCustomerName
+                this.formData.originContactName = this.user.originContactName
+                this.formData.originCustomerName = this.user.originCustomerName
+            }else {
+                this.auditStatus = 2
+            }
+            this.formData.auditStatus = this.auditStatus
+            const res = await setSelfInfo(this.formData)
+            if (res.code !== 0){
+                this.$message(this.$refs.toast).success("提交失败！")
+                return false
+            }
+            this.user.originContactName = this.formData.originContactName
+            this.user.originCustomerName = this.formData.originCustomerName
+            this.user.auditStatus = this.auditStatus
+            setUser(this.user)
+            this.$message(this.$refs.toast).success("提交成功，请耐心等待审核！")
+        }
+    }
+
 }
 </script>
 
 <style scoped lang="scss">
-.box {
+.box1 {
   margin: 10px 10px 12px;
-  height: 100px;
   border-radius: 10px;
   box-shadow: 0px 0px 20px #f4f3f3;
   background: #FFFFFF;
-  padding: 20px 15px 30px;
+  padding: 20px 10px 20px;
 }
+
+.box2 {
+  margin: 10px 10px 12px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 20px #f4f3f3;
+  background: #FFFFFF;
+  padding: 20px 10px 30px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+
+  .face {
+    flex-shrink: 0;
+    width: 20vw;
+    height: 20vw;
+
+    image {
+      width: 20vw;
+      height: 100%;
+      border-radius: 100%
+    }
+  }
+}
+
+.username {
+  font-size: 17px;
+  width: 100%;
+  text-align: center;
+  margin: 16px 0 12px 0;
+}
+
+.title {
+  font-size: 17px;
+  width: 100%;
+  text-align: center;
+}
+
 .con-bd-item {
   display: flex;
   align-items: center;
   width: 100%;
-  height: 110rpx;
+  height: 55px;
 }
 
 .con-bd-item-name {
-  width: 120px;
+  width: 110px;
   height: 110px;
-  text-align: left;
   font-size: 16px;
   color: #333333;
   line-height: 110px;
+  text-align: right;
+  margin-right: 15px;
 }
 
 .con-bd-item-con {
   display: flex;
   align-items: center;
-  width: calc(100% - 120rpx);
-  height: 108rpx;
-  border-bottom: 2rpx solid #F7F7F7;
+  width: calc(100% - 60px);
+  height: 54px;
+  border-bottom: 1px solid #F7F7F7;
 }
 
 .con-bd-item-con input {
   width: 100%;
-  height: 60rpx;
+  height: 30px;
+}
+
+.btn-box {
+  position: fixed;
+  bottom: 10px;
+  height: 50px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .btn {
+    width: 90%;
+    height: 50px;
+    color: #fff;
+    background-color: #2979ff;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
 }
 </style>
