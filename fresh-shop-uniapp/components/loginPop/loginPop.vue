@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import { setToken, setExpires, setUser, setOpenId } from '@/store/storage.js'
+import { setToken, setExpires, setUser, setOpenId} from '@/store/storage.js'
 import { getWeChatOpenIdByCode, wxLogin } from '@/api/login.js'
 export default {
     name: "loginPop",
@@ -85,6 +85,11 @@ export default {
                 setExpires(res.data.expiresAt)
                 setOpenId(res.data.user.openId)
                 setUser(res.data.user)
+                if (res.data.user.auditStatus !== 1) {
+                    uni.navigateTo({
+                        url: "/pages/my/memberInfo"
+                    });
+                }
                 this.$emit("success", res.data.user)
             })
         },

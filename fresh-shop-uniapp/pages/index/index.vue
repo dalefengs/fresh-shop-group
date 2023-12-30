@@ -106,9 +106,8 @@ import config from '@/config/config.js'
 import { getBannerList } from '@/api/banner.js'
 import { getHomeCategoryList } from '@/api/category.js'
 import { getGoodsPageList } from '@/api/goods.js'
-import { getToken, getUser } from '@/store/storage.js'
+import { getToken, getUser, setUser, getFirstEntry } from '@/store/storage.js'
 import { getUserAuditStatus } from "@/api/user";
-import {setUser} from "../../store/storage";
 export default {
 	components: {
 		Tabbar,
@@ -118,6 +117,7 @@ export default {
 	data() {
 		return {
             isAudit: false,
+            applyTime: "",
 			loginSuspendShow: false, // 是否显示底部登录
 			goodsTabsId: 0, // 商品标签切换
 			swiperHeight: 1000, // 商品栏目整体高度 页面大小
@@ -148,20 +148,26 @@ export default {
 	onLoad() {
         let user = getUser()
         if (user) {
+            let entry = getFirstEntry()
             if (user.auditStatus === 1) {
                 this.isAudit = true
             }else {
                 getUserAuditStatus().then(res => {
+                    this.applyTime = res.data.applyTime
                     if (res.data.auditStatus === 1) {
                         this.isAudit = true
                         user.auditStatus = 1
                         setUser(user)
+                    }else if(!entry) {
+                        uni.navigateTo({
+                            url: "/pages/my/memberInfo"
+                        });
                     }
                 })
             }
         }
 
-		this._freshing = false;
+		this.freshing = false;
 		this.getBanner();
 		this.getHomeCategory();
 		this.getGoodsListData(0)

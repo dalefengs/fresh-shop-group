@@ -29,12 +29,13 @@ type SysUser struct {
 	LoginIp        string         `json:"loginIp" gorm:"comment:登录IP"`                     // 登录IP
 	LoginTime      time.Time      `json:"loginTime" gorm:"comment:最后登录时间"`                 // 最后登录时间
 
-	OriginContactName  string `json:"originContactName" gorm:"column:origin_contact_name;comment:联系人姓名"`                             // 联系人姓名
-	ChangeContactName  string `json:"changeContactName" gorm:"column:change_contact_name;comment:联系人姓名修改待审核"`                        // 联系人姓名修改待审核
-	OriginCustomerName string `json:"originCustomerName" gorm:"column:origin_customer_name;comment:客户名称、公司名称"`                       // 客户名称、公司名称
-	ChangeCustomerName string `json:"changeCustomerName" gorm:"column:change_customer_name;comment:客户名称、公司名称待审核"`                    // 客户名称、公司名称待审核
-	AuditStatus        int8   `json:"auditStatus" gorm:"column:audit_status;default:0;comment:审核状态 0新注册未填写信息 1已通过 2已填写未审核 3修改信息待审核"` // 审核状态 0新注册未填写信息 1已通过 2已填写未审核 3修改信息待审核 4已拒绝
-	AuditRemark        string `json:"auditRemark" gorm:"column:audit_remark;comment:审核备注"`                                           // 审核备注
+	OriginContactName  string    `json:"originContactName" gorm:"column:origin_contact_name;comment:联系人姓名"`                             // 联系人姓名
+	ChangeContactName  string    `json:"changeContactName" gorm:"column:change_contact_name;comment:联系人姓名修改待审核"`                        // 联系人姓名修改待审核
+	OriginCustomerName string    `json:"originCustomerName" gorm:"column:origin_customer_name;comment:客户名称、公司名称"`                       // 客户名称、公司名称
+	ChangeCustomerName string    `json:"changeCustomerName" gorm:"column:change_customer_name;comment:客户名称、公司名称待审核"`                    // 客户名称、公司名称待审核
+	AuditStatus        int8      `json:"auditStatus" gorm:"column:audit_status;default:0;comment:审核状态 0新注册未填写信息 1已通过 2已填写未审核 3修改信息待审核"` // 审核状态 0新注册未填写信息 1已通过 2已填写未审核 3修改信息待审核 4已拒绝
+	AuditRemark        string    `json:"auditRemark" gorm:"column:audit_remark;comment:审核备注"`                                           // 审核备注
+	ApplyTime          time.Time `json:"applyTime" gorm:"column:apply_time;comment:审核时间"`
 
 	Account any `json:"account" gorm:"-"`
 }

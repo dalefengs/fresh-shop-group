@@ -242,6 +242,14 @@ export default {
         // 添加购物车按钮
         // type 1增 2减
         addCartClick(type) {
+            if (!this.isAudit){
+                this.$message(this.$refs.toast).warning('审核通过后才可以下单！').then(()=>{
+                    uni.navigateTo({
+                        url: "/pages/my/memberInfo"
+                    });
+                })
+                return false
+            }
             let currentNum = this.goods.cartNum
             let addNum = currentNum
             if (type === 1) {

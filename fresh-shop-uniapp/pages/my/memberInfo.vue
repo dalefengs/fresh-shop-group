@@ -38,6 +38,12 @@
                     <input type="text" v-model="user.auditRemark" disabled="disabled" placeholder="无" placeholder-class="input-placeholder"/>
                 </view>
             </view>
+            <view v-if="auditStatus !== 0" class="con-bd-item">
+                <view class="con-bd-item-name">申请时间</view>
+                <view class="con-bd-item-con">
+                    <text>{{user.applyTime | parseDate}}</text>
+                </view>
+            </view>
         </view>
         <view class="btn-box" @click="submit">
             <view v-if="auditStatus === 1" class="btn">修改</view>
@@ -45,12 +51,13 @@
             <view v-else-if="auditStatus === 4" class="btn">重新提交</view>
             <view v-else-if="auditStatus === 0" class="btn">提交</view>
         </view>
+        <u-toast style="z-index:9998;" ref="toast"></u-toast>
     </pageWrapper>
 
 </template>
 
 <script>
-import {getToken, setUser, getUser} from "@/store/storage";
+import {getToken, setUser, getUser, setFirstEntry} from "@/store/storage";
 import {setSelfInfo} from "@/api/user";
 import {getUserAuditStatus} from "@/api/user";
 
@@ -73,6 +80,7 @@ export default {
             })
             return
         }
+        setFirstEntry(true) // 已经进入
         this.user = getUser()
         if (this.user) {
             if (this.user.auditStatus === 1) {
@@ -84,6 +92,7 @@ export default {
                     this.auditStatus = res.data.auditStatus
                     this.user.auditStatus = res.data.auditStatus
                     this.user.auditRemark = res.data.auditRemark
+                    this.user.applyTime = res.data.applyTime
                     if (this.auditStatus === 3) {
                         this.formData.originContactName = this.user.changeContactName
                         this.formData.originCustomerName = this.user.changeCustomerName
@@ -101,7 +110,7 @@ export default {
     methods:{
         async submit() {
             if (this.auditStatus === 2) {
-                this.$message(this.$refs.toast).error("您的信息正在审核中,请勿重复提交")
+                this.$message(this.$refs.toast).error("审核中,请勿重复提交")
                 return false
             }
 
@@ -112,25 +121,38 @@ export default {
 
             // 修改原有信息
             if (this.auditStatus === 1) {
-                this.auditStatus = 3
+                this.formData.auditStatus = 3
                 this.formData.changeContactName =  this.formData.originContactName
                 this.formData.changeCustomerName = this.formData.originCustomerName
                 this.formData.originContactName = this.user.originContactName
                 this.formData.originCustomerName = this.user.originCustomerName
             }else {
-                this.auditStatus = 2
+                this.formData.auditStatus = 2
             }
-            this.formData.auditStatus = this.auditStatus
+            this.formData.applyTime = this.formatDate()
             const res = await setSelfInfo(this.formData)
             if (res.code !== 0){
-                this.$message(this.$refs.toast).success("提交失败！")
+                this.$message(this.$refs.toast).error("提交失败！")
                 return false
             }
+            this.auditStatus = this.formData.auditStatus
             this.user.originContactName = this.formData.originContactName
             this.user.originCustomerName = this.formData.originCustomerName
             this.user.auditStatus = this.auditStatus
+            this.user.applyTime = this.formData.applyTime
             setUser(this.user)
             this.$message(this.$refs.toast).success("提交成功，请耐心等待审核！")
+        },
+        // 获取当前时间
+        formatDate() {
+            var currentdate = new Date();
+            var datetime = currentdate.getFullYear() + "-"
+                + (currentdate.getMonth()+1)  + "-"
+                + currentdate.getDate() + "T"
+                + currentdate.getHours() + ":"
+                + currentdate.getMinutes() + ":"
+                + currentdate.getSeconds() + "Z";
+            return datetime
         }
     }
 

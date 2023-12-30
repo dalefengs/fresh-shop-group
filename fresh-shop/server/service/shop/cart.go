@@ -92,6 +92,9 @@ func (cartService *CartService) SelectAllChecked(userId uint) (err error) {
 		return nil
 	}
 	for _, c := range carts {
+		if c.Goods.ID == 0 {
+			continue
+		}
 		if *c.Goods.Store <= 0 {
 			continue
 		} else if *c.Goods.Store < c.Num {
@@ -147,7 +150,11 @@ func (cartService *CartService) GetCartInfoList(info shopReq.CartSearch, userId 
 	}
 	// 将库存不足的取消选择
 	cancelCheckIds := make([]uint, 0)
+	results := make([]shop.Cart, 0, len(carts))
 	for i, c := range carts {
+		if c.Goods.ID == 0 {
+			continue
+		}
 		if *c.Goods.Store <= 0 {
 			carts[i].Checked = utils.Pointer(0)
 			cancelCheckIds = append(cancelCheckIds, c.ID)
@@ -155,9 +162,11 @@ func (cartService *CartService) GetCartInfoList(info shopReq.CartSearch, userId 
 			carts[i].Checked = utils.Pointer(0)
 			cancelCheckIds = append(cancelCheckIds, c.ID)
 		}
+		results = append(results, carts[i])
 	}
 	if len(cancelCheckIds) > 0 {
 		err = global.DB.Model(&shop.Cart{}).Where("id in ?", cancelCheckIds).Update("checked", 0).Error
 	}
-	return carts, total, err
+	total = int64(len(results))
+	return results, total, err
 }

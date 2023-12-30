@@ -423,7 +423,7 @@ func (userService *UserService) ResetPassword(ID uint) (err error) {
 
 func (userService *UserService) GetAuditStatus(userId uint) (user *system.SysUser, err error) {
 	var u system.SysUser
-	err = global.DB.Select("audit_status,audit_remark").Where("`id` = ?", userId).First(&u).Error
+	err = global.DB.Select("audit_status,audit_remark,apply_time").Where("`id` = ?", userId).First(&u).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return &u, nil
 	} else if err != nil {

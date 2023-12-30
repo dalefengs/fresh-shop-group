@@ -485,6 +485,7 @@ func (b *BaseApi) SetSelfInfo(c *gin.Context) {
 		ChangeContactName:  user.ChangeContactName,
 		ChangeCustomerName: user.ChangeCustomerName,
 		AuditStatus:        user.AuditStatus,
+		ApplyTime:          user.ApplyTime,
 	}
 	if info.HeaderImg != "" {
 		info.HeaderImg = user.HeaderImg
@@ -575,6 +576,7 @@ func (b *BaseApi) GetAuditStatus(c *gin.Context) {
 	}
 	resp["auditStatus"] = user.AuditStatus
 	resp["auditRemark"] = user.AuditRemark
+	resp["applyTime"] = user.ApplyTime
 
 	response.OkWithData(resp, c)
 }

@@ -144,7 +144,7 @@
                   <el-button type="primary" link icon="delete">删除</el-button>
                 </template>
               </el-popover>
-              <el-button type="primary" link icon="edit" @click="openEdit(scope.row)">编辑</el-button>
+              <el-button type="primary" link icon="edit" @click="openEdit(scope.row)">{{ scope.row.auditStatus === 2 || scope.row.auditStatus === 3 ? "审核" : "编辑" }}</el-button>
               <el-button type="primary" link icon="magic-stick" @click="resetPasswordFunc(scope.row)">重置密码
               </el-button>
             </div>
@@ -462,9 +462,6 @@ const rules = ref({
   ],
   nickName: [
     { required: true, message: '请输入用户昵称', trigger: 'blur' },
-  ],
-  originContactName: [
-    { required: true, message: '请输入联系人名称', trigger: 'blur' },
   ],
   phone: [
     {

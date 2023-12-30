@@ -2,6 +2,7 @@ const TOKEN = "token"
 const EXPIRES = "expires"
 const USER = "user"
 const OPENID = "openid"
+const FirstEntry = "firstEntry"
 
 
 // 设置 token
@@ -40,4 +41,13 @@ export function setOpenId(openId) {
 
 export function getOpenId() {
     return uni.getStorageSync(OPENID)
+}
+
+
+export function getFirstEntry() {
+    return uni.getStorageSync(FirstEntry)
+}
+// 设置 openid
+export function setFirstEntry(bool) {
+    uni.setStorageSync(FirstEntry, bool)
 }
