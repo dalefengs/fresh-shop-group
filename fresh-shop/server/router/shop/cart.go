@@ -21,8 +21,9 @@ func (s *CartRouter) InitCartRouter(Router *gin.RouterGroup) {
 		cartRouter.PUT("updateCart", cartApi.UpdateCart)              // 更新Cart
 	}
 	{
-		cartRouterWithoutRecord.POST("selectAllChecked", cartApi.SelectAllChecked) // 全选 Cart
-		cartRouterWithoutRecord.POST("clearAllChecked", cartApi.ClearAllChecked)   // 取消全选 Cart
-		cartRouterWithoutRecord.GET("getCartList", cartApi.GetCartList)            // 获取Cart列表
+		cartRouterWithoutRecord.POST("selectAllChecked", cartApi.SelectAllChecked)               // 全选 Cart
+		cartRouterWithoutRecord.POST("selectGoodsSingeChecked", cartApi.SelectGoodsSingeChecked) // 单选商品
+		cartRouterWithoutRecord.POST("clearAllChecked", cartApi.ClearAllChecked)                 // 取消全选 Cart
+		cartRouterWithoutRecord.GET("getCartList", cartApi.GetCartList)                          // 获取Cart列表
 	}
 }

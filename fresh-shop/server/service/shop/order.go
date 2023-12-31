@@ -15,7 +15,6 @@ import (
 	"fresh-shop/server/service/wechat"
 	"fresh-shop/server/utils"
 	"github.com/gin-gonic/gin"
-	orderPay "github.com/silenceper/wechat/v2/pay/order"
 	"gorm.io/gorm"
 	"strconv"
 	"strings"
@@ -247,18 +246,18 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 
 	// 提交事务
 	txDB.Commit()
-	jsApiData := &orderPay.Config{}
-	if order.PointGoodsId == 0 {
-		// 发起 JSAIP 支付返回参数
-		err, jsApiData = wechat.JSAPIPay(userClaims.OpenId, order.OrderSn, order.ID, order.Total, clientIP)
-		if err != nil {
-			global.SugarLog.Errorf("log:%s, 微信 JsApi 发起调用异常, err: %v \n", log, err)
-			return
-		}
-	}
+	//jsApiData := &orderPay.Config{}
+	//if order.PointGoodsId == 0 {
+	//	// 发起 JSAIP 支付返回参数
+	//	err, jsApiData = wechat.JSAPIPay(userClaims.OpenId, order.OrderSn, order.ID, order.Total, clientIP)
+	//	if err != nil {
+	//		global.SugarLog.Errorf("log:%s, 微信 JsApi 发起调用异常, err: %v \n", log, err)
+	//		return
+	//	}
+	//}
 	resp = &response.CreateOrderResp{
 		Order: order,
-		Pay:   *jsApiData,
+		//Pay:   *jsApiData,
 	}
 	return
 }

@@ -128,7 +128,7 @@ export default {
         return {
             token: '',
             list: [],
-	          pointGoodsId: 0,
+            pointGoodsId: 0,
             addressId: 0, // 用户地址ID
             address: {}, // 用户收货地址
             total: 0,
@@ -346,7 +346,7 @@ export default {
                 return
             }
             if (!res.data.list || res.data.list.length === 0) {
-                this.$message(this.$refs.toast).error("购物车中无数据").then(() => {
+                this.$message(this.$refs.toast).error("无商品数据").then(() => {
                     uni.redirectTo({
                         url: '/pages/cart/cart'
                     })

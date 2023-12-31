@@ -8,7 +8,7 @@
 <template>
     <pageWrapper>
         <u-swiper v-if="Object.keys(goods).length > 0" :list="goods.images" @change="e => currentImgIndex = e.current"
-                  :autoplay="false" indicatorStyle="right: 20px" height="280">
+                  :autoplay="false" indicatorStyle="right: 20px" height="280" @click="showImage">
             <view slot="indicator" class="indicator-num">
                 <text class="indicator-num__text">{{ currentImgIndex + 1 }}/{{ goods.images.length }}</text>
             </view>
@@ -17,10 +17,13 @@
         <view class="box" v-show="Object.keys(goods).length > 0">
             <view class="price-box">
                 <view v-if="isAudit">
-                    <text class="price" v-if="goods.goodsArea === 1">{{ goods.costPrice || '0' }} 积分 </text>
-                    <text class="price" v-else>￥{{ goods.price > 0 && goods.price < goods.costPrice ? goods.price : goods.costPrice || '0' }}</text>
+                    <text class="price" v-if="goods.goodsArea === 1">{{ goods.costPrice || '0' }} 积分</text>
+                    <text class="price" v-else>
+                        ￥{{ goods.price > 0 && goods.price < goods.costPrice ? goods.price : goods.costPrice || '0' }}
+                    </text>
                     <text class="unit">/{{ goods.unit }}</text>
-                    <text v-if="goods.price > 0 && goods.price < goods.costPrice && goods.goodsArea === 0" class="del-price">￥{{
+                    <text v-if="goods.price > 0 && goods.price < goods.costPrice && goods.goodsArea === 0"
+                          class="del-price">￥{{
                             goods.costPrice || '0'
                         }}
                     </text>
@@ -69,12 +72,12 @@
                     <view>购物车</view>
                 </view>
             </view>
-            <view class="right">
-	              <view class="addCartBtn" v-if="goods.goodsArea === 1" @click="submitPointOrder">
-		              <text v-if="goods.store <= 0"> 暂时无货 </text>
-		              <text v-else-if="pointAmount < goods.costPrice" >积分不足</text>
-		              <text v-else>立即兑换</text>
-	              </view>
+            <view class="right" >
+                <view class="addCartBtn" v-if="goods.goodsArea === 1" @click="submitPointOrder">
+                    <text v-if="goods.store <= 0"> 暂时无货</text>
+                    <text v-else-if="pointAmount < goods.costPrice">积分不足</text>
+                    <text v-else>立即兑换</text>
+                </view>
                 <view v-else-if="goods.cartNum > 0" class="addCartBtnSelect">
                     <view class="symbol" @click="addCartClick(2)">
                         -
@@ -86,11 +89,12 @@
                         +
                     </view>
                 </view>
-                <view v-else class="addCartBtn" :style="{'background-color': goods.store <= 0 || goods.store <= goods.minCount ? '#f29100' : '#2979ff'}" @click="addCartClick(1)">
+                <view v-else class="addCartBtn" :style="{'background-color': goods.store <= 0 || goods.store <= goods.minCount ? '#f29100' : '#f29100'}" @click="addCartClick(1)">
                     <text v-if="goods.store <= 0 || goods.store <= goods.minCount"> 暂时无货 </text>
                     <text v-else-if="goods.minCount > 1">最低 {{ goods.minCount }} 件起购</text>
                     <text v-else>加入购物车</text>
                 </view>
+                <view v-if="goods.store > 0 || goods.store >= goods.minCount" class="placeOrder" style="background: #2979ff"  @click="placeOrder">立即下单</view>
             </view>
         </view>
         <loginSuspend :show="loginSuspendShow" @success="loginSuccess"></loginSuspend>
@@ -104,7 +108,7 @@ import loginSuspend from '@/components/loginPop/loginSuspend.vue'
 import {getGoodsInfo} from '@/api/goods.js'
 import {favorites} from '@/api/favorites.js'
 import config from '@/config/config.js'
-import {addCart} from "@/api/cart";
+import {addCart,selectGoodsSingeChecked} from "@/api/cart";
 import {getAccountInfo} from "@/api/account.js";
 import UviewUi from "../../uni_modules/uview-ui/components/uview-ui/uview-ui";
 import {getUser, setUser} from "@/store/storage";
@@ -112,7 +116,7 @@ import {getUserAuditStatus} from "@/api/user";
 
 export default {
     components: {
-	    UviewUi,
+        UviewUi,
         loginSuspend
     },
     data() {
@@ -130,7 +134,7 @@ export default {
             addCartBtnStyle: {
                 borderRadius: '20px',
             },
-	          pointAmount: 0, // 积分数量
+            pointAmount: 0, // 积分数量
         }
     },
     onLoad(options) {
@@ -157,9 +161,9 @@ export default {
         }
         let user = getUser()
         if (user) {
-            if ( user.auditStatus === 1) {
+            if (user.auditStatus === 1) {
                 this.isAudit = true
-            }else {
+            } else {
                 getUserAuditStatus().then(res => {
                     if (res.data.auditStatus === 1) {
                         this.isAudit = true
@@ -176,20 +180,20 @@ export default {
     mounted() {
     },
     methods: {
-			  // 积分订单提交
-		    submitPointOrder() {
-					if (this.pointAmount < this.goods.costPrice) {
-						this.$message(this.$refs.toast).error("积分不足")
-						return
-					}
-                      if (this.goods.store <= 0) {
-                        this.$message(this.$refs.toast).error("暂时无货")
-                        return
-                      }
-					uni.navigateTo({
-						url: '/pages/order/submit?pointGoodsId=' + this.id
-					})
-		    },
+        // 积分订单提交
+        submitPointOrder() {
+            if (this.pointAmount < this.goods.costPrice) {
+                this.$message(this.$refs.toast).error("积分不足")
+                return
+            }
+            if (this.goods.store <= 0) {
+                this.$message(this.$refs.toast).error("暂时无货")
+                return
+            }
+            uni.navigateTo({
+                url: '/pages/order/submit?pointGoodsId=' + this.id
+            })
+        },
         // 登陆成功
         loginSuccess() {
             this.loginSuspendShow = false
@@ -199,29 +203,29 @@ export default {
                 ID: this.id,
             }
             const res = await getGoodsInfo(data, this.$refs.toast)
-		        res.data.regoods.images.forEach((item, index) => {
-			        if (item.url.slice(0, 4) !== 'http') {
-				        res.data.regoods.images[index].url = config.baseUrl + "/" + item.url
-			        }
-		        })
-		        if (res.data.regoods.weight > 1000) {
-			        res.data.regoods.weight = res.data.regoods.weight / 1000 + 'kg'
-		        } else {
-			        res.data.regoods.weight = res.data.regoods.weight + 'g'
-		        }
-		        this.goods = res.data.regoods
-            if (this.goods.images.length === 0) {
-              this.goods.images.push({
-                url: '/static/nopicture.jpg'
-              })
+            res.data.regoods.images.forEach((item, index) => {
+                if (item.url.slice(0, 4) !== 'http') {
+                    res.data.regoods.images[index].url = config.baseUrl + "/" + item.url
+                }
+            })
+            if (res.data.regoods.weight > 1000) {
+                res.data.regoods.weight = res.data.regoods.weight / 1000 + 'kg'
+            } else {
+                res.data.regoods.weight = res.data.regoods.weight + 'g'
             }
-	          // 积分商品需要获取积分余额
-						if (this.goods.goodsArea === 1) {
-							const accRes = await getAccountInfo(2, this.$refs.toast)
-							if (accRes.code === 0) {
-								this.pointAmount = accRes.data.account.amount
-							}
-						}
+            this.goods = res.data.regoods
+            if (this.goods.images.length === 0) {
+                this.goods.images.push({
+                    url: '/static/nopicture.jpg'
+                })
+            }
+            // 积分商品需要获取积分余额
+            if (this.goods.goodsArea === 1) {
+                const accRes = await getAccountInfo(2, this.$refs.toast)
+                if (accRes.code === 0) {
+                    this.pointAmount = accRes.data.account.amount
+                }
+            }
         },
         // 收藏商品
         favoritesClick() {
@@ -234,16 +238,38 @@ export default {
                 this.goods.isFavorite = !this.goods.isFavorite
                 if (this.goods.isFavorite) {
                     this.$message(this.$refs.toast).success('收藏成功')
-                }else {
+                } else {
                     this.$message(this.$refs.toast).success('取消收藏成功')
                 }
+            })
+        },
+        // 立即下单
+        async placeOrder(){
+            let num = 1
+            // 添加一个到购物车
+            if(this.goods.cartNum > 1) {
+                // 添加购物车
+                num = this.goods.cartNum
+            }
+            const data = {
+                goodsId: this.id,
+                specType: 0, // 单规格
+                num: num
+            }
+            const res = await selectGoodsSingeChecked(data)
+            if (res.code !== 0) {
+                this.$message(this.$refs.toast).error("操作错误")
+                return false
+            }
+            await uni.navigateTo({
+                url: '/pages/order/submit'
             })
         },
         // 添加购物车按钮
         // type 1增 2减
         addCartClick(type) {
-            if (!this.isAudit){
-                this.$message(this.$refs.toast).warning('审核通过后才可以下单！').then(()=>{
+            if (!this.isAudit) {
+                this.$message(this.$refs.toast).warning('审核通过后才可以下单！').then(() => {
                     uni.navigateTo({
                         url: "/pages/my/memberInfo"
                     });
@@ -263,6 +289,9 @@ export default {
                     addNum = this.goods.minCount
                 } else {
                     addNum = 0
+                    this.goods.cartNum = 0
+                    this.goods.cartTotalNum -= 1
+                    this.num = 0
                 }
 
             }
@@ -281,7 +310,7 @@ export default {
             const res = await addCart(data)
             if (res.code === 0) {
                 if (type === 1) {
-                    this.$message(this.$refs.toast).success("添加购物车成功")
+                    // this.$message(this.$refs.toast).success("添加购物车成功")
                     this.goods.cartTotalNum = this.goods.cartTotalNum + (num - this.goods.cartNum)
                 } else {
                     this.goods.cartTotalNum = this.goods.cartTotalNum - (this.goods.cartNum - num)
@@ -293,8 +322,20 @@ export default {
             uni.navigateTo({
                 url: '/pages/cart/cart'
             })
+        },
+        showImage(index) {
+            console.log(this.goods.images[index].url)
+            let urls = []
+            this.goods.images.forEach(item => {
+                urls.push(item.url)
+            })
+            console.log(urls)
+            uni.previewImage({
+                current: index,
+                urls: urls,
+                indicator: "default"
+            })
         }
-
     }
 }
 </script>
@@ -428,7 +469,7 @@ export default {
   box-sizing: border-box;
 
   .left {
-    width: 45%;
+    width: 30%;
     display: flex;
     justify-content: space-between;
 
@@ -447,34 +488,47 @@ export default {
   }
 
   .right {
-    width: 55%;
-    margin-right: 10px;
+    width: 70%;
     font-size: 17px;
-    padding: 0 10px;
-    margin: 0 auto;
+    display: flex;
+    margin: 0 16px;
+    justify-content: flex-end;;
 
-    .addCartBtn {
-      width: 100%;
+    .placeOrder{
+      width: 40%;
       height: 44px;
       line-height: 42px;
       text-align: center;
       border-radius: 22px;
       background-color: #2979ff;
       color: white;
-      font-size: 18px;
+      font-size: 16px;
+    }
+
+    .addCartBtn {
+      width: 60%;
+      height: 44px;
+      line-height: 42px;
+      text-align: center;
+      border-radius: 22px;
+      background-color: #2979ff;
+      color: white;
+      font-size: 16px;
+      margin-right: 10px;
     }
 
     .addCartBtnSelect {
       display: flex;
       justify-content: space-between;
-      width: 100%;
+      width: 60%;
       height: 44px;
       text-align: center;
       border-radius: 22px;
       background-color: #2979ff;
       color: white;
-      font-size: 18px;
+      font-size: 16px;
       box-sizing: border-box;
+      margin-right: 10px;
 
       .symbol {
         width: 32%;

@@ -24,11 +24,15 @@ func (cartService *CartService) CreateCart(cart shop.Cart) (err error) {
 
 	// 记录不存在则创建
 	cart.SpecItemId = 0
+	if cart.Checked == nil {
+		cart.Checked = utils.Pointer(0)
+	}
 	if errors.Is(global.DB.Where("user_id = ? and goods_id = ?", cart.UserId, cart.GoodsId).First(&c).Error, gorm.ErrRecordNotFound) {
 		if *goods.Store < cart.Num {
 			return errors.New("商品库存不足")
 		}
 		if cart.Num > 0 {
+			c.Checked = cart.Checked
 			err = global.DB.Create(&cart).Error
 		}
 	} else {
@@ -40,6 +44,7 @@ func (cartService *CartService) CreateCart(cart shop.Cart) (err error) {
 		if cart.Num == 0 {
 			err = global.DB.Delete(&c).Error
 		} else {
+			c.Checked = cart.Checked
 			c.Num = cart.Num
 			err = global.DB.Save(&c).Error
 		}

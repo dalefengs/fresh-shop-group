@@ -56,6 +56,16 @@ export const selectAllCart = (refs) => {
     },refs)
 }
 
+// 全选购物车
+export const selectGoodsSingeChecked = (data, refs) => {
+    return request({
+        url: `/cart/selectGoodsSingeChecked`,
+        method: 'POST',
+        loading: false,
+        data
+    },refs)
+}
+
 // 取消全选购物车
 export const clearSelectAllCart = (refs) => {
     return request({

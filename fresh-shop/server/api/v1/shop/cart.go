@@ -33,9 +33,10 @@ func (cartApi *CartApi) CreateCart(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	if cart.GoodsId == nil || cart.Num == 0 {
+	if cart.GoodsId == nil {
 		global.Log.Error("参数错误!", zap.Error(err))
 		response.FailWithMessage("参数错误", c)
+		return
 	}
 	userId := utils.GetUserID(c)
 	cart.UserId = utils.Pointer(int(userId))
@@ -135,6 +136,44 @@ func (cartApi *CartApi) SelectAllChecked(c *gin.Context) {
 		response.FailWithMessage("全选失败", c)
 	} else {
 		response.OkWithMessage("全选成功", c)
+	}
+}
+
+// SelectGoodsSingeChecked 单选商品
+// @Tags Cart
+// @Summary 全选 Cart
+// @Security ApiKeyAuth
+// @accept appjson
+// @Produce application/json
+// @Param data body shop.Cart true "全选 Cart"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"全选成功"}"
+// @Router /cart/selectAllChecked [post]
+func (cartApi *CartApi) SelectGoodsSingeChecked(c *gin.Context) {
+	userId := utils.GetUserID(c)
+
+	var cart shop.Cart
+	err := c.ShouldBindJSON(&cart)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if cart.GoodsId == nil || cart.Num == 0 {
+		global.Log.Error("参数错误!", zap.Error(err))
+		response.FailWithMessage("参数错误", c)
+		return
+	}
+
+	// 取消全选失败
+	if err := cartService.ClearAllChecked(userId); err != nil {
+		global.Log.Error("SelectGoodsSingeChecked 取消全选失败!", zap.Error(err))
+	}
+	cart.Checked = utils.Pointer(1)
+	cart.UserId = utils.Pointer(int(userId))
+	if err := cartService.CreateCart(cart); err != nil {
+		global.Log.Error(err.Error(), zap.Error(err))
+		response.FailWithMessage(err.Error(), c)
+	} else {
+		response.OkWithMessage("success", c)
 	}
 }
 

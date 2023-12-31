@@ -129,7 +129,6 @@ export default {
             }else {
                 this.formData.auditStatus = 2
             }
-            this.formData.applyTime = this.formatDate()
             const res = await setSelfInfo(this.formData)
             if (res.code !== 0){
                 this.$message(this.$refs.toast).error("提交失败！")
@@ -139,20 +138,37 @@ export default {
             this.user.originContactName = this.formData.originContactName
             this.user.originCustomerName = this.formData.originCustomerName
             this.user.auditStatus = this.auditStatus
-            this.user.applyTime = this.formData.applyTime
+            this.user.applyTime = this.getNowFormatDate()
             setUser(this.user)
             this.$message(this.$refs.toast).success("提交成功，请耐心等待审核！")
         },
         // 获取当前时间
-        formatDate() {
-            var currentdate = new Date();
-            var datetime = currentdate.getFullYear() + "-"
-                + (currentdate.getMonth()+1)  + "-"
-                + currentdate.getDate() + "T"
-                + currentdate.getHours() + ":"
-                + currentdate.getMinutes() + ":"
-                + currentdate.getSeconds() + "Z";
-            return datetime
+        getNowFormatDate() {
+            var date = new Date();
+            var year = date.getFullYear();
+            var month = date.getMonth() + 1;
+            var strDate = date.getDate();
+            var hour = date.getHours();
+            var minute = date.getMinutes();
+            var second = date.getSeconds();
+            if (month >= 1 && month <= 9) {
+                month = "0" + month;
+            }
+            if (strDate >= 0 && strDate <= 9) {
+                strDate = "0" + strDate;
+            }
+            if (hour >= 0 && hour <= 9) {
+                hour = "0" + hour;
+            }
+            if (minute >= 0 && minute <= 9) {
+                minute = "0" + minute;
+            }
+            if (second >= 0 && second <= 9) {
+                second = "0" + second;
+            }
+            var currentdate = year + '-' + month + '-' + strDate
+                + " " + hour + ':' + minute + ':' + second;
+            return currentdate;
         }
     }
 

@@ -485,7 +485,9 @@ func (b *BaseApi) SetSelfInfo(c *gin.Context) {
 		ChangeContactName:  user.ChangeContactName,
 		ChangeCustomerName: user.ChangeCustomerName,
 		AuditStatus:        user.AuditStatus,
-		ApplyTime:          user.ApplyTime,
+	}
+	if user.AuditStatus == 2 || user.AuditStatus == 3 {
+		info.ApplyTime = time.Now()
 	}
 	if info.HeaderImg != "" {
 		info.HeaderImg = user.HeaderImg
