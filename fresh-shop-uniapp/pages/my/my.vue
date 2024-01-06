@@ -99,7 +99,7 @@ import loginPop from '@/components/loginPop/loginPop.vue'
 import {getUserInfo, setSelfInfo} from "@/api/user";
 import {getOrderStatusCount} from "@/api/order";
 import {getUser, getToken, setUser, setToken, setOpenId} from '@/store/storage.js'
-
+import config from '@/config/config.js'
 export default {
     components: {
         Tabbar,
@@ -119,7 +119,7 @@ export default {
             token: '',
             showLoginDialog: false, // 登录
             showPhoneDialog: false, // 拨号
-            relationPhone: "13527326320", // 联系人电话
+            relationPhone: "", // 联系人电话
             showChangeNickName: false, // 修改昵称模态框
             orderTypeLise: [
                 //name-标题 icon-图标 badge-角标
@@ -144,7 +144,8 @@ export default {
     },
     onLoad() {
         //加载
-        this.init();
+        this.init()
+        this.relationPhone = config.phone
     },
     methods: {
         async init() {

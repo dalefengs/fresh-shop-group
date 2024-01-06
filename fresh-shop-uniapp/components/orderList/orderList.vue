@@ -121,6 +121,10 @@
                 此操作不可撤销，请谨慎操作！
             </text>
         </u-modal>
+        <u-modal :show="showPhoneDialog" showCancelButton closeOnClickOverlay @confirm="callPhone"
+                 @cancel="() => showPhoneDialog = false" @close="close" confirmText="拨号">
+            <view>联系电话：{{ relationPhone }}</view>
+        </u-modal>
         <u-toast ref="toast" style="z-index: 9999"></u-toast>
     </view>
 </template>
@@ -154,6 +158,8 @@ export default {
             showDeleteOrder:false,
             showCancelOrder:false,
             currentOperateOrderId: 0, // 当前操作的订单ID
+            showPhoneDialog: false, // 拨号
+            relationPhone: "", // 联系人电话
         }
 
     },
@@ -166,26 +172,31 @@ export default {
             },
         });
         this.getOrderListData(0)
+        this.relationPhone = config.phone
     },
     methods: {
         // 订单提交
         async goPay(orderId) {
-            const res = await orderPay({
-                ID: orderId
-            }, this.$refs.toast)
-            if (res.code !== 0) {
-                return false
-            }
-            if (!res.data.pay) {
-                this.$message(this.$refs.toast).error("交易失败，请重试")
-                return false
-            }
-			//直接提交订单，不支付
-			else
-			this.$message(this.$refs.toast).success("正在跳转商家联系方式")
-			uni.redirectTo({
-				url: '/pages/my/my'
-			})
+            // const res = await orderPay({
+            //     ID: orderId
+            // }, this.$refs.toast)
+            // if (res.code !== 0) {
+            //     return false
+            // }
+            // if (!res.data.pay) {
+            //     this.$message(this.$refs.toast).error("交易失败，请重试")
+            //     return false
+            // }
+			// //直接提交订单，不支付
+			// else
+			// this.$message(this.$refs.toast).success("正在跳转商家联系方式").then(() => {
+            //     uni.redirectTo({
+            //         url: '/pages/my/my'
+            //     })
+            // })
+
+            this.showPhoneDialog = true
+
 			return true
             // this.toPay(res.data.pay, res.data.order)
         },

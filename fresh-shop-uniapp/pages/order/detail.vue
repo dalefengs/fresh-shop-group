@@ -149,6 +149,10 @@
                 请您确认货物是否完整！
             </text>
         </u-modal>
+        <u-modal :show="showPhoneDialog" showCancelButton closeOnClickOverlay @confirm="callPhone"
+                 @cancel="() => showPhoneDialog = false" @close="close" confirmText="拨号">
+            <view>联系电话：{{ relationPhone }}</view>
+        </u-modal>
     </pageWrapper>
 </template>
 
@@ -168,6 +172,8 @@ export default {
             },
             cancelOrderShow: false, // 取消订单
             confirmShow: false, // 确认订单
+            showPhoneDialog: false, // 拨号
+            relationPhone: "", // 联系人电话
         }
     },
     onLoad(options) {
@@ -182,6 +188,7 @@ export default {
             return false
         }
         this.getOrderInfoData()
+        this.relationPhone = config.phone
     },
     methods: {
         // 获取订单信息
@@ -230,24 +237,26 @@ export default {
         },
         // 订单提交
         async goPay() {
-            const res = await orderPay({
-                ID: this.orderId
-            }, this.$refs.toast)
-            if (res.code !== 0) {
-                return false
-            }
-            // if (!res.data.pay) {
-            //     this.$message(this.$refs.toast).error("交易失败，请重试")
+            // const res = await orderPay({
+            //     ID: this.orderId
+            // }, this.$refs.toast)
+            // if (res.code !== 0) {
             //     return false
             // }
-            // this.toPay(res.data.pay, res.data.order)
-			//直接提交订单不支付
-			else
-			    this.$message(this.$refs.toast).success("正在跳转商家联系方式")
-				uni.redirectTo({
-					url: '/pages/my/my'
-				})
-			    return true
+            // // if (!res.data.pay) {
+            // //     this.$message(this.$refs.toast).error("交易失败，请重试")
+            // //     return false
+            // // }
+            // // this.toPay(res.data.pay, res.data.order)
+			// //直接提交订单不支付
+			// // else
+			//     this.$message(this.$refs.toast).success("正在跳转商家联系方式").then(res => {
+            //         uni.redirectTo({
+            //             url: '/pages/my/my?showPhone=1'
+            //         })
+			//     })
+			//     return true
+            this.showPhoneDialog = true
         },
 		//微信支付功能关闭
         // 发起微信支付
@@ -317,7 +326,21 @@ export default {
             uni.navigateTo({
                 url: `/pages/goods/detail?id=${goodsId}`
             })
-        }
+        },
+        // 显示手机号
+        showPhone() {
+            this.showPhoneDialog = true
+        },
+        // 拨打电话
+        callPhone() {
+            uni.makePhoneCall({
+                phoneNumber: this.relationPhone,
+                success: (result) => {
+                },
+                fail: (error) => {
+                }
+            })
+        },
     }
 }
 </script>
