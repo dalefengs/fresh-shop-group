@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: ZipFiles
 //@description: 压缩文件
 //@param: filename string, files []string, oldForm, newForm string

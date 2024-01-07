@@ -135,6 +135,8 @@ func (favoritesApi *FavoritesApi) GetFavoritesList(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
+	userId := utils.GetUserID(c)
+	pageInfo.UserId = utils.Pointer(int(userId))
 	if list, total, err := favoritesService.GetFavoritesInfoList(pageInfo); err != nil {
 		global.Log.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)

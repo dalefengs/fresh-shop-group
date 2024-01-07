@@ -25,7 +25,7 @@ type OrderService struct {
 }
 
 // CreateOrder 创建Order记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *systemReq.CustomClaims, clientIP string) (resp *response.CreateOrderResp, err error) {
 	var user sysModel.SysUser
 	if err := global.DB.Where("id = ?", order.UserId).First(&user).Error; err != nil {
@@ -263,7 +263,7 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 }
 
 // OrderPay 支付 Order, 返回微信支付所需要的参数
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (orderService *OrderService) OrderPay(order shop.Order, userClaims *systemReq.CustomClaims, clientIP string) (resp *response.CreateOrderResp, err error) {
 	log := fmt.Sprintf("[OrderService] OrderPay orderId:%d; \n", order.ID)
 	// 查询订单信息
@@ -297,7 +297,7 @@ func (orderService *OrderService) OrderDeliver(order shop.Order) (err error) {
 }
 
 // DeleteOrder 删除Order记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (orderService *OrderService) DeleteOrder(order shop.Order) (err error) {
 	var detail shop.OrderDetails
 	err = global.DB.Transaction(func(tx *gorm.DB) error {
@@ -317,7 +317,7 @@ func (orderService *OrderService) DeleteOrder(order shop.Order) (err error) {
 }
 
 // CancelOrder 取消订单
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (orderService *OrderService) CancelOrder(order shop.Order) (err error) {
 	cancelType := 1 // 默认用户取消
 	if order.StatusCancel != nil && *order.StatusCancel > 1 {
@@ -338,21 +338,21 @@ func (orderService *OrderService) CancelOrder(order shop.Order) (err error) {
 }
 
 // DeleteOrderByIds 批量删除Order记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (orderService *OrderService) DeleteOrderByIds(ids request.IdsReq) (err error) {
 	err = global.DB.Delete(&[]shop.Order{}, "id in ?", ids.Ids).Error
 	return err
 }
 
 // UpdateOrder 更新Order记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (orderService *OrderService) UpdateOrder(order shop.Order) (err error) {
 	err = global.DB.Save(&order).Error
 	return err
 }
 
 // GetOrder 根据id获取Order记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (orderService *OrderService) GetOrder(id uint) (order shop.Order, err error) {
 	err = global.DB.Where("id = ?", id).
 		Preload("OrderDetails.Goods").
@@ -366,7 +366,7 @@ func (orderService *OrderService) GetOrder(id uint) (order shop.Order, err error
 }
 
 // FindUserOrderStatus 获取用户订单中数量
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (orderService *OrderService) FindUserOrderStatus(userId uint) (resp shopResp.OrderStatusCountResponse, err error) {
 	err = global.DB.Debug().
 		Table("shop_order").
@@ -377,7 +377,7 @@ func (orderService *OrderService) FindUserOrderStatus(userId uint) (resp shopRes
 }
 
 // OrderStatus 获取订单状态
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (orderService *OrderService) OrderStatus(id uint) (status gin.H, err error) {
 	var o shop.Order
 	if errors.Is(global.DB.Select("status").Where("id = ?", id).First(&o).Error, gorm.ErrRecordNotFound) {
@@ -390,7 +390,7 @@ func (orderService *OrderService) OrderStatus(id uint) (status gin.H, err error)
 }
 
 // GetOrderInfoList 分页获取Order记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (orderService *OrderService) GetOrderInfoList(info shopReq.OrderSearch) (list []shop.Order, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)

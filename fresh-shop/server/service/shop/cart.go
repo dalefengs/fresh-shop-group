@@ -14,7 +14,7 @@ type CartService struct {
 }
 
 // CreateCart 创建Cart记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (cartService *CartService) CreateCart(cart shop.Cart) (err error) {
 	var c shop.Cart
 	var goods shop.Goods
@@ -53,21 +53,21 @@ func (cartService *CartService) CreateCart(cart shop.Cart) (err error) {
 }
 
 // DeleteCart 删除Cart记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (cartService *CartService) DeleteCart(cart shop.Cart) (err error) {
 	err = global.DB.Delete(&cart).Error
 	return err
 }
 
 // DeleteCartByIds 批量删除Cart记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (cartService *CartService) DeleteCartByIds(ids request.IdsReq) (err error) {
 	err = global.DB.Delete(&[]shop.Cart{}, "id in ?", ids.Ids).Error
 	return err
 }
 
 // UpdateCart 更新Cart记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (cartService *CartService) UpdateCart(cart shop.Cart) (err error) {
 	var dbC shop.Cart
 	err = global.DB.Where("id = ?", cart.ID).Preload("Goods").First(&dbC).Error
@@ -85,7 +85,7 @@ func (cartService *CartService) UpdateCart(cart shop.Cart) (err error) {
 }
 
 // SelectAllChecked 全选 Cart记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (cartService *CartService) SelectAllChecked(userId uint) (err error) {
 	var ids []uint
 	var carts []shop.Cart
@@ -112,7 +112,7 @@ func (cartService *CartService) SelectAllChecked(userId uint) (err error) {
 }
 
 // ClearAllChecked 取消全选 Cart记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (cartService *CartService) ClearAllChecked(userId uint) (err error) {
 	var ids []int
 	err = global.DB.Model(&shop.Cart{}).Where("user_id = ?", userId).Pluck("id", &ids).Error
@@ -124,17 +124,17 @@ func (cartService *CartService) ClearAllChecked(userId uint) (err error) {
 }
 
 // GetCart 根据id获取Cart记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (cartService *CartService) GetCart(id uint) (cart shop.Cart, err error) {
 	err = global.DB.Where("id = ?", id).First(&cart).Error
 	return
 }
 
 // GetCartInfoList 获取全部 Cart记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (cartService *CartService) GetCartInfoList(info shopReq.CartSearch, userId uint) (list []shop.Cart, total int64, err error) {
 	// 创建db
-	db := global.DB.Model(&shop.Cart{}).Where("user_id = ?", userId).Preload("Goods.Images")
+	db := global.DB.Debug().Model(&shop.Cart{}).Where("user_id = ?", userId).Preload("Goods.Images")
 	var carts []shop.Cart
 	if info.Checked != nil {
 		db = db.Where("checked = ?", *info.Checked)

@@ -11,42 +11,42 @@ type TagsService struct {
 }
 
 // CreateTags 创建Tags记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (tagsService *TagsService) CreateTags(tags shop.Tags) (err error) {
 	err = global.DB.Create(&tags).Error
 	return err
 }
 
 // DeleteTags 删除Tags记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (tagsService *TagsService) DeleteTags(tags shop.Tags) (err error) {
 	err = global.DB.Delete(&tags).Error
 	return err
 }
 
 // DeleteTagsByIds 批量删除Tags记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (tagsService *TagsService) DeleteTagsByIds(ids request.IdsReq) (err error) {
 	err = global.DB.Delete(&[]shop.Tags{}, "id in ?", ids.Ids).Error
 	return err
 }
 
 // UpdateTags 更新Tags记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (tagsService *TagsService) UpdateTags(tags shop.Tags) (err error) {
 	err = global.DB.Save(&tags).Error
 	return err
 }
 
 // GetTags 根据id获取Tags记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (tagsService *TagsService) GetTags(id uint) (tags shop.Tags, err error) {
 	err = global.DB.Where("id = ?", id).First(&tags).Error
 	return
 }
 
 // GetTagsInfoList 分页获取Tags记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (tagsService *TagsService) GetTagsInfoList(info shopReq.TagsSearch) (list []shop.Tags, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
@@ -80,7 +80,7 @@ func (tagsService *TagsService) GetTagsInfoList(info shopReq.TagsSearch) (list [
 }
 
 // GetTagsListAll 分页获取Tags记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (tagsService *TagsService) GetTagsListAll() (list []shop.Tags, err error) {
 	var tagss []shop.Tags
 	err = global.DB.Find(&tagss).Error

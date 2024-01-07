@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: DeleteSysDictionary
 //@description: 创建字典数据
 //@param: sysDictionary model.SysDictionary
@@ -25,7 +25,7 @@ func (dictionaryService *DictionaryService) CreateSysDictionary(sysDictionary sy
 	return err
 }
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: DeleteSysDictionary
 //@description: 删除字典数据
 //@param: sysDictionary model.SysDictionary
@@ -50,7 +50,7 @@ func (dictionaryService *DictionaryService) DeleteSysDictionary(sysDictionary sy
 	return
 }
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: UpdateSysDictionary
 //@description: 更新字典数据
 //@param: sysDictionary *model.SysDictionary
@@ -74,7 +74,7 @@ func (dictionaryService *DictionaryService) UpdateSysDictionary(sysDictionary *s
 	return err
 }
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: GetSysDictionary
 //@description: 根据id或者type获取字典单条数据
 //@param: Type string, Id uint
@@ -91,7 +91,7 @@ func (dictionaryService *DictionaryService) GetSysDictionary(Type string, Id uin
 	return
 }
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@author: [SliverHorn](https://github.com/SliverHorn)
 //@function: GetSysDictionaryInfoList
 //@description: 分页获取字典列表

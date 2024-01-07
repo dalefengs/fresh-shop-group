@@ -152,16 +152,13 @@ export default {
         getList() {
             let result = [];
             this.goods.forEach((good) => {
-
                 good.foods.forEach((food) => {
-
                     if (food.count) {
                         result.push(food)
                     }
                 })
             })
             return result
-
         },
         // 获得购物车所有商品数量
         getAllCount: function (item) {

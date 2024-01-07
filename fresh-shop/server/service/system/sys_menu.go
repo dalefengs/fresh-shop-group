@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: getMenuTreeMap
 //@description: 获取路由总树map
 //@param: authorityId string
@@ -70,7 +70,7 @@ func (menuService *MenuService) getMenuTreeMap(authorityId uint) (treeMap map[st
 	return treeMap, err
 }
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: GetMenuTree
 //@description: 获取动态菜单树
 //@param: authorityId string
@@ -85,7 +85,7 @@ func (menuService *MenuService) GetMenuTree(authorityId uint) (menus []system.Sy
 	return menus, err
 }
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: getChildrenList
 //@description: 获取子菜单
 //@param: menu *model.SysMenu, treeMap map[string][]model.SysMenu
@@ -99,7 +99,7 @@ func (menuService *MenuService) getChildrenList(menu *system.SysMenu, treeMap ma
 	return err
 }
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: GetInfoList
 //@description: 获取路由分页
 //@return: list interface{}, total int64,err error
@@ -114,7 +114,7 @@ func (menuService *MenuService) GetInfoList() (list interface{}, total int64, er
 	return menuList, total, err
 }
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: getBaseChildrenList
 //@description: 获取菜单的子菜单
 //@param: menu *model.SysBaseMenu, treeMap map[string][]model.SysBaseMenu
@@ -128,7 +128,7 @@ func (menuService *MenuService) getBaseChildrenList(menu *system.SysBaseMenu, tr
 	return err
 }
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: AddBaseMenu
 //@description: 添加基础路由
 //@param: menu model.SysBaseMenu
@@ -141,7 +141,7 @@ func (menuService *MenuService) AddBaseMenu(menu system.SysBaseMenu) error {
 	return global.DB.Create(&menu).Error
 }
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: getBaseMenuTreeMap
 //@description: 获取路由总树map
 //@return: treeMap map[string][]system.SysBaseMenu, err error
@@ -156,7 +156,7 @@ func (menuService *MenuService) getBaseMenuTreeMap() (treeMap map[string][]syste
 	return treeMap, err
 }
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: GetBaseMenuTree
 //@description: 获取基础路由树
 //@return: menus []system.SysBaseMenu, err error
@@ -170,7 +170,7 @@ func (menuService *MenuService) GetBaseMenuTree() (menus []system.SysBaseMenu, e
 	return menus, err
 }
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: AddMenuAuthority
 //@description: 为角色增加menu树
 //@param: menus []model.SysBaseMenu, authorityId string
@@ -184,7 +184,7 @@ func (menuService *MenuService) AddMenuAuthority(menus []system.SysBaseMenu, aut
 	return err
 }
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: GetMenuAuthority
 //@description: 查看当前角色树
 //@param: info *request.GetAuthorityId

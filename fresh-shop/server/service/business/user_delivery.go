@@ -11,42 +11,42 @@ type UserDeliveryService struct {
 }
 
 // CreateUserDelivery 创建UserDelivery记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (userDeliveryService *UserDeliveryService) CreateUserDelivery(userDelivery business.UserDelivery) (err error) {
 	err = global.DB.Create(&userDelivery).Error
 	return err
 }
 
 // DeleteUserDelivery 删除UserDelivery记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (userDeliveryService *UserDeliveryService) DeleteUserDelivery(userDelivery business.UserDelivery) (err error) {
 	err = global.DB.Delete(&userDelivery).Error
 	return err
 }
 
 // DeleteUserDeliveryByIds 批量删除UserDelivery记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (userDeliveryService *UserDeliveryService) DeleteUserDeliveryByIds(ids request.IdsReq) (err error) {
 	err = global.DB.Delete(&[]business.UserDelivery{}, "id in ?", ids.Ids).Error
 	return err
 }
 
 // UpdateUserDelivery 更新UserDelivery记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (userDeliveryService *UserDeliveryService) UpdateUserDelivery(userDelivery business.UserDelivery) (err error) {
 	err = global.DB.Save(&userDelivery).Error
 	return err
 }
 
 // GetUserDelivery 根据id获取UserDelivery记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (userDeliveryService *UserDeliveryService) GetUserDelivery(id uint) (userDelivery business.UserDelivery, err error) {
 	err = global.DB.Where("id = ?", id).First(&userDelivery).Error
 	return
 }
 
 // GetUserDeliveryInfoList 分页获取UserDelivery记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (userDeliveryService *UserDeliveryService) GetUserDeliveryInfoList(info businessReq.UserDeliverySearch) (list []business.UserDelivery, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
@@ -86,7 +86,7 @@ func (userDeliveryService *UserDeliveryService) GetUserDeliveryInfoList(info bus
 }
 
 // GetUserDeliveryAllList 获取所有 UserDelivery 列表
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (userDeliveryService *UserDeliveryService) GetUserDeliveryAllList(info businessReq.UserDeliverySearch) (list []business.UserDelivery, err error) {
 	// 创建db
 	db := global.DB.Model(&business.UserDelivery{})

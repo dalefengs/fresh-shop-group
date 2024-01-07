@@ -21,6 +21,28 @@ export const getOrderList = (data, loading, refs) => {
     }, refs)
 }
 
+// 获取近期购买商品列表
+export const getRecentlyPurchasedGoodsListLoading = (data, refs) => {
+    return request({
+        url: `/orderDetails/recentlyPurchasedGoods`,
+        method: 'GET',
+        loading: true,
+        toLogin: true,
+        data
+    }, refs)
+}
+
+// 获取近期购买商品列表
+export const getRecentlyPurchasedGoodsList = (data,  refs) => {
+    return request({
+        url: `/orderDetails/recentlyPurchasedGoods`,
+        method: 'GET',
+        loading: false,
+        toLogin: true,
+        data
+    }, refs)
+}
+
 // 获取订单
 export const getOrderInfo = (data, refs) => {
     return request({

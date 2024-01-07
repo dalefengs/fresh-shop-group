@@ -97,7 +97,7 @@ var imgCell = []string{"N", "O", "P", "Q", "R", "S"} // 图片2 - 5单元格
 const Sheet1 = "Sheet1"
 
 // ExportGoods 批量导出商品信息
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (goodsService *GoodsService) ExportGoods(goodsIdsReq shopReq.GoodsIdsReq) (r *bytes.Reader, err error) {
 	if goodsIdsReq.GoodsIds != nil {
 		return nil, nil
@@ -206,7 +206,7 @@ func joinCellIndex(rowName string, colIndex int) string {
 }
 
 // BatchCreateGoodsByExcel 批量导入商品信息
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (goodsService *GoodsService) BatchCreateGoodsByExcel(header *multipart.FileHeader) (err error) {
 	oss := upload.NewOss()
 	filePath, _, err := oss.UploadFile(header)
@@ -550,7 +550,7 @@ func paramCheckEmpty(rowIndex int, name, categoryName, constPrice, uint, weight,
 }
 
 // CreateGoods 创建Goods记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (goodsService *GoodsService) CreateGoods(form shopReq.GoodsSubmitFrom) (err error) {
 	log := "创建商品 --- "
 
@@ -691,7 +691,7 @@ func (goodsService *GoodsService) CreateGoods(form shopReq.GoodsSubmitFrom) (err
 }
 
 // UpdateGoods 更新Goods记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (goodsService *GoodsService) UpdateGoods(form shopReq.GoodsSubmitFrom) (err error) {
 	log := "更新商品 --- "
 
@@ -1165,21 +1165,21 @@ func findItemIdByVirtualItemId(item *[]shop.GoodsSpecItem, itemId string) (uint,
 }
 
 // DeleteGoods 删除Goods记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (goodsService *GoodsService) DeleteGoods(goods shop.Goods) (err error) {
 	err = global.DB.Delete(&goods).Error
 	return err
 }
 
 // DeleteGoodsByIds 批量删除Goods记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (goodsService *GoodsService) DeleteGoodsByIds(ids request.IdsReq) (err error) {
 	err = global.DB.Delete(&[]shop.Goods{}, "id in ?", ids.Ids).Error
 	return err
 }
 
 // GetGoods 根据id获取Goods记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (goodsService *GoodsService) GetGoods(id, userId uint) (goods shop.Goods, err error) {
 	err = global.DB.Where("id = ?", id).
 		Preload("Desc").
@@ -1228,7 +1228,7 @@ func (goodsService *GoodsService) GetGoods(id, userId uint) (goods shop.Goods, e
 }
 
 // GetGoodsInfoList 分页获取Goods记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (goodsService *GoodsService) GetGoodsInfoList(info shopReq.GoodsSearch, userId uint) (list []shop.Goods, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)

@@ -1,7 +1,7 @@
 /*
- * @Author: likfees
+ * @Author: dalefeng
  * @Date: 2023-03-24 14:09:29
- * @LastEditors: likfees
+ * @LastEditors: dalefeng
  * @LastEditTime: 2023-04-23 14:06:02
  */
 
@@ -12,8 +12,8 @@ export default {
     // #endif
     // 其他使用 url
     // #ifndef H5
-    baseUrl: 'http://localhost:48888',
-    // baseUrl: 'https://qiyundongpin.cn/goapi',
+    // baseUrl: 'http://localhost:48888',
+    baseUrl: 'https://qiyundongpin.cn/goapi',
     // #endif
     phone: 13527326320
 }

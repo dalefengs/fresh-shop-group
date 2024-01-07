@@ -18,7 +18,7 @@ type OrderDeliveryService struct {
 }
 
 // CreateOrderDelivery 创建OrderDelivery记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (orderDeliveryService *OrderDeliveryService) CreateOrderDelivery(orderDelivery shop.OrderDelivery) (err error) {
 	var order shop.Order
 	err = global.DB.Where("id = ? and status = 1 and status_cancel = 0", orderDelivery.OrderId).First(&order).Error
@@ -42,21 +42,21 @@ func (orderDeliveryService *OrderDeliveryService) CreateOrderDelivery(orderDeliv
 }
 
 // DeleteOrderDelivery 删除OrderDelivery记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (orderDeliveryService *OrderDeliveryService) DeleteOrderDelivery(orderDelivery shop.OrderDelivery) (err error) {
 	err = global.DB.Delete(&orderDelivery).Error
 	return err
 }
 
 // DeleteOrderDeliveryByIds 批量删除OrderDelivery记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (orderDeliveryService *OrderDeliveryService) DeleteOrderDeliveryByIds(ids request.IdsReq) (err error) {
 	err = global.DB.Delete(&[]shop.OrderDelivery{}, "id in ?", ids.Ids).Error
 	return err
 }
 
 // UpdateOrderDelivery 订单收货
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (orderDeliveryService *OrderDeliveryService) UpdateOrderDelivery(orderDelivery shop.OrderDelivery) (err error) {
 	var order shop.Order
 	err = global.DB.Where("id = ? and status = 2 and status_cancel = 0", orderDelivery.OrderId).First(&order).Error
@@ -111,7 +111,7 @@ func (orderDeliveryService *OrderDeliveryService) UpdateOrderDelivery(orderDeliv
 }
 
 // GetOrderDelivery 根据id获取OrderDelivery记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (orderDeliveryService *OrderDeliveryService) GetOrderDelivery(id uint, orderId int) (orderDelivery shop.OrderDelivery, err error) {
 	db := global.DB
 	if id != 0 {
@@ -126,7 +126,7 @@ func (orderDeliveryService *OrderDeliveryService) GetOrderDelivery(id uint, orde
 }
 
 // GetOrderDeliveryInfoList 分页获取OrderDelivery记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (orderDeliveryService *OrderDeliveryService) GetOrderDeliveryInfoList(info shopReq.OrderDeliverySearch) (list []shop.OrderDelivery, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)

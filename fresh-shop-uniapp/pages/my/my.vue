@@ -1,7 +1,7 @@
 <!--
- * @Author: likfees
+ * @Author: dalefeng
  * @Date: 2023-04-14 13:36:30
- * @LastEditors: likfees
+ * @LastEditors: dalefeng
  * @LastEditTime: 2023-04-23 14:12:03
 -->
 <template>
@@ -74,7 +74,7 @@
                  @cancel="() => showPhoneDialog = false" @close="close" confirmText="拨号">
             <view>联系电话：{{ relationPhone }}</view>
         </u-modal>
-        <Tabbar :tabsId="3"/>
+        <Tabbar :tabsId="4"/>
         <u-toast ref="toast" style="z-index: 9999"></u-toast>
         <u-modal :show="showChangeNickName" title="修改昵称" @confirm="changeNickName"
                  @cancel="() => showChangeNickName = false"

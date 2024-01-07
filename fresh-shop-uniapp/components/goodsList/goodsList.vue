@@ -5,7 +5,7 @@
                 <view class="item-cover-mask" v-if="item.store <= 0">
                     <view class="item-cover-mask-text">补货中</view>
                 </view>
-                <img v-if="item.images[0]" class="item-img" :src="item.images.length > 0 ? item.images[0].url : ''" alt="">
+                <img v-if="item.images != null && item.images[0]" class="item-img" :src="item.images != null && item.images.length > 0 ? item.images[0].url : ''" alt="">
                 <img v-else class="item-img" src="/static/nopicture.jpg" alt="">
 				<view class="item-content">
 					<view class="title">{{ item.name }}</view>
@@ -23,35 +23,40 @@
 		</view>
         <!--  每个商品一行   -->
 		<view class="goodsv--box" v-else>
-			<view class="goodsv--item" v-for="(item, index) in lists" :key="index" @click="goodsClick(item)">
-                <view class="item-cover-mask" v-if="item.store <= 0">
+			<view class="goodsv--item" v-for="(item, index) in lists" :key="index" @longpress="goodsLongClick(item)">
+                <view class="item-cover-mask" :style="goodsImageStyle" v-if="(item.store <= 0 || item.store < item.minCount) " @click.stop="goodsClick(item)">
                     <view class="item-cover-mask-text">补货中</view>
                 </view>
-				<view class="item-cover" v-if="item.images && item.images[0]"
-					:style="{ backgroundImage: 'url(' + (item.images.length > 0 ? item.images[0].url : '') + ')' }" />
-				<image class="item-cover" v-else src="/static/nopicture.jpg" />
+                <view class="item-cover" v-if="item.images != null && item.images && item.images[0]"
+                      :style="'background-image: url(' + (item.images.length > 0 ? item.images[0].url : '') + '); ' + goodsImageStyle" @click.stop="goodsClick(item)" />
+                <image class="item-cover" :style="goodsImageStyle" v-else src="/static/nopicture.jpg"  @click.stop="goodsClick(item)" />
 
-				<view class="item-content">
-					<text class="title">{{ item.name }}</text>
+                <view class="item-content">
+                    <text class="title" @click.stop="goodsClick(item)">{{ item.name }}</text>
+                    <!--					<text class="title"> {{ item.weight }}</text>-->
                     <view class="store">
-                        <text>库存：{{ item.store }}</text>
+                        <view><text>库存：{{ item.store >= item.minCount ? item.store : 0 }}</text> <text v-if="showPayCount" class="king-ml-10">买过 {{ item.payCount ? item.payCount : 0 }} {{ item.unit }}</text></view>
                     </view>
-					<view v-if="isAudit"  class="bottom-txt">
-						<view>
-							<text class="price">{{ priceType }}{{ item.price > 0 && item.price < item.costPrice ? item.price : item.costPrice| '0' }}</text>
-							<text class="unit">/{{ item.unit }}</text>
-							<text v-if="item.price > 0 && item.price < item.costPrice" class="del-price">{{ priceType }}{{ item.costPrice || '0'
-							}}</text>
-						</view>
-						<view class="sale-num"><text>已售 {{ item.sale }}</text></view>
-						<view class="add-cart-button" v-if="item.store > 0">
-							<u-icon name="shopping-cart" color="#ffffff" size="24"></u-icon>
+                    <view v-if="isAudit"  class="bottom-txt">
+                        <view>
+                            <text class="price">{{ priceType }}{{ item.price > 0 && item.price < item.costPrice ? item.price : item.costPrice || '0' }}</text>
+                            <text class="unit">/{{ item.unit }}</text>
+                            <text v-if="item.price > 0 && item.price < item.costPrice" class="del-price">{{ priceType }}{{ item.costPrice || '0'}}</text>
+                        </view>
+                        <view class="sale-num"><text>已售 {{ item.sale }}</text></view>
+                        <view class="add-cart-button" v-if="item.store > 0 && isAddCart === false">
+                            <u-icon name="shopping-cart" color="#ffffff" size="24"></u-icon>
                             <view class="badge">
                                 <u-badge max="99" :value="item.cartNum" shape="circle"></u-badge>
                             </view>
-						</view>
-					</view>
-				</view>
+                        </view>
+                        <view v-if="item.store > 0 && isAddCart === true" class="cart-quantity-control" @click.stop="">
+                            <button class="decrease-quantity" @click.stop="updateCart(index, item.goodsCardId, item.cartNum - 1)">-</button>
+                            <input type="number" v-model="item.cartNum" class="quantity" min="0" :max="item.store" @change="updateCart(index, item.goodsCardId, item.cartNum)">
+                            <button class="increase-quantity" @click.stop="updateCart(index, item.goodsCardId, item.cartNum + 1)">+</button>
+                        </view>
+                    </view>
+                </view>
 			</view>
 		</view>
 	</view>
@@ -90,8 +95,42 @@ export default {
 		isAudit: {
 			type: Boolean,
 			default: false
+		},
+		// 是否开启一键添加购物车
+		isAddCart: {
+			type: Boolean,
+			default: false
+		},
+		// 商品图片宽度
+		imgWidth: {
+			type: String,
+			default: ""
+		},
+		imgHeight: {
+			type: String,
+			default: ""
+		},
+		showPayCount: {
+			type: Boolean,
+			default: false
 		}
 	},
+    computed: {
+        goodsImageStyle() {
+            let style = ""
+            if (this.imgWidth !== "") {
+                style += `width: ${this.imgWidth};`
+            }else {
+                style += `width: 75px;`
+            }
+            if (this.imgHeight !== "") {
+                style += `height: ${this.imgHeight};`
+            }else {
+                style += `height: 75px;`
+            }
+            return style
+        }
+    },
 	methods: {
 		// 商品点击 默认跳转详情
 		goodsClick(goods) {
@@ -102,7 +141,14 @@ export default {
 					url: `/pages/goods/detail?id=${goods.ID}`
 				})
 			}
-		}
+		},
+        goodsLongClick(goods) {
+            this.$emit("onGoodsLongClick", goods)
+		},
+        updateCart(index, cardId, num) {
+            this.$emit("updateCart", index, cardId, num)
+        },
+
 	}
 }
 </script>
@@ -138,7 +184,7 @@ $radius: 20rpx;
 
 .store {
   color: #888;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: normal;
   margin-left: 3px;
 }
@@ -252,8 +298,6 @@ $radius: 20rpx;
     padding: 8px 1px;
 
     .item-cover-mask {
-      width: 75px;
-      height: 75px;
       flex-shrink: 0;
       background-color: rgba(173, 171, 171, 0.5);
       position: absolute;
@@ -274,8 +318,6 @@ $radius: 20rpx;
 
 
     .item-cover {
-      width: 75px;
-      height: 75px;
       background-position: center;
       background-size: cover;
       display: inline-block;
@@ -292,9 +334,9 @@ $radius: 20rpx;
       flex: 1;
 
       & > .title {
-        font-size: 28 rpx;
-        line-height: 40 rpx;
-        height: 80 rpx;
+        font-size: 16px;
+        line-height: 20px;
+        height: 40px;
         color: #333;
         @extend .ellipsis-2-v;
       }
@@ -326,5 +368,38 @@ $radius: 20rpx;
     top: -6px;
     right: -6px;
   }
+}
+
+.cart-quantity-control {
+  position: absolute;
+  right: 10px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.decrease-quantity,
+.increase-quantity {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  background-color: #f5f5f5;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.quantity {
+  flex-grow: 1;
+  text-align: center;
+  border: none;
+  color: #333;
+  font-size: 16px;
+  outline: none;
+  padding: 0 5px;
 }
 </style>

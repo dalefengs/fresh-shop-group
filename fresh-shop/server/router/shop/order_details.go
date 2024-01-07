@@ -15,13 +15,14 @@ func (s *OrderDetailsRouter) InitOrderDetailsRouter(Router *gin.RouterGroup) {
 	orderDetailsRouterWithoutRecord := Router.Group("orderDetails")
 	var orderDetailsApi = v1.ApiGroupApp.ShopApiGroup.OrderDetailsApi
 	{
-		orderDetailsRouter.POST("createOrderDetails", orderDetailsApi.CreateOrderDetails)   // 新建OrderDetails
-		orderDetailsRouter.DELETE("deleteOrderDetails", orderDetailsApi.DeleteOrderDetails) // 删除OrderDetails
+		orderDetailsRouter.POST("createOrderDetails", orderDetailsApi.CreateOrderDetails)             // 新建OrderDetails
+		orderDetailsRouter.DELETE("deleteOrderDetails", orderDetailsApi.DeleteOrderDetails)           // 删除OrderDetails
 		orderDetailsRouter.DELETE("deleteOrderDetailsByIds", orderDetailsApi.DeleteOrderDetailsByIds) // 批量删除OrderDetails
-		orderDetailsRouter.PUT("updateOrderDetails", orderDetailsApi.UpdateOrderDetails)    // 更新OrderDetails
+		orderDetailsRouter.PUT("updateOrderDetails", orderDetailsApi.UpdateOrderDetails)              // 更新OrderDetails
 	}
 	{
-		orderDetailsRouterWithoutRecord.GET("findOrderDetails", orderDetailsApi.FindOrderDetails)        // 根据ID获取OrderDetails
-		orderDetailsRouterWithoutRecord.GET("getOrderDetailsList", orderDetailsApi.GetOrderDetailsList)  // 获取OrderDetails列表
+		orderDetailsRouterWithoutRecord.GET("recentlyPurchasedGoods", orderDetailsApi.RecentlyPurchasedGoods) // 近期购买的商品列表
+		orderDetailsRouterWithoutRecord.GET("findOrderDetails", orderDetailsApi.FindOrderDetails)             // 根据ID获取OrderDetails
+		orderDetailsRouterWithoutRecord.GET("getOrderDetailsList", orderDetailsApi.GetOrderDetailsList)       // 获取OrderDetails列表
 	}
 }

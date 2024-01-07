@@ -25,9 +25,11 @@ type Goods struct {
 	IsFirst      *int             `json:"isFirst" form:"isFirst" gorm:"column:is_first;default:0;comment:是否首页(0否 1是);"`
 	IsHot        *int             `json:"isHot" form:"isHot" gorm:"column:is_hot;default:0;comment:是否热销(0否 1是);"`
 	IsNew        *int             `json:"isNew" form:"isNew" gorm:"column:is_new;default:0;comment:是否上新(0否 1是);"`
-	IsFavorite   bool             `json:"isFavorite" gorm:"-"`   // 是否收藏
-	CartNum      *int             `json:"cartNum" gorm:"-"`      // 购物车数量
-	CartTotalNum *int             `json:"cartTotalNum" gorm:"-"` // 用户所有购物车数量
+	IsFavorite   bool             `json:"isFavorite" gorm:"-"`               // 是否收藏
+	CartNum      *int             `json:"cartNum" gorm:"-"`                  // 购物车数量
+	GoodsCardId  uint             `json:"goodsCardId" gorm:"-"`              // 购物车id
+	CartTotalNum *int             `json:"cartTotalNum" gorm:"-"`             // 用户所有购物车数量
+	PayCount     int              `json:"payCount" gorm:"column:pay_count;"` // 近期购买数量  冗余字段可以作为其他表的ID
 	Desc         GoodsDescription `json:"desc"`
 	Images       []GoodsImage     `json:"images"`
 	Spec         []GoodsSpec      `json:"spec"`

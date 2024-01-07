@@ -15,7 +15,7 @@ import (
 
 type Qiniu struct{}
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@author: [ccfish86](https://github.com/ccfish86)
 //@author: [SliverHorn](https://github.com/SliverHorn)
 //@object: *Qiniu
@@ -49,7 +49,7 @@ func (*Qiniu) UploadFile(file *multipart.FileHeader) (string, string, error) {
 	return global.Config.Qiniu.ImgPath + "/" + ret.Key, ret.Key, nil
 }
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@author: [ccfish86](https://github.com/ccfish86)
 //@author: [SliverHorn](https://github.com/SliverHorn)
 //@object: *Qiniu

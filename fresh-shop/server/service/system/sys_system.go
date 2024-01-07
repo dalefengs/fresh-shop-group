@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 )
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: GetSystemConfig
 //@description: 读取配置文件
 //@return: conf config.Server, err error
@@ -20,7 +20,7 @@ func (systemConfigService *SystemConfigService) GetSystemConfig() (conf config.S
 }
 
 // @description   set system config,
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: SetSystemConfig
 //@description: 设置配置文件
 //@param: system model.System

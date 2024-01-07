@@ -2,20 +2,20 @@ package shop
 
 import (
 	"fresh-shop/server/global"
-    "fresh-shop/server/model/shop"
-    "fresh-shop/server/model/common/request"
-    shopReq "fresh-shop/server/model/shop/request"
-    "fresh-shop/server/model/common/response"
-    "fresh-shop/server/service"
-    "github.com/gin-gonic/gin"
-    "go.uber.org/zap"
+	"fresh-shop/server/model/common/request"
+	"fresh-shop/server/model/common/response"
+	"fresh-shop/server/model/shop"
+	shopReq "fresh-shop/server/model/shop/request"
+	"fresh-shop/server/service"
+	"fresh-shop/server/utils"
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type OrderDetailsApi struct {
 }
 
 var orderDetailsService = service.ServiceGroupApp.ShopServiceGroup.OrderDetailsService
-
 
 // CreateOrderDetails 创建OrderDetails
 // @Tags OrderDetails
@@ -34,7 +34,7 @@ func (orderDetailsApi *OrderDetailsApi) CreateOrderDetails(c *gin.Context) {
 		return
 	}
 	if err := orderDetailsService.CreateOrderDetails(orderDetails); err != nil {
-        global.Log.Error("创建失败!", zap.Error(err))
+		global.Log.Error("创建失败!", zap.Error(err))
 		response.FailWithMessage("创建失败", c)
 	} else {
 		response.OkWithMessage("创建成功", c)
@@ -58,7 +58,7 @@ func (orderDetailsApi *OrderDetailsApi) DeleteOrderDetails(c *gin.Context) {
 		return
 	}
 	if err := orderDetailsService.DeleteOrderDetails(orderDetails); err != nil {
-        global.Log.Error("删除失败!", zap.Error(err))
+		global.Log.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
 	} else {
 		response.OkWithMessage("删除成功", c)
@@ -76,13 +76,13 @@ func (orderDetailsApi *OrderDetailsApi) DeleteOrderDetails(c *gin.Context) {
 // @Router /orderDetails/deleteOrderDetailsByIds [delete]
 func (orderDetailsApi *OrderDetailsApi) DeleteOrderDetailsByIds(c *gin.Context) {
 	var IDS request.IdsReq
-    err := c.ShouldBindJSON(&IDS)
+	err := c.ShouldBindJSON(&IDS)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 	if err := orderDetailsService.DeleteOrderDetailsByIds(IDS); err != nil {
-        global.Log.Error("批量删除失败!", zap.Error(err))
+		global.Log.Error("批量删除失败!", zap.Error(err))
 		response.FailWithMessage("批量删除失败", c)
 	} else {
 		response.OkWithMessage("批量删除成功", c)
@@ -106,10 +106,50 @@ func (orderDetailsApi *OrderDetailsApi) UpdateOrderDetails(c *gin.Context) {
 		return
 	}
 	if err := orderDetailsService.UpdateOrderDetails(orderDetails); err != nil {
-        global.Log.Error("更新失败!", zap.Error(err))
+		global.Log.Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败", c)
 	} else {
 		response.OkWithMessage("更新成功", c)
+	}
+}
+
+// RecentlyPurchasedGoods 近期购买的商品列表
+// @Tags RecentlyPurchasedGoods
+// @Summary 更新OrderDetails
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body shop.OrderDetails true "近期购买的商品列表"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /orderDetails/RecentlyPurchasedGoods [get]
+func (orderDetailsApi *OrderDetailsApi) RecentlyPurchasedGoods(c *gin.Context) {
+	var pageInfo shopReq.GoodsSearch
+	err := c.ShouldBindQuery(&pageInfo)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	var userId uint
+	userInfo := utils.GetUserInfo(c)
+	if userInfo != nil {
+		userId = userInfo.ID
+	}
+	if pageInfo.PageSize == 0 {
+		pageInfo.PageSize = 10
+	}
+	if pageInfo.Page == 0 {
+		pageInfo.Page = 1
+	}
+	if list, total, err := orderDetailsService.RecentlyPurchasedGoodsList(pageInfo, userId); err != nil {
+		global.Log.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+	} else {
+		response.OkWithDetailed(response.PageResult{
+			List:     list,
+			Total:    total,
+			Page:     pageInfo.Page,
+			PageSize: pageInfo.PageSize,
+		}, "获取成功", c)
 	}
 }
 
@@ -130,7 +170,7 @@ func (orderDetailsApi *OrderDetailsApi) FindOrderDetails(c *gin.Context) {
 		return
 	}
 	if reorderDetails, err := orderDetailsService.GetOrderDetails(orderDetails.ID); err != nil {
-        global.Log.Error("查询失败!", zap.Error(err))
+		global.Log.Error("查询失败!", zap.Error(err))
 		response.FailWithMessage("查询失败", c)
 	} else {
 		response.OkWithData(gin.H{"reorderDetails": reorderDetails}, c)
@@ -154,14 +194,14 @@ func (orderDetailsApi *OrderDetailsApi) GetOrderDetailsList(c *gin.Context) {
 		return
 	}
 	if list, total, err := orderDetailsService.GetOrderDetailsInfoList(pageInfo); err != nil {
-	    global.Log.Error("获取失败!", zap.Error(err))
-        response.FailWithMessage("获取失败", c)
-    } else {
-        response.OkWithDetailed(response.PageResult{
-            List:     list,
-            Total:    total,
-            Page:     pageInfo.Page,
-            PageSize: pageInfo.PageSize,
-        }, "获取成功", c)
-    }
+		global.Log.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+	} else {
+		response.OkWithDetailed(response.PageResult{
+			List:     list,
+			Total:    total,
+			Page:     pageInfo.Page,
+			PageSize: pageInfo.PageSize,
+		}, "获取成功", c)
+	}
 }

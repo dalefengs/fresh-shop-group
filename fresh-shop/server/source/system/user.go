@@ -52,11 +52,11 @@ func (i *initUser) InitializeData(ctx context.Context) (next context.Context, er
 			UUID:        uuid.NewV4(),
 			Username:    "admin",
 			Password:    adminPassword,
-			NickName:    "likfees",
+			NickName:    "dalefeng",
 			HeaderImg:   "https://minio.fungs.cn/picture/images/avatar/face.png",
 			AuthorityId: 888,
 			Phone:       "18166669999",
-			Email:       "likfees@gmail.com",
+			Email:       "dalefeng@gmail.com",
 		},
 		{
 			UUID:        uuid.NewV4(),

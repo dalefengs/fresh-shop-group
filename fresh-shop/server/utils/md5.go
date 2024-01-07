@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 )
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: MD5V
 //@description: md5加密
 //@param: str []byte

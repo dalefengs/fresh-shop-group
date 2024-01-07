@@ -11,7 +11,7 @@ var AutoCodeMssql = new(autoCodeMssql)
 type autoCodeMssql struct{}
 
 // GetDB 获取数据库的所有数据库名
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 // Author [SliverHorn](https://github.com/SliverHorn)
 func (s *autoCodeMssql) GetDB(businessDB string) (data []response.Db, err error) {
 	var entities []response.Db
@@ -25,7 +25,7 @@ func (s *autoCodeMssql) GetDB(businessDB string) (data []response.Db, err error)
 }
 
 // GetTables 获取数据库的所有表名
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 // Author [SliverHorn](https://github.com/SliverHorn)
 func (s *autoCodeMssql) GetTables(businessDB string, dbName string) (data []response.Table, err error) {
 	var entities []response.Table
@@ -41,7 +41,7 @@ func (s *autoCodeMssql) GetTables(businessDB string, dbName string) (data []resp
 }
 
 // GetColumn 获取指定数据库和指定数据表的所有字段名,类型值等
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 // Author [SliverHorn](https://github.com/SliverHorn)
 func (s *autoCodeMssql) GetColumn(businessDB string, tableName string, dbName string) (data []response.Column, err error) {
 	var entities []response.Column

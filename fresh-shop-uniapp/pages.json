@@ -42,6 +42,13 @@
 			}
 		},
 		{
+			"path": "pages/goods/quickPay",
+			"style": {
+				"navigationBarTitleText": "快速下单",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
 			"path": "pages/my/my",
 			"style": {
 				"navigationBarTitleText": "个人中心",

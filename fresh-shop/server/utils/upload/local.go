@@ -18,7 +18,7 @@ import (
 
 type Local struct{}
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@author: [ccfish86](https://github.com/ccfish86)
 //@author: [SliverHorn](https://github.com/SliverHorn)
 //@object: *Local
@@ -68,7 +68,7 @@ func (*Local) UploadFile(file *multipart.FileHeader) (string, string, error) {
 	return filepath, filename, nil
 }
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@author: [ccfish86](https://github.com/ccfish86)
 //@author: [SliverHorn](https://github.com/SliverHorn)
 //@object: *Local
@@ -110,7 +110,7 @@ func (*Local) UploadFileByBytes(file *[]byte, ext string) (string, string, error
 	return filepath, filename, nil
 }
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@author: [ccfish86](https://github.com/ccfish86)
 //@author: [SliverHorn](https://github.com/SliverHorn)
 //@object: *Local

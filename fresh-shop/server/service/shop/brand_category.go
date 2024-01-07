@@ -13,7 +13,7 @@ type BrandCategoryService struct {
 }
 
 // CreateBrandCategory 创建BrandCategory记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (brandCategoryService *BrandCategoryService) CreateBrandCategory(bc shopReq.BrandCategorySearch) (err error) {
 	var data []shop.BrandCategory
 	for _, brandId := range bc.BrandIds {
@@ -40,35 +40,35 @@ func (brandCategoryService *BrandCategoryService) CreateBrandCategory(bc shopReq
 }
 
 // DeleteBrandCategory 删除BrandCategory记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (brandCategoryService *BrandCategoryService) DeleteBrandCategory(brandCategory shop.BrandCategory) (err error) {
 	err = global.DB.Delete(&brandCategory).Error
 	return err
 }
 
 // DeleteBrandCategoryByIds 批量删除BrandCategory记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (brandCategoryService *BrandCategoryService) DeleteBrandCategoryByIds(ids request.IdsReq) (err error) {
 	err = global.DB.Delete(&[]shop.BrandCategory{}, "id in ?", ids.Ids).Error
 	return err
 }
 
 // UpdateBrandCategory 更新BrandCategory记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (brandCategoryService *BrandCategoryService) UpdateBrandCategory(brandCategory shop.BrandCategory) (err error) {
 	err = global.DB.Save(&brandCategory).Error
 	return err
 }
 
 // GetBrandCategory 根据id获取BrandCategory记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (brandCategoryService *BrandCategoryService) GetBrandCategory(id uint) (brandCategory shop.BrandCategory, err error) {
 	err = global.DB.Where("id = ?", id).First(&brandCategory).Error
 	return
 }
 
 // GetBrandCategoryInfoList 分页获取BrandCategory记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (brandCategoryService *BrandCategoryService) GetBrandCategoryInfoList(info shopReq.BrandCategorySearch) (list []shop.BrandCategory, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)

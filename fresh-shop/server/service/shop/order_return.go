@@ -11,42 +11,42 @@ type OrderReturnService struct {
 }
 
 // CreateOrderReturn 创建OrderReturn记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (orderReturnService *OrderReturnService) CreateOrderReturn(orderReturn shop.OrderReturn) (err error) {
 	err = global.DB.Create(&orderReturn).Error
 	return err
 }
 
 // DeleteOrderReturn 删除OrderReturn记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (orderReturnService *OrderReturnService) DeleteOrderReturn(orderReturn shop.OrderReturn) (err error) {
 	err = global.DB.Delete(&orderReturn).Error
 	return err
 }
 
 // DeleteOrderReturnByIds 批量删除OrderReturn记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (orderReturnService *OrderReturnService) DeleteOrderReturnByIds(ids request.IdsReq) (err error) {
 	err = global.DB.Delete(&[]shop.OrderReturn{}, "id in ?", ids.Ids).Error
 	return err
 }
 
 // UpdateOrderReturn 更新OrderReturn记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (orderReturnService *OrderReturnService) UpdateOrderReturn(orderReturn shop.OrderReturn) (err error) {
 	err = global.DB.Save(&orderReturn).Error
 	return err
 }
 
 // GetOrderReturn 根据id获取OrderReturn记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (orderReturnService *OrderReturnService) GetOrderReturn(id uint) (orderReturn shop.OrderReturn, err error) {
 	err = global.DB.Where("id = ?", id).First(&orderReturn).Error
 	return
 }
 
 // GetOrderReturnInfoList 分页获取OrderReturn记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (orderReturnService *OrderReturnService) GetOrderReturnInfoList(info shopReq.OrderReturnSearch) (list []shop.OrderReturn, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)

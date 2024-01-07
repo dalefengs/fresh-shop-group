@@ -13,7 +13,7 @@ type UserAddressService struct {
 }
 
 // CreateUserAddress 创建UserAddress记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (userAddressService *UserAddressService) CreateUserAddress(userAddress shop.UserAddress) (address shop.UserAddress, err error) {
 	err = global.DB.Transaction(func(tx *gorm.DB) error {
 		if *userAddress.IsDefault == 1 {
@@ -30,14 +30,14 @@ func (userAddressService *UserAddressService) CreateUserAddress(userAddress shop
 }
 
 // DeleteUserAddress 删除UserAddress记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (userAddressService *UserAddressService) DeleteUserAddress(userAddress shop.UserAddress) (err error) {
 	err = global.DB.Delete(&userAddress).Error
 	return err
 }
 
 // DeleteUserAddressByIds 批量删除UserAddress记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (userAddressService *UserAddressService) DeleteUserAddressByIds(ids request.IdsReq) (err error) {
 	err = global.DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Where("id in ?", ids.Ids).Delete(&shop.UserAddress{}).Error; err != nil {
@@ -49,7 +49,7 @@ func (userAddressService *UserAddressService) DeleteUserAddressByIds(ids request
 }
 
 // UpdateUserAddress 更新UserAddress记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (userAddressService *UserAddressService) UpdateUserAddress(userAddress shop.UserAddress) (err error) {
 	err = global.DB.Transaction(func(tx *gorm.DB) error {
 		if *userAddress.IsDefault == 1 {
@@ -67,14 +67,14 @@ func (userAddressService *UserAddressService) UpdateUserAddress(userAddress shop
 }
 
 // GetUserAddress 根据id获取UserAddress记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (userAddressService *UserAddressService) GetUserAddress(id uint) (userAddress shop.UserAddress, err error) {
 	err = global.DB.Where("id = ?", id).First(&userAddress).Error
 	return
 }
 
 // GetUserDeafultAddress 根据用户id获取默认UserAddress记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (userAddressService *UserAddressService) GetUserDeafultAddress(userId uint) (userAddress shop.UserAddress, err error) {
 	err = global.DB.Where("user_id = ? and is_default = 1", userId).First(&userAddress).Error
 	if err != nil {
@@ -87,7 +87,7 @@ func (userAddressService *UserAddressService) GetUserDeafultAddress(userId uint)
 }
 
 // GetUserAddressInfoList 获取UserAddress记录
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 func (userAddressService *UserAddressService) GetUserAddressInfoList(info shopReq.UserAddressSearch) (list []shop.UserAddress, err error) {
 	// 创建db
 	db := global.DB.Model(&shop.UserAddress{}).Where("user_id = ?", info.UserId)

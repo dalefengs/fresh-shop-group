@@ -21,6 +21,6 @@ func (s *FavoritesRouter) InitFavoritesRouter(Router *gin.RouterGroup) {
 	}
 	{
 		favoritesRouterWithoutRecord.GET("findFavorites", favoritesApi.FindFavorites)       // 根据ID获取Favorites
-		favoritesRouterWithoutRecord.GET("getFavoritesList", favoritesApi.GetFavoritesList) // 获取Favorites列表
+		favoritesRouterWithoutRecord.GET("getFavoritesList", favoritesApi.GetFavoritesList) // 获取用户Favorites列表
 	}
 }

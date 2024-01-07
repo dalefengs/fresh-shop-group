@@ -11,7 +11,7 @@ import (
 	"fresh-shop/server/utils/upload"
 )
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: Upload
 //@description: 创建文件上传记录
 //@param: file model.ExaFileUploadAndDownload
@@ -21,7 +21,7 @@ func (e *FileUploadAndDownloadService) Upload(file file.ExaFileUploadAndDownload
 	return global.DB.Create(&file).Error
 }
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: FindFile
 //@description: 查询文件记录
 //@param: id uint
@@ -33,7 +33,7 @@ func (e *FileUploadAndDownloadService) FindFile(id uint) (file.ExaFileUploadAndD
 	return f, err
 }
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: DeleteFile
 //@description: 删除文件记录
 //@param: file model.ExaFileUploadAndDownload
@@ -59,7 +59,7 @@ func (e *FileUploadAndDownloadService) EditFileName(f file.ExaFileUploadAndDownl
 	return global.DB.Where("id = ?", f.ID).First(&fileFromDb).Update("name", f.Name).Error
 }
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: GetFileRecordInfoList
 //@description: 分页获取数据
 //@param: info request.PageInfo
@@ -82,7 +82,7 @@ func (e *FileUploadAndDownloadService) GetFileRecordInfoList(info request.PageIn
 	return fileLists, total, err
 }
 
-//@author: [likfees](https://github.com/likfees)
+//@author: [dalefeng](https://github.com/dalefeng)
 //@function: UploadFile
 //@description: 根据配置文件判断是文件上传到本地或者七牛云
 //@param: header *multipart.FileHeader, noSave string

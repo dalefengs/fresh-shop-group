@@ -9,7 +9,7 @@ import (
 )
 
 // GormMysql 初始化Mysql数据库
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 // Author [SliverHorn](https://github.com/SliverHorn)
 func GormMysql() *gorm.DB {
 	m := global.Config.Mysql

@@ -9,7 +9,7 @@ import (
 )
 
 // GormPgSql 初始化 Postgresql 数据库
-// Author [likfees](https://github.com/likfees)
+// Author [dalefeng](https://github.com/dalefeng)
 // Author [SliverHorn](https://github.com/SliverHorn)
 func GormPgSql() *gorm.DB {
 	p := global.Config.Pgsql

@@ -34,7 +34,7 @@
             </view>
         </view>
 
-        <Tabbar :tabsId="2"/>
+        <Tabbar :tabsId="3"/>
         <!-- 登录 -->
         <loginPop :show="showLoginDialog" @close="hideLogin" @success="loginSuccess"/>
         <u-toast ref="toast" style="z-index: 9999"></u-toast>
@@ -79,7 +79,6 @@ export default {
     },
     onLoad() {
         this.token = getToken()
-
     },
     onShow() {
         // 登录的情况下获取

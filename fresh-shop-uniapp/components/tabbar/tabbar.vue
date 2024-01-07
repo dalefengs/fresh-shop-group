@@ -1,7 +1,7 @@
 <!--
- * @Author: likfees
+ * @Author: dalefeng
  * @Date: 2023-03-23 16:56:40
- * @LastEditors: likfees
+ * @LastEditors: dalefeng
  * @LastEditTime: 2023-04-14 20:56:15
 -->
 <template>
@@ -33,6 +33,11 @@ export default {
 					text: "分类",
 					icon: "grid",
 					url: "/pages/category/category"
+				},
+				{
+					text: "快速下单",
+					icon: "star-fill",
+					url: "/pages/goods/quickPay"
 				},
 				{
 					text: "购物车",
