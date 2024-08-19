@@ -406,6 +406,7 @@ export default {
         loginSuccess(u) {
             this.hideLogin();
             this.token = getToken()
+            this.getRecentlyGoodsList(0)
             this.$message(this.$refs.toast).success("登录成功")
         },
         // 显示登录框

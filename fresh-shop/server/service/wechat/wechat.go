@@ -1,6 +1,8 @@
 package wechat
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"fresh-shop/server/global"
@@ -8,6 +10,7 @@ import (
 	"fresh-shop/server/model/wechat/request"
 	"fresh-shop/server/utils"
 	"github.com/silenceper/wechat/v2/miniprogram/auth"
+	"github.com/silenceper/wechat/v2/miniprogram/qrcode"
 	"github.com/silenceper/wechat/v2/pay/notify"
 	orderPay "github.com/silenceper/wechat/v2/pay/order"
 	"gorm.io/gorm"
@@ -29,6 +32,31 @@ func (s *WechatService) Code2SessionKey(session request.Jscode2SessionReq) (auth
 
 func (s *WechatService) CreatePayData(payReq request.WechatPayReq) error {
 	return nil
+}
+
+type Scent struct {
+	Uid        uint
+	CreateTime string
+}
+
+// GetUnlimitedQRCode 获取小程序码 不限制
+func (s *WechatService) GetUnlimitedQRCode(uid uint) (response []byte, err error) {
+	scene := Scent{
+		Uid:        uid,
+		CreateTime: time.Now().Format("2006-01-02 15:04:05"),
+	}
+	sceneByte, _ := json.Marshal(scene)
+	code := global.MiniProgram.GetQRCode()
+	param := qrcode.QRCoder{
+		Scene:      base64.StdEncoding.EncodeToString(sceneByte),
+		EnvVersion: "release",
+	}
+	response, err = code.GetWXACodeUnlimit(param)
+	if err != nil {
+		global.SugarLog.Errorf("获取小程序码失败, err:%s \n", err.Error())
+		return
+	}
+	return
 }
 
 func JSAPIPay(openId, orderSn string, orderId uint, amount float64, createIp string) (err error, result *orderPay.Config) {

@@ -48,6 +48,14 @@
                         </view>
                         <view style="width: 100%; text-align: center;">{{ row.name }}</view>
                     </view>
+					
+					<view class="label" hover-class="hover"
+						  @tap="getUnlimitedQRCode()">
+						<view class="icon">
+							<image class="icon-img" :src="'../../static/my/tuiguang.png'"></image>
+						</view>
+						<view style="width: 100%; text-align: center;">推广码</view>
+					</view>
                 </view>
             </view>
         </view>

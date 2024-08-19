@@ -4,6 +4,7 @@ import (
 	"fresh-shop/server/global"
 	"fresh-shop/server/model/common/response"
 	"fresh-shop/server/model/wechat/request"
+	"fresh-shop/server/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/silenceper/wechat/v2/pay/notify"
 	"go.uber.org/zap"
@@ -56,6 +57,24 @@ func (w *WeChatApi) CreatePayData(c *gin.Context) {
 	} else {
 		//response.OkWithData(result, c)
 	}
+}
+
+func (w *WeChatApi) GetUnlimitedQRCode(c *gin.Context) {
+	uid := utils.GetUserID(c)
+	if uid == 0 {
+		response.FailWithMessage("请先登录！", c)
+		return
+	}
+	resp, err := wechatService.GetUnlimitedQRCode(uid)
+	if err != nil {
+		global.Log.Error("获取推广码失败!", zap.Error(err))
+		response.FailWithMessage("获取推广码失败", c)
+	}
+
+	// 设置响应头，指明内容类型为 image/png
+	c.Header("Content-Type", "image/png")
+	// 返回图片数据
+	c.Writer.Write(resp)
 }
 
 // PayNotify 支付完成回调
