@@ -48,6 +48,14 @@
                         </view>
                         <view style="width: 100%; text-align: center;">{{ row.name }}</view>
                     </view>
+					
+					<view class="label" hover-class="hover"
+						  @tap="getUnlimitedQRCode()">
+						<view class="icon">
+							<image class="icon-img" :src="'../../static/my/tuiguang.png'"></image>
+						</view>
+						<view style="width: 100%; text-align: center;">推广码</view>
+					</view>
                 </view>
             </view>
         </view>
@@ -96,7 +104,7 @@
 <script>
 import Tabbar from '@/components/tabbar/tabbar.vue'
 import loginPop from '@/components/loginPop/loginPop.vue'
-import {getUserInfo, setSelfInfo} from "@/api/user";
+import {getUserInfo, setSelfInfo, getUnlimitedQRCodeImg} from "@/api/user";
 import {getOrderStatusCount} from "@/api/order";
 import {getUser, getToken, setUser, setToken, setOpenId} from '@/store/storage.js'
 import config from '@/config/config.js'
@@ -121,6 +129,7 @@ export default {
             showPhoneDialog: false, // 拨号
             relationPhone: "", // 联系人电话
             showChangeNickName: false, // 修改昵称模态框
+			qrCodeImageUrl: "",
             orderTypeLise: [
                 //name-标题 icon-图标 badge-角标
                 {name: '全部订单', icon: 'qrbu.png', badge: 0, status: null},
@@ -278,6 +287,15 @@ export default {
                 url: '/pages/order/list?status=' + this.orderTypeLise[index].status
             })
         },
+		async getUnlimitedQRCode() {
+			const res = await getUnlimitedQRCodeImg()
+			  // 将 arraybuffer 转换为 base64
+			const base64 = uni.arrayBufferToBase64(res.data);
+			// 拼接成 data URL
+			const imageUrl = 'data:image/png;base64,' + base64;
+			// 将图片 URL 设置到 data 中，供页面显示
+			this.qrCodeImageUrl = imageUrl
+		},
         //用户点击列表项
         toPage(list_i, li_i) {
             uni.showToast({title: this.severList[list_i][li_i].name});

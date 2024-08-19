@@ -33,3 +33,13 @@ export const setSelfInfo = (data, refs) => {
         data
     },refs)
 }
+
+// 设置自身用户信息
+export const getUnlimitedQRCodeImg = (refs) => {
+    return request({
+        url: `/wechat/getUnlimitedQRCode`,
+        method: 'GET',
+        loading: true,
+		responseType: 'arraybuffer'
+    },refs)
+}
