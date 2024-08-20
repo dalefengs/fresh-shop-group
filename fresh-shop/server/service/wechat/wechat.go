@@ -1,8 +1,6 @@
 package wechat
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"fresh-shop/server/global"
@@ -41,14 +39,9 @@ type Scent struct {
 
 // GetUnlimitedQRCode 获取小程序码 不限制
 func (s *WechatService) GetUnlimitedQRCode(uid uint) (response []byte, err error) {
-	scene := Scent{
-		Uid:        uid,
-		CreateTime: time.Now().Format("2006-01-02 15:04:05"),
-	}
-	sceneByte, _ := json.Marshal(scene)
 	code := global.MiniProgram.GetQRCode()
 	param := qrcode.QRCoder{
-		Scene:      base64.StdEncoding.EncodeToString(sceneByte),
+		Scene:      fmt.Sprintf("uid=%d", uid),
 		EnvVersion: "release",
 	}
 	response, err = code.GetWXACodeUnlimit(param)

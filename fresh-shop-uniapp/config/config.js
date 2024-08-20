@@ -12,8 +12,8 @@ export default {
     // #endif
     // 其他使用 url
     // #ifndef H5
-    // baseUrl: 'http://localhost:48888',
-    baseUrl: 'https://qiyundongpin.cn/goapi',
+    baseUrl: 'http://localhost:48888',
+    // baseUrl: 'https://qiyundongpin.cn/goapi',
     // #endif
     phone: 13527326320
 }

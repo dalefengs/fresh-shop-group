@@ -92,8 +92,8 @@ func (orderDetailsService *OrderDetailsService) RecentlyPurchasedGoodsList(info 
 		sql += " and g.name LIKE '%" + info.Goods.Name + "%'"
 		countSql += " and g.name LIKE '%" + info.Goods.Name + "%'"
 	}
-	sql += " group by g.id order by od.created_at desc"
-	countSql += " group by g.id order by od.created_at desc"
+	sql += " group by g.id order by g.id desc"
+	countSql += " group by g.id order by g.id desc"
 	err = global.DB.Raw(countSql, userId).Scan(&total).Error
 	if err != nil {
 		global.SugarLog.Errorw("查询失败!近期购买总数失败", "err", err)

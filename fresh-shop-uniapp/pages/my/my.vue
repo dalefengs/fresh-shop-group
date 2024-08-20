@@ -99,6 +99,17 @@
                 ></u--input>
             </view>
         </u-modal>
+		<u-modal
+			title="启运冻品"
+			:show="showMiniQCImg"
+			closeOnClickOverlay
+			@confirm="() => showMiniQCImg = false"
+		>
+			<image
+				style="width: 220px;height: 220px;"
+				:src="qrCodeImageUrl"
+			></image>
+		</u-modal>
     </pageWrapper>
 </template>
 <script>
@@ -129,7 +140,8 @@ export default {
             showPhoneDialog: false, // 拨号
             relationPhone: "", // 联系人电话
             showChangeNickName: false, // 修改昵称模态框
-			qrCodeImageUrl: "",
+			qrCodeImageUrl: "",  // 推广码
+			showMiniQCImg: false, // 推广码
             orderTypeLise: [
                 //name-标题 icon-图标 badge-角标
                 {name: '全部订单', icon: 'qrbu.png', badge: 0, status: null},
@@ -290,11 +302,12 @@ export default {
 		async getUnlimitedQRCode() {
 			const res = await getUnlimitedQRCodeImg()
 			  // 将 arraybuffer 转换为 base64
-			const base64 = uni.arrayBufferToBase64(res.data);
+			const base64 = uni.arrayBufferToBase64(res);
 			// 拼接成 data URL
 			const imageUrl = 'data:image/png;base64,' + base64;
 			// 将图片 URL 设置到 data 中，供页面显示
 			this.qrCodeImageUrl = imageUrl
+			this.showMiniQCImg = true
 		},
         //用户点击列表项
         toPage(list_i, li_i) {
