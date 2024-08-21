@@ -17,9 +17,17 @@
 <!--                        <text style="margin-right: 4px;">推荐码：{{ user.invitationCode ? user.invitationCode : '' }}</text>-->
 <!--                        <u-icon name="file-text" color="#fff"></u-icon>-->
 <!--                    </view>-->
-                    <view class="integral">
-                      积分：{{ point ? point : 0 }}
-                    </view>
+					<view class="king-flex">
+						<view class="integral king-mr-10">
+							<text v-if="user.auditStatus === 1">{{ role.authorityName ? role.authorityName : '' }}</text>
+							<text v-else-if="user.auditStatus === 0">未填写会员信息</text>
+							<text v-else-if="[2,3].includes(user.auditStatus)">等待审核</text>
+							<text v-else-if="user.auditStatus === 4">审核不通过</text>
+						</view>
+						<view class="integral">
+						  积分：{{ point ? point : 0 }}
+						</view>
+					</view>
                 </view>
             </view>
             <view class="setting">
@@ -117,7 +125,7 @@ import Tabbar from '@/components/tabbar/tabbar.vue'
 import loginPop from '@/components/loginPop/loginPop.vue'
 import {getUserInfo, setSelfInfo, getUnlimitedQRCodeImg} from "@/api/user";
 import {getOrderStatusCount} from "@/api/order";
-import {getUser, getToken, setUser, setToken, setOpenId} from '@/store/storage.js'
+import {getUser, getToken, setUser, setToken, setOpenId, getRole, setRole} from '@/store/storage.js'
 import config from '@/config/config.js'
 export default {
     components: {
@@ -133,7 +141,8 @@ export default {
             isH5Plus: false,
             //#endif
             user: {},
-	          point: 0, // 积分余额
+			role: {},
+	        point: 0, // 积分余额
             orderStatusCount: {},
             token: '',
             showLoginDialog: false, // 登录
@@ -165,9 +174,12 @@ export default {
     },
     onLoad() {
         //加载
-        this.init()
         this.relationPhone = config.phone
+		this.init()
     },
+	onShow() {
+		this.user = getUser()
+	},
     methods: {
         async init() {
             this.token = getToken()
@@ -180,8 +192,10 @@ export default {
                   this.token = ""
                 }
                 this.user = res.data.userInfo
-	              this.point = res.data.point
+				this.role = res.data.userInfo.authority
+	            this.point = res.data.point
                 setUser(this.user)
+				setRole(this.role)
                 // 获取订单状态数量
                 const orderStatusRes = await getOrderStatusCount()
                 this.orderStatusCount = orderStatusRes.data

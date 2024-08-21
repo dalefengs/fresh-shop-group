@@ -1,6 +1,7 @@
 const TOKEN = "token"
 const EXPIRES = "expires"
 const USER = "user"
+const ROLE = "role"
 const OPENID = "openid"
 const FirstEntry = "firstEntry"
 
@@ -32,6 +33,15 @@ export function setUser(user) {
 
 export function getUser() {
     return uni.getStorageSync(USER)
+}
+
+// 设置用户角色信息
+export function setRole(role) {
+    uni.setStorageSync(ROLE, role)
+}
+
+export function getRole() {
+    return uni.getStorageSync(ROLE)
 }
 
 // 设置 openid

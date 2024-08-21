@@ -469,7 +469,18 @@ func (b *BaseApi) SetSelfInfo(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
+
 	user.ID = utils.GetUserID(c)
+
+	if len(user.AuthorityIds) != 0 {
+		err = userService.SetUserAuthorities(user.ID, user.AuthorityIds)
+		if err != nil {
+			global.Log.Error("设置客户类型失败!", zap.Error(err))
+			response.FailWithMessage("修改客户类型失败", c)
+			return
+		}
+	}
+
 	info := system.SysUser{
 		DbModel: global.DbModel{
 			ID: user.ID,

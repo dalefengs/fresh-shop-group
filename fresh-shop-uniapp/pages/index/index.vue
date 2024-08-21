@@ -106,8 +106,8 @@ import config from '@/config/config.js'
 import { getBannerList } from '@/api/banner.js'
 import { getHomeCategoryList } from '@/api/category.js'
 import { getGoodsPageList } from '@/api/goods.js'
-import { getToken, getUser, setUser, getFirstEntry } from '@/store/storage.js'
-import { getUserAuditStatus } from "@/api/user";
+import { getToken, getUser, setUser, getFirstEntry, setRole } from '@/store/storage.js'
+import { getUserAuditStatus, getUserInfo } from "@/api/user";
 export default {
 	components: {
 		Tabbar,
@@ -172,11 +172,15 @@ export default {
 		this.getHomeCategory();
 		this.getGoodsListData(0)
 		this.getGoodsListData(1)
-		// 如果为登录状态
+		// 如果不是登录状态
 		const t = getToken()
 		if (!t) {
 			this.loginSuspendShow = true
+			return 
 		}
+		
+		this.getUserInfo()
+		
 	},
 	mounted() {
 		// 设置商品列表高度为页面高度
@@ -188,6 +192,18 @@ export default {
 		});
 	},
 	methods: {
+		// 获取用户信息
+		async getUserInfo() {
+		    this.token = getToken()
+		    //如果登录了，则获取用户信息
+		    if (this.token) {
+		        const res = await getUserInfo()
+		        if (res.code === 0) {
+					setUser(res.data.userInfo)
+					setRole(res.data.userInfo.authority)
+		        }
+		    }
+		},
 		//分享好友
 		onShareAppMessage() {
 		      return {
