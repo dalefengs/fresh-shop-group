@@ -24,8 +24,13 @@
 							<text v-else-if="[2,3].includes(user.auditStatus)">等待审核</text>
 							<text v-else-if="user.auditStatus === 4">审核不通过</text>
 						</view>
-						<view class="integral">
+						<view class="integral king-mr-10">
 						  积分：{{ point ? point : 0 }}
+						</view>
+					</view>
+					<view class="king-flex" v-if="role.authorityId === 1001">
+						<view class="integral">
+						  当月未结：{{ point ? point : 0 }} 元
 						</view>
 					</view>
                 </view>

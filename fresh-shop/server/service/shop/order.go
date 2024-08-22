@@ -166,15 +166,24 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 	// 设置订单基本信息
 	order.OrderSn = utils.GenerateOrderNumber("SN")
 	if order.PointGoodsId > 0 { // 积分商品
+		order.Status = utils.Pointer(1) // 积分-已付款状态
 		order.GoodsArea = utils.Pointer(1)
 		order.Payment = utils.Pointer(4) // 积分支付
-		order.Status = utils.Pointer(1)  // 已付款状态
 		order.Finish = order.Total
 		order.PayTime = utils.Pointer(time.Now())
 	} else { // 普通商品
 		order.GoodsArea = utils.Pointer(0)
-		order.Payment = utils.Pointer(2) // 默认是微信支付
-		order.Status = utils.Pointer(0)  // 未付款状态
+	}
+	if userClaims.AuthorityId == 1001 {
+		// 月结
+		order.Status = utils.Pointer(1)         // 已付款状态
+		order.SettlementType = utils.Pointer(1) // 月结未付款
+		order.Payment = utils.Pointer(5)        // 线下支付
+	} else {
+		// 零售客户默认使用微信支付
+		order.Status = utils.Pointer(0) // 未付款状态
+		order.Payment = utils.Pointer(2)
+		order.SettlementType = utils.Pointer(0) // 零售
 	}
 	order.ShipmentName = addressName
 	order.ShipmentMobile = address.Mobile
