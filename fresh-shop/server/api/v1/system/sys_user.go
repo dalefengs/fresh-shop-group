@@ -497,6 +497,7 @@ func (b *BaseApi) SetSelfInfo(c *gin.Context) {
 		ChangeCustomerName: user.ChangeCustomerName,
 		AuditStatus:        user.AuditStatus,
 	}
+
 	if user.AuditStatus == 2 || user.AuditStatus == 3 {
 		info.ApplyTime = time.Now()
 	}

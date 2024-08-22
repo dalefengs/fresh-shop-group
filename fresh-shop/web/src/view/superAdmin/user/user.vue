@@ -64,6 +64,9 @@
           <template #default="scope">
             <div class="table-multi-line">
               <div v-if="scope.row.auditStatus === 3">
+                状态：<span
+                  :class="getStatusColorClass(scope.row.auditStatus)"
+              >{{ filterDict(scope.row.auditStatus, auditStatusOptions) }}</span><br>
                 <span>原始联系人名称：{{ scope.row.originContactName ? scope.row.originContactName : '无' }}</span><br>
                 <span>原始客户名称：{{ scope.row.originCustomerName ? scope.row.originCustomerName : '无' }}</span><br>
                 修改联系人名称：<span
@@ -95,16 +98,16 @@
         <!--            </div>-->
         <!--          </template>-->
         <!--        </el-table-column>-->
-        <el-table-column align="left" label="用户角色" min-width="200">
+        <el-table-column align="left" label="客户类型" min-width="200">
           <template #default="scope">
             <el-cascader
               v-model="scope.row.authorityIds"
               :options="authOptions"
               :show-all-levels="false"
               collapse-tags
-              :props="{ multiple:true,checkStrictly: true,label:'authorityName',value:'authorityId',disabled:'disabled',emitPath:false}"
+              :props="{ multiple: userStore.role.authorityId === 888, checkStrictly: true,label:'authorityName',value:'authorityId',disabled:'disabled',emitPath:false}"
               :clearable="false"
-              :disabled="userStore.role.authorityId !== 888"
+              :disabled="userStore.role.authorityId !== 888 && ( scope.row.ID === 5 || scope.row.ID === 1)"
               @visible-change="(flag)=>{changeAuthority(scope.row,flag,0)}"
               @remove-tag="(removeAuth)=>{changeAuthority(scope.row,false,removeAuth)}"
             />
@@ -191,6 +194,9 @@
           </el-form-item>
           <el-form-item label="客户名称" prop="originCustomerName">
             <el-input v-model="userInfo.originCustomerName" />
+          </el-form-item>
+          <el-form-item label="客户类型" prop="authorityName">
+            <div>{{ userInfo.authority.authorityName }}</div>
           </el-form-item>
           <el-form-item v-if="userInfo.auditStatus === 3" label="修改联系人名称" prop="changeContactName">
             <el-input v-model="userInfo.changeContactName" />
@@ -527,19 +533,24 @@ const addUser = () => {
 
 const tempAuth = {}
 const changeAuthority = async(row, flag, removeAuth) => {
+  const roleId = userStore.role.authorityId
+  if (!Array.isArray(row.authorityIds)) {
+    row.authorityIds = [row.authorityIds]
+  }
   if (flag) {
     if (!removeAuth) {
       tempAuth[row.ID] = [...row.authorityIds]
     }
     return
   }
+
   await nextTick()
   const res = await setUserAuthorities({
     ID: row.ID,
     authorityIds: row.authorityIds,
   })
   if (res.code === 0) {
-    ElMessage({ type: 'success', message: '角色设置成功' })
+    ElMessage({ type: 'success', message: '客户类型设置成功' })
   } else {
     if (!removeAuth) {
       row.authorityIds = [...tempAuth[row.ID]]

@@ -16,7 +16,7 @@
 		<!-- 轮播图 -->
 		<view class="king-p-5">
 			<u-swiper :list="banner" keyName="imgUrl" indicator indicatorMode="line" :height="150" circular
-				bgColor="#ffffff"></u-swiper>
+				bgColor="#ffffff" @click="clickBanner"></u-swiper>
 		</view>
 		<!-- 首页分类 -->
 		<view class="king-bg-white king-mx-10 king-radius10 king-pb-5 king-pt-10" style="min-height: 80px">
@@ -405,6 +405,15 @@ export default {
 		// 登陆成功
 		loginSuccess() {
 			this.loginSuspendShow = false
+		},
+		// 轮播图跳转
+		clickBanner(index) {
+			let b = this.banner[index]
+			if (b.type === 1) {
+				uni.navigateTo({
+					url: b.toPath
+				})
+			}
 		}
 	},
 }

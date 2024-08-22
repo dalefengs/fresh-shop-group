@@ -163,7 +163,8 @@ func (a *AuthorityApi) GetAuthorityList(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	list, total, err := authorityService.GetAuthorityInfoList(pageInfo)
+	roleId := utils.GetUserAuthorityId(c)
+	list, total, err := authorityService.GetAuthorityInfoList(pageInfo, roleId)
 	if err != nil {
 		global.Log.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败"+err.Error(), c)

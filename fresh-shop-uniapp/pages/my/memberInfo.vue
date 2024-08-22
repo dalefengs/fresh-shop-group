@@ -73,7 +73,8 @@
 		setUser,
 		getUser,
 		getRole,
-		setFirstEntry
+		setFirstEntry,
+		setRole
 	} from "@/store/storage";
 	import {
 		setSelfInfo
@@ -119,6 +120,7 @@
 			}
 			setFirstEntry(true) // 已经进入
 			this.user = getUser()
+			this.role = getRole()
 			if (this.user) {
 				if (this.user.auditStatus === 1) {
 					this.auditStatus = 1
@@ -141,7 +143,7 @@
 					})
 				}
 				// 去除末尾客户
-				this.customerTypeValue = this.user.authority.authorityName.replace("客户", "")
+				this.customerTypeValue = this.role.authorityName.replace("客户", "")
 			}
 
 
@@ -182,6 +184,9 @@
 				this.user.auditStatus = this.auditStatus
 				this.user.applyTime = this.getNowFormatDate()
 				setUser(this.user)
+				this.role.authorityName = this.customerTypeValue + "客户"
+				this.role.authorityId = this.formData.AuthorityIds[0]
+				setRole(this.role)
 				this.$message(this.$refs.toast).success("提交成功，请耐心等待审核！")
 			},
 			// 获取当前时间

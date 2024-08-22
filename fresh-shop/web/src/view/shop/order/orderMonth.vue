@@ -2,6 +2,19 @@
   <div>
     <div class="gva-search-box">
       <el-form :inline="true" :model="searchInfo" class="demo-form-inline" @keyup.enter="onSubmit">
+        <el-form-item label="结算月">
+          <el-date-picker
+            v-model="searchInfo.settlementMonth"
+            format="YYYY-MM"
+            type="month"
+            placeholder="请选择结算月"
+          />
+        </el-form-item>
+        <el-form-item label="订单状态" prop="status">
+          <el-select v-model="searchInfo.status" clearable placeholder="请选择" @clear="()=>{searchInfo.status=undefined}">
+            <el-option v-for="(item,key) in orderStatusOptions" :key="key" :label="item.label" :value="item.value" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="订单编号">
           <el-input v-model="searchInfo.orderSn" placeholder="搜索条件" />
         </el-form-item>
@@ -17,11 +30,6 @@
         <el-form-item label="支付方式" prop="payment">
           <el-select v-model="searchInfo.payment" clearable placeholder="请选择" @clear="()=>{searchInfo.payment=undefined}">
             <el-option v-for="(item,key) in paymentOptions" :key="key" :label="item.label" :value="item.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="订单状态" prop="status">
-          <el-select v-model="searchInfo.status" clearable placeholder="请选择" @clear="()=>{searchInfo.status=undefined}">
-            <el-option v-for="(item,key) in orderStatusOptions" :key="key" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="发货时间">
@@ -402,7 +410,7 @@
 
 <script>
 export default {
-  name: 'Order'
+  name: 'OrderMonth'
 }
 </script>
 
@@ -480,6 +488,8 @@ const pageSize = ref(10)
 const tableData = ref([])
 const tableDetailData = ref([])
 const searchInfo = ref({})
+
+searchInfo.value.settlementMonth = new Date()
 
 // 重置
 const onReset = () => {
