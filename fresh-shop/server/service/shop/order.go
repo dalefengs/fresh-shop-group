@@ -410,6 +410,18 @@ func (orderService *OrderService) GetOrderInfoList(info shopReq.OrderSearch) (li
 	if info.UserId != nil {
 		db = db.Where("shop_order.user_id = ?", info.UserId)
 	}
+	if info.SettlementType != nil {
+		db = db.Where("shop_order.settlement_type = ?", info.SettlementType)
+	}
+	if info.SettlementMonth != nil {
+		// 获取当前月份的第一天
+		firstDay := time.Date(info.SettlementMonth.Year(), info.SettlementMonth.Month(), 1, 0, 0, 0, 0, info.SettlementMonth.Location())
+		// 获取下个月的第一天
+		nextMonth := firstDay.AddDate(0, 1, 0)
+		// 获取当前月份的最后一天（下个月第一天减去一天）
+		lastDay := nextMonth.Add(-time.Second)
+		db = db.Where("shop_order.created_at BETWEEN ? AND ?", firstDay, lastDay)
+	}
 	if info.GoodsArea != nil {
 		db = db.Where("shop_order.goods_area = ?", info.GoodsArea)
 	}

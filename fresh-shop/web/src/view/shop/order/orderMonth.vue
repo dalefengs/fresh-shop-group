@@ -52,11 +52,6 @@
 <!--          <el-date-picker v-model="searchInfo.endCancelTime" type="datetime" placeholder="搜索条件（止）" />-->
 
 <!--        </el-form-item>-->
-        <el-form-item label="创建时间">
-          <el-date-picker v-model="searchInfo.startCreatedAt" type="datetime" placeholder="开始时间" />
-          —
-          <el-date-picker v-model="searchInfo.endCreatedAt" type="datetime" placeholder="结束时间" />
-        </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="search" @click="onSubmit">查询</el-button>
           <el-button icon="refresh" @click="onReset">重置</el-button>
@@ -518,6 +513,7 @@ const handleCurrentChange = (val) => {
 // 查询
 const getTableData = async() => {
   searchInfo.value.goodsArea = route.currentRoute.value.query.goodsArea
+  searchInfo.value.settlementType = route.currentRoute.value.query.settlementType
   const table = await getOrderList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
   if (table.code === 0) {
     tableData.value = table.data.list

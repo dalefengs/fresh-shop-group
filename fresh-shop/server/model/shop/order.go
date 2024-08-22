@@ -19,6 +19,7 @@ type Order struct {
 	Total           float64        `json:"total" form:"total" gorm:"column:total;comment:订单商品总金额;size:14;"`
 	Postage         float64        `json:"postage" form:"postage" gorm:"column:postage;comment:邮费;size:14;"`
 	Finish          float64        `json:"finish" form:"finish" gorm:"column:finish;comment:实付金额;size:14;"`
+	SettlementType  *int           `json:"settlementType" form:"settlementType" gorm:"column:settlement_type;comment:结算类型(0现结 1月结)"`
 	Payment         *int           `json:"payment" form:"payment" gorm:"column:payment;comment:支付方式(1余额 2微信 3支付宝 4积分);"`
 	PickUpNumber    int            `json:"pickUpNumber" form:"pickUpNumber" gorm:"column:pick_up_number;comment:取餐号码;size:11;"`
 	PaymentInfo     string         `json:"paymentInfo" form:"paymentInfo" gorm:"column:payment_info;comment:支付详情信息;size:255;"`
