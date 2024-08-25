@@ -573,7 +573,7 @@ const tableDetailData = ref([])
 const searchInfo = ref({})
 
 searchInfo.value.settlementMonth = new Date()
-searchInfo.value.userPhone = '18169630262'
+searchInfo.value.userPhone = ''
 
 // 月结
 const orderStatistics = ref({})

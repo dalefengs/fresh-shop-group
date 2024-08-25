@@ -51,7 +51,7 @@ type ChangeUserInfo struct {
 	Phone              string    `json:"phone"  gorm:"comment:用户手机号"`                                                                   // 用户手机号
 	AuthorityIds       []uint    `json:"authorityIds" gorm:"-"`                                                                         // 角色ID
 	Email              string    `json:"email"  gorm:"comment:用户邮箱"`                                                                    // 用户邮箱
-	HeaderImg          string    `json:"headerImg" gorm:"default:https://minio.fungs.cn/picture/images/avatar/face.png;comment:用户头像"`   // 用户头像
+	HeaderImg          string    `json:"headerImg" gorm:"default:https://minio.kl.do/picture/images/avatar/face.png;comment:用户头像"`      // 用户头像
 	SideMode           string    `json:"sideMode"  gorm:"comment:用户侧边主题"`                                                               // 用户侧边主题
 	Enable             int       `json:"enable" gorm:"comment:冻结用户"`                                                                    //冻结用户
 	OriginContactName  string    `json:"originContactName" gorm:"column:origin_contact_name;comment:联系人姓名"`                             // 联系人姓名
