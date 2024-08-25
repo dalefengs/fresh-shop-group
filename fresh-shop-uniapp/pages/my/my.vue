@@ -338,13 +338,35 @@ export default {
         },
 		async getUnlimitedQRCode() {
 			const res = await getUnlimitedQRCodeImg()
-			  // 将 arraybuffer 转换为 base64
+			// 将 arraybuffer 转换为 base64
 			const base64 = uni.arrayBufferToBase64(res);
+			try {
+				const resp = JSON.parse(this.base64ToUtf8(base64))
+				if (resp.code !== 0) {
+					this.$message(this.$refs.toast).error(resp.msg)
+					return false
+				}
+				console.log(resp);
+			} catch (e) {
+				
+			}
 			// 拼接成 data URL
 			const imageUrl = 'data:image/png;base64,' + base64;
 			// 将图片 URL 设置到 data 中，供页面显示
 			this.qrCodeImageUrl = imageUrl
 			this.showMiniQCImg = true
+		},
+		base64ToUtf8(base64String) {
+		    const binaryString = atob(base64String);
+		    const binaryLength = binaryString.length;
+		    const bytes = new Uint8Array(binaryLength);
+		
+		    for (let i = 0; i < binaryLength; i++) {
+		        bytes[i] = binaryString.charCodeAt(i);
+		    }
+		
+		    const decoder = new TextDecoder();
+		    return decoder.decode(bytes);
 		},
         //用户点击列表项
         toPage(list_i, li_i) {
