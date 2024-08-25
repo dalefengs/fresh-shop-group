@@ -5,6 +5,8 @@ const ROLE = "role"
 const OPENID = "openid"
 const FirstEntry = "firstEntry"
 
+const SettlmentInfo = "settlmentInfo"
+
 
 // 设置 token
 export function setToken(token) {
@@ -60,4 +62,13 @@ export function getFirstEntry() {
 // 设置 openid
 export function setFirstEntry(bool) {
     uni.setStorageSync(FirstEntry, bool)
+}
+
+
+// 设置结算状态
+export function getSettlmentInfo() {
+    return uni.getStorageSync(SettlmentInfo)
+}
+export function setSettlmentInfo(data) {
+    uni.setStorageSync(SettlmentInfo, data)
 }

@@ -5,4 +5,6 @@ type OrderStatusCountResponse struct {
 	Delivered int `json:"delivered"` // 待发货
 	Shipped   int `json:"shipped"`   // 已发货
 	Success   int `json:"success"`
+
+	OrderMonthStatistics
 }

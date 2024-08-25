@@ -189,7 +189,7 @@ export default {
             const allBrand = [{
                 ID: 0,
                 name: "全部",
-                logo: "https://minio.fungs.cn/picture/images/avatar/face.png",
+                logo: "https://minio.kl.do/picture/images/avatar/face.png",
             }]
             // 获取品牌列表
             const brandRes = await getBrandListByCategoryId({

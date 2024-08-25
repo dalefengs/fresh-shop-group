@@ -35,7 +35,7 @@
 
 <script>
 import config from '@/config/config.js'
-import {getOrderList, confirmOrder, cancelOrder, orderPay, getOrderStatus} from '@/api/order'
+import {getOrderList, confirmOrder, cancelOrder, orderPay, getOrderStatus, getOrderStatusCount} from '@/api/order'
 import {getToken} from '@/store/storage.js'
 import orderList from "@/components/orderList/orderList";
 

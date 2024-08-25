@@ -94,6 +94,20 @@
 				您确认购买该商品么？
 			</view>
 		</u-modal>
+		<u-modal :show="showSettlmentUnpaid" showCancelButton closeOnClickOverlay @confirm="callPhone"
+			@cancel="settlmentUnpaidCancel" confirmText="联系商家" cancelText="稍后处理" title="未结算订单提醒">
+			<view>
+				<view class="main-message">您有{{preSettlmentInfo.month}}月未结算的订单需要处理</view>
+				<view class="details">
+					<view>共有 <text class="highlight"> {{ preSettlmentInfo.monthUnpaid }} </text> 个订单未结算</view>
+					<view>结算金额为 <text class="highlight"> {{ preSettlmentInfo.settlementUnpaid }} </text> 元</view>
+				</view>
+				<view class="contact-info">
+					<view>为确保您的正常使用，请尽快处理</view>
+					<view>如需帮助，请联系商家：<text class="phone-number">{{ relationPhone }}</text></view>
+				</view>
+			</view>
+		</u-modal>
 		<u-toast ref="toast" style="z-index: 9999 !important"></u-toast>
 	</pageWrapper>
 </template>
@@ -105,14 +119,15 @@
 	import config from '@/config/config.js'
 	import {
 		getToken,
-		getRole
+		getRole,
+		getSettlmentInfo,
 	} from '@/store/storage.js'
 	import {
 		getDefaultAddressInfo
 	} from '@/api/address';
 	import {
 		createOrder,
-		getOrderStatus
+		getOrderStatus,
 	} from '@/api/order';
 	import addressPop from '@/components/addressPop/addressPop'
 	import {
@@ -135,6 +150,8 @@
 				addressId: 0, // 用户地址ID
 				address: {}, // 用户收货地址
 				total: 0,
+				showSettlmentUnpaid: false,
+				relationPhone: '',
 				showLoginDialog: false,
 				shipmentType: '0', // 配送方式 1配送 2自提
 				remark: "", // 备注
@@ -149,15 +166,21 @@
 				},
 				showPointPay: false, // 积分购买提示框
 				pointAmount: 0, // 积分数量
+				preSettlmentInfo: {}, // 月结信息
 			}
 		},
 		onLoad(options) {
+			this.relationPhone = config.phone
 			if (options.pointGoodsId) {
 				this.pointGoodsId = parseInt(options.pointGoodsId)
 			}
 			this.role = getRole()
 			if (!this.role) {
 				this.$message(this.$refs.toast).error("客户类型异常，请联系管理员")
+			}
+			this.preSettlmentInfo = getSettlmentInfo()
+			if (this.preSettlmentInfo.monthUnpaid > 0) {
+				this.showSettlmentUnpaid = true
 			}
 			console.log('pointGoodsId', this.pointGoodsId)
 		},
@@ -218,7 +241,7 @@
 				if (this.role.authorityId === 1001) {
 					this.$message(this.$refs.toast).success("订单已提交，等待配送")
 				}else {
-					if (!res.data.pay) {
+					if (!res.data.pay || res.data.pay.paySign === "") {
 						this.$message(this.$refs.toast).error("交易失败，请重试")
 						return false
 					}
@@ -398,8 +421,22 @@
 				} else {
 					this.getAddressInfo()
 				}
+			},
+			// 拨打电话
+			callPhone() {
+				uni.makePhoneCall({
+					phoneNumber: this.relationPhone,
+					success: (result) => {},
+					fail: (error) => {}
+				})
+			},
+			settlmentUnpaidCancel() {
+				this.showSettlmentUnpaid = false
+				uni.navigateBack({
+				    delta: 1
+				});
 			}
-		}
+		},
 	}
 </script>
 
@@ -585,5 +622,43 @@
 
 	.u-radio-group {
 		justify-content: center;
+	}
+	
+	
+	// 结算提示
+	
+	.modal-content {
+	    padding: 20px;
+	    text-align: center;
+	}
+	
+	.warning-icon {
+	    font-size: 40px;
+	    margin-bottom: 10px;
+	}
+	
+	.main-message {
+	    font-size: 18px;
+	    font-weight: bold;
+	    margin-bottom: 15px;
+	}
+	
+	.details {
+	    margin-bottom: 15px;
+	}
+	
+	.highlight {
+	    color: #ff6600;
+	    font-weight: bold;
+		margin: 0 4px;
+	}
+	
+	.contact-info {
+	    font-size: 14px;
+	}
+	
+	.phone-number {
+	    font-weight: bold;
+	    margin-top: 5px;
 	}
 </style>

@@ -81,6 +81,22 @@ export const findOrder = (params) => {
 }
 
 // @Tags Order
+// @Summary 获取月结统计数据
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query model.Order true "获取月结统计数据"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"查询成功"}"
+// @Router /order/getOrderMonthStatistics [get]
+export const getOrderMonthStatistics = (params) => {
+  return service({
+    url: '/order/getOrderMonthStatistics',
+    method: 'get',
+    params
+  })
+}
+
+// @Tags Order
 // @Summary 分页获取Order列表
 // @Security ApiKeyAuth
 // @accept application/json
@@ -93,5 +109,21 @@ export const getOrderList = (params) => {
     url: '/order/getOrderList',
     method: 'get',
     params
+  })
+}
+
+// @Tags Order
+// @Summary 批量提交用户结算
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query request.PageInfo true "批量提交用户结算"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /order/batchSettlement [post]
+export const batchSettlement = (data) => {
+  return service({
+    url: '/order/batchSettlement',
+    method: 'post',
+    data
   })
 }

@@ -8,14 +8,14 @@
 	<pageWrapper>
 		<u-sticky class="king-bg-white">
 			<view class="king-p-5 king-bg-white" style="height: 35px;">
-<!--				<u-search search-icon="scan" disabled :show-action="false" placeholder="请输入商品名称" @click="searchClick">-->
+				<!--				<u-search search-icon="scan" disabled :show-action="false" placeholder="请输入商品名称" @click="searchClick">-->
 				<u-search search-icon="search" disabled :show-action="false" placeholder="请输入商品名称" @click="searchClick">
 				</u-search>
 			</view>
 		</u-sticky>
 		<!-- 轮播图 -->
 		<view class="king-p-5">
-			<u-swiper :list="banner" keyName="imgUrl" indicator indicatorMode="line" :height="150" circular
+			<u-swiper :list="banner" keyName="imgUrl" indicator indicatorMode="line" :height="160" circular
 				bgColor="#ffffff" @click="clickBanner"></u-swiper>
 		</view>
 		<!-- 首页分类 -->
@@ -68,7 +68,8 @@
 							:refresher-triggered="hotTriggered" @refresherrefresh="onRefresh"
 							@scrolltolower="hotScrollTolower" :scroll-anchoring="true">
 							<!-- 商品列表 -->
-							<GoodsList :lists="goodsHotArr" price-type="￥" @onGoods="toGoodsInfo" :is-audit="isAudit"></GoodsList>
+							<GoodsList :lists="goodsHotArr" price-type="￥" @onGoods="toGoodsInfo" :is-audit="isAudit">
+							</GoodsList>
 							<view class="king-py-40" @click="hotScrollTolower">
 								<u-loadmore :status="hotLoadMore" loading-text="努力加载中，请喝杯茶" loadmore-text="上拉加载更多"
 									nomore-text="实在是没有了" />
@@ -94,343 +95,449 @@
 		</view>
 		<loginSuspend :show="loginSuspendShow" @success="loginSuccess"></loginSuspend>
 		<Tabbar :tabsId="0" />
-        <u-toast style="z-index:9998;" ref="toast"></u-toast>
+
+		<u-modal :show="showSettlmentUnpaid" showCancelButton closeOnClickOverlay @confirm="callPhone"
+			@cancel="() => showSettlmentUnpaid = false" @close="close" confirmText="联系商家" cancelText="稍后处理" title="未结算订单提醒">
+			<view>
+				<view class="main-message">您有{{preOrderStatus.month}}月未结算的订单需要处理</view>
+				<view class="details">
+					<view>共有 <text class="highlight"> {{ preOrderStatus.monthUnpaid }} </text> 个订单未结算</view>
+					<view>结算金额为 <text class="highlight"> {{ preOrderStatus.settlementUnpaid }} </text> 元</view>
+				</view>
+				<view class="contact-info">
+					<view>为确保您的正常使用，请尽快处理</view>
+					<view>如需帮助，请联系商家：<text class="phone-number">{{ relationPhone }}</text></view>
+				</view>
+			</view>
+		</u-modal>
+		<u-toast style="z-index:9998;" ref="toast"></u-toast>
+
 	</pageWrapper>
 </template>
 
 <script>
-import Tabbar from '@/components/tabbar/tabbar.vue'
-import loginSuspend from '@/components/loginPop/loginSuspend.vue'
-import GoodsList from '@/components/goodsList/goodsList.vue'
-import config from '@/config/config.js'
-import { getBannerList } from '@/api/banner.js'
-import { getHomeCategoryList } from '@/api/category.js'
-import { getGoodsPageList } from '@/api/goods.js'
-import { getToken, getUser, setUser, getFirstEntry, setRole } from '@/store/storage.js'
-import { getUserAuditStatus, getUserInfo } from "@/api/user";
-export default {
-	components: {
-		Tabbar,
-		GoodsList,
-		loginSuspend
-	},
-	data() {
-		return {
-            isAudit: false,
-            applyTime: "",
-			loginSuspendShow: false, // 是否显示底部登录
-			goodsTabsId: 0, // 商品标签切换
-			swiperHeight: 1000, // 商品栏目整体高度 页面大小
-			hotScrollTop: 0,
-			newScrollTop: 0,
-			hotTriggered: false, // 下拉刷新状态
-			newTriggered: false, // 下拉刷新状态
-			hotLoadMore: 'loadmore', // 上拉加载状态
-			newLoadMore: 'loadmore', // 上拉加载状态
-			hotPage: {
-				page: 1,
-				pageSize: 12,
-				total: 0, // 总条数
-				isMore: true // 是否还有更多
-			},
-			newPage: {
-				page: 1,
-				pageSize: 12,
-				total: 0, // 总条数
-				isMore: true // 是否还有更多
-			},
-			banner: [],
-			category: [],
-			goodsHotArr: [],
-			goodsNewArr: [],
-		}
-	},
-	onLoad() {
-        let user = getUser()
-        if (user) {
-            let entry = getFirstEntry()
-            if (user.auditStatus === 1) {
-                this.isAudit = true
-            }else {
-                getUserAuditStatus().then(res => {
-                    this.applyTime = res.data.applyTime
-                    if (res.data.auditStatus === 1) {
-                        this.isAudit = true
-                        user.auditStatus = 1
-                        setUser(user)
-                    }else if(!entry) {
-                        uni.navigateTo({
-                            url: "/pages/my/memberInfo"
-                        });
-                    }
-                })
-            }
-        }
+	import Tabbar from '@/components/tabbar/tabbar.vue'
+	import loginSuspend from '@/components/loginPop/loginSuspend.vue'
+	import GoodsList from '@/components/goodsList/goodsList.vue'
+	import config from '@/config/config.js'
+	import {
+		getBannerList
+	} from '@/api/banner.js'
+	import {
+		getHomeCategoryList
+	} from '@/api/category.js'
+	import {
+		getGoodsPageList
+	} from '@/api/goods.js'
+	import {
+		getToken,
+		getUser,
+		setUser,
+		getFirstEntry,
+		setRole,
+		setSettlmentInfo,
+	} from '@/store/storage.js'
+	import {
+		getUserAuditStatus,
+		getUserInfo
+	} from "@/api/user";
+	import {
+		getOrderStatusCount
+	} from "@/api/order";
+	import {
+		parseDateStr
+	} from "@/utils/date";
 
-		this.freshing = false;
-		this.getBanner();
-		this.getHomeCategory();
-		this.getGoodsListData(0)
-		this.getGoodsListData(1)
-		// 如果不是登录状态
-		const t = getToken()
-		if (!t) {
-			this.loginSuspendShow = true
-			return 
-		}
-		
-		this.getUserInfo()
-		
-	},
-	mounted() {
-		// 设置商品列表高度为页面高度
-		uni.getSystemInfo({
-			success: (res) => {
-				const windowHeight = res.windowHeight;
-				this.swiperHeight = windowHeight - 155;
-			},
-		});
-	},
-	methods: {
-		// 获取用户信息
-		async getUserInfo() {
-		    this.token = getToken()
-		    //如果登录了，则获取用户信息
-		    if (this.token) {
-		        const res = await getUserInfo()
-		        if (res.code === 0) {
-					setUser(res.data.userInfo)
-					setRole(res.data.userInfo.authority)
-		        }
-		    }
+	export default {
+		components: {
+			Tabbar,
+			GoodsList,
+			loginSuspend
 		},
-		//分享好友
-		onShareAppMessage() {
-		      return {
-		        title: '启运冻品',  // 分享标题
-		        path: '/pages/index/index',  // 分享路径，注意要写正确的页面路径
-		        imageUrl: '/static/qiyun_logo.png',// 分享图片的本地路径
-		      }
-		},
-		//分享到朋友圈
-		onShareTimeline() {
+		data() {
 			return {
-				title: '启运冻品',
-				link: '/pages/index/index',
-				imageUrl: '/static/qiyun_logo.png',
+				isAudit: false,
+				applyTime: "",
+				loginSuspendShow: false, // 是否显示底部登录
+				relationPhone: '',
+				showSettlmentUnpaid: false, // 显示区结算弹窗
+				goodsTabsId: 0, // 商品标签切换
+				swiperHeight: 1000, // 商品栏目整体高度 页面大小
+				hotScrollTop: 0,
+				newScrollTop: 0,
+				hotTriggered: false, // 下拉刷新状态
+				newTriggered: false, // 下拉刷新状态
+				hotLoadMore: 'loadmore', // 上拉加载状态
+				newLoadMore: 'loadmore', // 上拉加载状态
+				hotPage: {
+					page: 1,
+					pageSize: 12,
+					total: 0, // 总条数
+					isMore: true // 是否还有更多
+				},
+				newPage: {
+					page: 1,
+					pageSize: 12,
+					total: 0, // 总条数
+					isMore: true // 是否还有更多
+				},
+				banner: [],
+				category: [],
+				goodsHotArr: [],
+				goodsNewArr: [],
+				preOrderStatus: {}, // 订单统计及订单数
 			}
 		},
-		// 搜索框点击跳转到搜索页面
-		searchClick() {
-			console.log('跳转')
-			uni.navigateTo({
-				url: '/pages/search/search'
-			})
-		},
-		// 获取轮播图
-		getBanner() {
-			getBannerList().then(res => {
-				res.data.list.forEach(item => {
-					if (item.imgUrl.slice(0, 4) !== 'http') {
-						item.imgUrl = config.baseUrl + "/" + item.imgUrl
-					}
-				})
-				this.banner = res.data.list;
-			})
-		},
-		// 获取首页分类
-		getHomeCategory() {
-			getHomeCategoryList().then(res => {
-				res.data.list.forEach(item => {
-					if (item.imgUrl.slice(0, 4) !== 'http') {
-						item.imgUrl = config.baseUrl + "/" + item.imgUrl
-					}
-				})
-				this.category = res.data.list
-				console.log('category', this.category);
-			})
-		},
-		// 切换标签页
-		onChangeGoodsTabs(e) {
-			this.goodsTabsId = e.detail.current
-		},
-		// 点击切换标签页
-		changeGoodsTabs(id) {
-			this.goodsTabsId = id
-		},
-		// 获取商品列表
-		// type = 1加载 其他为刷新
-		async getGoodsListData(tabId, type) {
-			const data = {
-				goodsArea: 0
-			}
-			if (type == 0) {
-				this.hotPage.page = 1
-				this.newPage.page = 1
-				this.hotPage.isMore = true
-				this.newPage.isMore = true
-				this.hotLoadMore = 'loadmore'
-				this.newLoadMore = 'loadmore'
-			}
-			if (tabId == 0) {
-				data.isHot = 1
-				data.page = this.hotPage.page
-				data.pageSize = this.hotPage.pageSize
-				this.hotPage.page++
-			} else if (tabId == 1) {
-				data.isNew = 1
-				data.page = this.newPage.page
-				data.pageSize = this.newPage.pageSize
-				this.newPage.page++
-			} else {
-				return false
-			}
-			const res = await getGoodsPageList(data)
-			if (res.code !== 0) {
-				return false
-			}
-			res.data.list.forEach(item => {
-				if (item.images[0] && item.images[0].url.slice(0, 4) !== 'http') {
-					item.images[0].url = config.baseUrl + "/" + item.images[0].url
+		onLoad() {
+			let user = getUser()
+			if (user) {
+				let entry = getFirstEntry()
+				if (user.auditStatus === 1) {
+					this.isAudit = true
+				} else {
+					getUserAuditStatus().then(res => {
+						this.applyTime = res.data.applyTime
+						if (res.data.auditStatus === 1) {
+							this.isAudit = true
+							user.auditStatus = 1
+							setUser(user)
+						} else if (!entry) {
+							uni.navigateTo({
+								url: "/pages/my/memberInfo"
+							});
+						}
+					})
 				}
-			})
-			console.log(res);
-			// 进行赋值并计算是否还有下一页
-			if (tabId == 0) { // 热门商品
-				this.hotPage.total = res.data.total
-				// 如果没有更多数据，则将isMore设置为false
-				if ((this.hotPage.page - 1) * this.hotPage.pageSize >= this.hotPage.total) {
-					console.log("没有更多了");
-					this.hotPage.isMore = false
+			}
+			this.relationPhone = config.phone
+			this.freshing = false;
+			this.getBanner();
+			this.getHomeCategory();
+			this.getGoodsListData(0)
+			this.getGoodsListData(1)
+			// 如果不是登录状态
+			const t = getToken()
+			if (!t) {
+				this.loginSuspendShow = true
+				return
+			}
+
+			this.getUserInfo()
+			const date = new Date()
+			date.setMonth(date.getMonth() - 1)
+			this.getOrderStatusCountInfo(date)
+
+		},
+		mounted() {
+			// 设置商品列表高度为页面高度
+			uni.getSystemInfo({
+				success: (res) => {
+					const windowHeight = res.windowHeight;
+					this.swiperHeight = windowHeight - 155;
+				},
+			});
+		},
+		methods: {
+			// 获取用户信息
+			async getUserInfo() {
+				this.token = getToken()
+				//如果登录了，则获取用户信息
+				if (this.token) {
+					const res = await getUserInfo()
+					if (res.code === 0) {
+						setUser(res.data.userInfo)
+						setRole(res.data.userInfo.authority)
+					}
+				}
+			},
+			// 获取结算状态
+			getOrderStatusCountInfo(date) {
+				const settlementMonth = parseDateStr(date.toString())
+				getOrderStatusCount({
+					settlementMonth: settlementMonth
+				}).then((res) => {
+					if (res.data.monthUnpaid > 0) {
+						setSettlmentInfo(res.data)
+						this.preOrderStatus = res.data
+						this.showSettlmentUnpaid = true
+					}
+				})
+			},
+			//分享好友
+			onShareAppMessage() {
+				return {
+					title: '启运冻品', // 分享标题
+					path: '/pages/index/index', // 分享路径，注意要写正确的页面路径
+					imageUrl: '/static/qiyun_logo.png', // 分享图片的本地路径
+				}
+			},
+			//分享到朋友圈
+			onShareTimeline() {
+				return {
+					title: '启运冻品',
+					link: '/pages/index/index',
+					imageUrl: '/static/qiyun_logo.png',
+				}
+			},
+			// 搜索框点击跳转到搜索页面
+			searchClick() {
+				console.log('跳转')
+				uni.navigateTo({
+					url: '/pages/search/search'
+				})
+			},
+			// 获取轮播图
+			getBanner() {
+				getBannerList().then(res => {
+					res.data.list.forEach(item => {
+						if (item.imgUrl.slice(0, 4) !== 'http') {
+							item.imgUrl = config.baseUrl + "/" + item.imgUrl
+						}
+					})
+					this.banner = res.data.list;
+				})
+			},
+			// 获取首页分类
+			getHomeCategory() {
+				getHomeCategoryList().then(res => {
+					res.data.list.forEach(item => {
+						if (item.imgUrl.slice(0, 4) !== 'http') {
+							item.imgUrl = config.baseUrl + "/" + item.imgUrl
+						}
+					})
+					this.category = res.data.list
+					console.log('category', this.category);
+				})
+			},
+			// 切换标签页
+			onChangeGoodsTabs(e) {
+				this.goodsTabsId = e.detail.current
+			},
+			// 点击切换标签页
+			changeGoodsTabs(id) {
+				this.goodsTabsId = id
+			},
+			// 获取商品列表
+			// type = 1加载 其他为刷新
+			async getGoodsListData(tabId, type) {
+				const data = {
+					goodsArea: 0
+				}
+				if (type == 0) {
+					this.hotPage.page = 1
+					this.newPage.page = 1
+					this.hotPage.isMore = true
+					this.newPage.isMore = true
+					this.hotLoadMore = 'loadmore'
+					this.newLoadMore = 'loadmore'
+				}
+				if (tabId == 0) {
+					data.isHot = 1
+					data.page = this.hotPage.page
+					data.pageSize = this.hotPage.pageSize
+					this.hotPage.page++
+				} else if (tabId == 1) {
+					data.isNew = 1
+					data.page = this.newPage.page
+					data.pageSize = this.newPage.pageSize
+					this.newPage.page++
+				} else {
+					return false
+				}
+				const res = await getGoodsPageList(data)
+				if (res.code !== 0) {
+					return false
+				}
+				res.data.list.forEach(item => {
+					if (item.images[0] && item.images[0].url.slice(0, 4) !== 'http') {
+						item.images[0].url = config.baseUrl + "/" + item.images[0].url
+					}
+				})
+				console.log(res);
+				// 进行赋值并计算是否还有下一页
+				if (tabId == 0) { // 热门商品
+					this.hotPage.total = res.data.total
+					// 如果没有更多数据，则将isMore设置为false
+					if ((this.hotPage.page - 1) * this.hotPage.pageSize >= this.hotPage.total) {
+						console.log("没有更多了");
+						this.hotPage.isMore = false
+						this.hotLoadMore = 'nomore'
+					}
+					if (type == 1) {
+						this.goodsHotArr = [...this.goodsHotArr, ...res.data.list]
+					} else {
+						this.goodsHotArr = res.data.list
+					}
+				} else if (tabId == 1) { // 新品上市
+					this.newPage.total = res.data.total
+					// 如果没有更多数据，则将isMore设置为false
+					console.log('(this.newPage.page - 1) * this.newPage.pageSize >= this.newPage.total', (this.newPage
+						.page - 1) * this.newPage.pageSize, this.newPage.total);
+					if ((this.newPage.page - 1) * this.newPage.pageSize >= this.newPage.total) {
+						this.newPage.isMore = false
+						this.newLoadMore = 'nomore'
+					}
+					if (type == 1) {
+						this.goodsNewArr = [...this.goodsNewArr, ...res.data.list]
+					} else {
+						this.goodsNewArr = res.data.list
+					}
+				} else {
+					return false
+				}
+				return true
+			},
+			// 热门列表滑动距离
+			hotScrollTopHandle(e) {
+				// 会出现抖动
+				//this.hotScrollTop = e.detail.scrollTop.toFixed(0)
+			},
+			// 上新列表滑动距离
+			newScrollTopHandle(e) {
+				//this.newScrollTop = e.detail.scrollTop.toFixed(0)
+			},
+			// 返回列表的顶部
+			toTop() {
+				this.hotScrollTop = 0
+				this.newScrollTop = 0
+			},
+			// 下拉刷新
+			// type = 1热门 2 上新
+			async onRefresh() {
+				if (this.goodsTabsId == 0) {
+					this.hotTriggered = true;
+				} else if (this.goodsTabsId == 1) {
+					this.newTriggered = true;
+				} else {
+					return
+				}
+				const b = await this.getGoodsListData(this.goodsTabsId, 0)
+				if (b) {
+					this.$message(this.$refs.toast).success("刷新成功")
+				} else {
+					this.$message(this.$refs.toast).success("刷新失败")
+				}
+				this.hotTriggered = false;
+				this.newTriggered = false;
+			},
+			async hotScrollTolower(e) {
+				// 如果是在加载中就不执行或没有更多时
+				if (this.hotLoadMore == 'loading' || !this.hotPage.isMore) {
+					return
+				}
+				// 设置状态为加载中
+				this.hotLoadMore = 'loading'
+				await this.getGoodsListData(this.goodsTabsId, 1)
+				// 如果还有更多
+				if (this.hotPage.isMore) {
+					this.hotLoadMore = 'loadmore'
+				} else {
 					this.hotLoadMore = 'nomore'
 				}
-				if (type == 1) {
-					this.goodsHotArr = [...this.goodsHotArr, ...res.data.list]
-				} else {
-					this.goodsHotArr = res.data.list
+			},
+			async newScrollTolower(e) {
+				// 如果是在加载中就不执行或没有更多时
+				if (this.newLoadMore == 'loading' || !this.newPage.isMore) {
+					return
 				}
-			} else if (tabId == 1) { // 新品上市
-				this.newPage.total = res.data.total
-				// 如果没有更多数据，则将isMore设置为false
-				console.log('(this.newPage.page - 1) * this.newPage.pageSize >= this.newPage.total', (this.newPage.page - 1) * this.newPage.pageSize, this.newPage.total);
-				if ((this.newPage.page - 1) * this.newPage.pageSize >= this.newPage.total) {
-					this.newPage.isMore = false
+				// 设置状态为加载中
+				this.newLoadMore = 'loading'
+				await this.getGoodsListData(this.goodsTabsId, 1)
+				// 如果还有更多
+				if (this.newPage.isMore) {
+					this.newLoadMore = 'loadmore'
+				} else {
 					this.newLoadMore = 'nomore'
 				}
-				if (type == 1) {
-					this.goodsNewArr = [...this.goodsNewArr, ...res.data.list]
-				} else {
-					this.goodsNewArr = res.data.list
-				}
-			} else {
-				return false
-			}
-			return true
-		},
-		// 热门列表滑动距离
-		hotScrollTopHandle(e) {
-			// 会出现抖动
-			//this.hotScrollTop = e.detail.scrollTop.toFixed(0)
-		},
-		// 上新列表滑动距离
-		newScrollTopHandle(e) {
-			//this.newScrollTop = e.detail.scrollTop.toFixed(0)
-		},
-		// 返回列表的顶部
-		toTop() {
-			this.hotScrollTop = 0
-			this.newScrollTop = 0
-		},
-		// 下拉刷新
-		// type = 1热门 2 上新
-		async onRefresh() {
-			if (this.goodsTabsId == 0) {
-				this.hotTriggered = true;
-			} else if (this.goodsTabsId == 1) {
-				this.newTriggered = true;
-			} else {
-				return
-			}
-			const b = await this.getGoodsListData(this.goodsTabsId, 0)
-			if (b) {
-                this.$message(this.$refs.toast).success("刷新成功")
-			} else {
-                this.$message(this.$refs.toast).success("刷新失败")
-			}
-			this.hotTriggered = false;
-			this.newTriggered = false;
-		},
-		async hotScrollTolower(e) {
-			// 如果是在加载中就不执行或没有更多时
-			if (this.hotLoadMore == 'loading' || !this.hotPage.isMore) {
-				return
-			}
-			// 设置状态为加载中
-			this.hotLoadMore = 'loading'
-			await this.getGoodsListData(this.goodsTabsId, 1)
-			// 如果还有更多
-			if (this.hotPage.isMore) {
-				this.hotLoadMore = 'loadmore'
-			} else {
-				this.hotLoadMore = 'nomore'
-			}
-		},
-		async newScrollTolower(e) {
-			// 如果是在加载中就不执行或没有更多时
-			if (this.newLoadMore == 'loading' || !this.newPage.isMore) {
-				return
-			}
-			// 设置状态为加载中
-			this.newLoadMore = 'loading'
-			await this.getGoodsListData(this.goodsTabsId, 1)
-			// 如果还有更多
-			if (this.newPage.isMore) {
-				this.newLoadMore = 'loadmore'
-			} else {
-				this.newLoadMore = 'nomore'
-			}
-		},
-		// 跳转商品列表
-		toGoodsByCategory(categoryId) {
-			uni.navigateTo({
-				url: `/pages/goods/goods?categoryId=` + categoryId
-			})
-		},
-		// 跳转商品详情
-		toGoodsInfo(goods) {
-			uni.navigateTo({
-				url: `/pages/goods/goodsInfo?id=` + goods.ID
-			})
-		},
-		// 登陆成功
-		loginSuccess() {
-			this.loginSuspendShow = false
-		},
-		// 轮播图跳转
-		clickBanner(index) {
-			let b = this.banner[index]
-			if (b.type === 1) {
+			},
+			// 跳转商品列表
+			toGoodsByCategory(categoryId) {
 				uni.navigateTo({
-					url: b.toPath
+					url: `/pages/goods/goods?categoryId=` + categoryId
 				})
-			}
-		}
-	},
-}
+			},
+			// 跳转商品详情
+			toGoodsInfo(goods) {
+				uni.navigateTo({
+					url: `/pages/goods/goodsInfo?id=` + goods.ID
+				})
+			},
+			// 登陆成功
+			loginSuccess() {
+				this.loginSuspendShow = false
+			},
+			// 轮播图跳转
+			clickBanner(index) {
+				let b = this.banner[index]
+				if (b.type === 1) {
+					uni.navigateTo({
+						url: b.toPath
+					})
+				}
+			},
+			// 拨打电话
+			callPhone() {
+				console.log("callPhone " + this.relationPhone);
+			    uni.makePhoneCall({
+			        phoneNumber: this.relationPhone,
+			        success: (result) => {
+			        },
+			        fail: (error) => {
+			        }
+			    })
+			},
+		},
+	}
 </script>
 
 <style lang="scss">
-.goods-tabs {
-	margin: 0 auto;
-	text-align: center;
-	height: 16px;
-	background: #ffffff;
+	.goods-tabs {
+		margin: 0 auto;
+		text-align: center;
+		height: 16px;
+		background: #ffffff;
 
-	.goods-tabs-active {
-		width: 66px;
-		border-bottom: 4px solid #2979ff;
-		padding-bottom: 4px;
-		display: block;
+		.goods-tabs-active {
+			width: 66px;
+			border-bottom: 4px solid #2979ff;
+			padding-bottom: 4px;
+			display: block;
+		}
 	}
-}
+	
+	.modal-content {
+	    padding: 20px;
+	    text-align: center;
+	}
+	
+	.warning-icon {
+	    font-size: 40px;
+	    margin-bottom: 10px;
+	}
+	
+	.main-message {
+	    font-size: 18px;
+	    font-weight: bold;
+	    margin-bottom: 15px;
+	}
+	
+	.details {
+	    margin-bottom: 15px;
+	}
+	
+	.highlight {
+	    color: #ff6600;
+	    font-weight: bold;
+		margin: 0 4px;
+	}
+	
+	.contact-info {
+	    font-size: 14px;
+	}
+	
+	.phone-number {
+	    font-weight: bold;
+	    margin-top: 5px;
+	}
+
 </style>

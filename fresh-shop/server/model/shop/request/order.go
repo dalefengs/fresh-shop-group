@@ -17,5 +17,12 @@ type OrderSearch struct {
 	StartCancelTime   *time.Time `json:"startCancelTime" form:"startCancelTime"`
 	EndCancelTime     *time.Time `json:"endCancelTime" form:"endCancelTime"`
 	SettlementMonth   *time.Time `json:"settlementMonth" form:"settlementMonth"`
+	UserPhone         string     `json:"userPhone" form:"userPhone"`
 	request.PageInfo
+}
+
+type BatchSettlement struct {
+	UserId          uint       `json:"userId" form:"userId"`
+	Payment         *int       `json:"payment" form:"payment"`
+	SettlementMonth *time.Time `json:"settlementMonth" form:"settlementMonth"`
 }

@@ -15,6 +15,7 @@ import (
 	"fresh-shop/server/service/wechat"
 	"fresh-shop/server/utils"
 	"github.com/gin-gonic/gin"
+	orderPay "github.com/silenceper/wechat/v2/pay/order"
 	"gorm.io/gorm"
 	"strconv"
 	"strings"
@@ -26,7 +27,7 @@ type OrderService struct {
 
 // CreateOrder 创建Order记录
 // Author [dalefeng](https://github.com/dalefeng)
-func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *systemReq.CustomClaims, clientIP string) (resp *response.CreateOrderResp, err error) {
+func (orderService *OrderService) CreateOrder(order shop.Order, clientIP string) (resp *response.CreateOrderResp, err error) {
 	var user sysModel.SysUser
 	if err := global.DB.Where("id = ?", order.UserId).First(&user).Error; err != nil {
 		global.SugarLog.Errorf("创建订单时查询用户信息异常, err:%v \n", err)
@@ -174,7 +175,7 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 	} else { // 普通商品
 		order.GoodsArea = utils.Pointer(0)
 	}
-	if userClaims.AuthorityId == 1001 {
+	if user.AuthorityId == 1001 {
 		// 月结
 		order.Status = utils.Pointer(1)         // 已付款状态
 		order.SettlementType = utils.Pointer(1) // 月结未付款
@@ -255,18 +256,20 @@ func (orderService *OrderService) CreateOrder(order shop.Order, userClaims *syst
 
 	// 提交事务
 	txDB.Commit()
-	//jsApiData := &orderPay.Config{}
-	//if order.PointGoodsId == 0 {
-	//	// 发起 JSAIP 支付返回参数
-	//	err, jsApiData = wechat.JSAPIPay(userClaims.OpenId, order.OrderSn, order.ID, order.Total, clientIP)
-	//	if err != nil {
-	//		global.SugarLog.Errorf("log:%s, 微信 JsApi 发起调用异常, err: %v \n", log, err)
-	//		return
-	//	}
-	//}
+	jsApiData := &orderPay.Config{}
+	if user.AuthorityId == 1000 {
+		if order.PointGoodsId == 0 {
+			// 发起 JSAIP 支付返回参数
+			err, jsApiData = wechat.JSAPIPay(user.OpenId, order.OrderSn, order.ID, order.Total, clientIP)
+			if err != nil {
+				global.SugarLog.Errorf("log:%s, 微信 JsApi 发起调用异常, err: %v \n", log, err)
+				return
+			}
+		}
+	}
 	resp = &response.CreateOrderResp{
 		Order: order,
-		//Pay:   *jsApiData,
+		Pay:   *jsApiData,
 	}
 	return
 }
@@ -360,6 +363,36 @@ func (orderService *OrderService) UpdateOrder(order shop.Order) (err error) {
 	return err
 }
 
+// BatchSettlement 批量结算
+// Author [dalefeng](https://github.com/dalefeng)
+func (orderService *OrderService) BatchSettlement(settlement shopReq.BatchSettlement) (err error) {
+	user, err := common.GetUserInfo(settlement.UserId)
+	if err != nil {
+		return errors.New("用户不存在")
+	}
+	if settlement.SettlementMonth == nil {
+		return errors.New("结算月份不能为空")
+	}
+	db := global.DB.Model(&shop.Order{}).
+		Where("user_id = ?", user.ID).
+		Where("status > 0").
+		Where("status_cancel = 0").
+		Where("settlement_type = 1").
+		Where("status_refund = 0")
+	// 获取当前月份的第一天
+	firstDay := time.Date(settlement.SettlementMonth.Year(), settlement.SettlementMonth.Month(), 1, 0, 0, 0, 0, settlement.SettlementMonth.Location())
+	// 获取下个月的第一天
+	nextMonth := firstDay.AddDate(0, 1, 0)
+	// 获取当前月份的最后一天（下个月第一天减去一天）
+	lastDay := nextMonth.Add(-time.Second)
+	db = db.Where("created_at BETWEEN ? AND ?", firstDay, lastDay)
+	err = db.Updates(map[string]interface{}{
+		"settlement_type": 2,
+		"payment":         settlement.Payment,
+	}).Error
+	return err
+}
+
 // GetOrder 根据id获取Order记录
 // Author [dalefeng](https://github.com/dalefeng)
 func (orderService *OrderService) GetOrder(id uint) (order shop.Order, err error) {
@@ -376,12 +409,22 @@ func (orderService *OrderService) GetOrder(id uint) (order shop.Order, err error
 
 // FindUserOrderStatus 获取用户订单中数量
 // Author [dalefeng](https://github.com/dalefeng)
-func (orderService *OrderService) FindUserOrderStatus(userId uint) (resp shopResp.OrderStatusCountResponse, err error) {
+func (orderService *OrderService) FindUserOrderStatus(userId uint, settlementMonth time.Time) (resp shopResp.OrderStatusCountResponse, err error) {
 	err = global.DB.Debug().
 		Table("shop_order").
 		Select("COUNT(CASE WHEN status = 0 and status_cancel = 0 THEN 1 ELSE null END ) as unpaid,COUNT(CASE WHEN status = 1 and status_cancel = 0 and status_refund = 0 THEN 1 ELSE null END ) as delivered,COUNT(CASE WHEN status = 2 and status_cancel = 0 and status_refund = 0 THEN 1 ELSE null END ) as shipped,COUNT(CASE WHEN status = 3 and status_cancel = 0 and status_refund = 0 THEN 1 ELSE null END) as success").
 		Where("user_id = ?", userId).
 		Scan(&resp).Error
+	info := shopReq.OrderSearch{}
+	info.UserId = utils.Pointer(int(userId))
+	if settlementMonth.IsZero() {
+		info.SettlementMonth = utils.Pointer(time.Now()) // 当前月
+	} else {
+		info.SettlementMonth = &settlementMonth
+	}
+	statistics, err := orderService.GetOrderMonthStatistics(info)
+	resp.OrderMonthStatistics = statistics
+	resp.UserId = userId
 	return
 }
 
@@ -401,12 +444,22 @@ func (orderService *OrderService) OrderStatus(id uint) (status gin.H, err error)
 // GetOrderInfoList 分页获取Order记录
 // Author [dalefeng](https://github.com/dalefeng)
 func (orderService *OrderService) GetOrderInfoList(info shopReq.OrderSearch) (list []shop.Order, total int64, err error) {
+	var user sysModel.SysUser
+
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	// 创建db
 	db := global.DB.Debug().Model(&shop.Order{}).Preload("OrderDetails").Preload("OrderDelivery").Joins("OrderReturn")
 	var orders []shop.Order
 	// 如果有条件搜索 下方会自动创建搜索语句
+
+	// 用户手机号精确搜索
+	if info.UserPhone != "" {
+		if errors.Is(global.DB.Where("phone = ?", info.UserPhone).First(&user).Error, gorm.ErrRecordNotFound) {
+			return list, 0, errors.New(info.UserPhone + "用户不存在")
+		}
+		db = db.Where("shop_order.user_id = ?", user.ID)
+	}
 
 	if info.Status != nil {
 		if *info.Status == 0 || *info.Status == 1 || *info.Status == 2 || *info.Status == 3 { // 未付款
@@ -420,7 +473,11 @@ func (orderService *OrderService) GetOrderInfoList(info shopReq.OrderSearch) (li
 		db = db.Where("shop_order.user_id = ?", info.UserId)
 	}
 	if info.SettlementType != nil {
-		db = db.Where("shop_order.settlement_type = ?", info.SettlementType)
+		if *info.SettlementType == -1 {
+			db = db.Where("shop_order.settlement_type in (1,2)") // 所有月结
+		} else {
+			db = db.Where("shop_order.settlement_type = ?", info.SettlementType)
+		}
 	}
 	if info.SettlementMonth != nil {
 		// 获取当前月份的第一天
@@ -470,4 +527,82 @@ func (orderService *OrderService) GetOrderInfoList(info shopReq.OrderSearch) (li
 
 	err = db.Limit(limit).Offset(offset).Find(&orders).Error
 	return orders, total, err
+}
+
+// GetOrderMonthStatistics 获取月结统计
+// Author [dalefeng](https://github.com/dalefeng)
+func (orderService *OrderService) GetOrderMonthStatistics(info shopReq.OrderSearch) (resp shopResp.OrderMonthStatistics, err error) {
+
+	// 创建db
+	db := global.DB.Debug().Table("shop_order")
+	//结算类型(0现结 1月结未结账 2月结已结账)
+	db = db.Select(`
+count(1) as month_total,
+count(case settlement_type when 1 then 1 else null end) as month_unpaid,
+count(case settlement_type when 2 then 1 else null end) as month_paid,
+sum(total) as settlement_total,
+sum(case settlement_type when 1 then total else 0 end) as settlement_unpaid,
+sum(case settlement_type when 2 then total else 0 end) as settlement_paid
+`)
+
+	db = db.Where("goods_area = 0 and status > 0  and status_cancel = 0 and status_refund = 0 and settlement_type != 0")
+
+	var user sysModel.SysUser
+	if info.UserPhone != "" {
+		err := global.DB.Where("phone = ?", info.UserPhone).First(&user).Error
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return resp, errors.New(info.UserPhone + "用户不存在")
+		} else if err != nil {
+			return resp, err
+		}
+		info.UserId = utils.Pointer(int(user.ID))
+	}
+
+	if info.UserId != nil {
+		db = db.Where("user_id = ?", info.UserId)
+	}
+
+	if info.SettlementMonth != nil {
+		// 获取当前月份的第一天
+		firstDay := time.Date(info.SettlementMonth.Year(), info.SettlementMonth.Month(), 1, 0, 0, 0, 0, info.SettlementMonth.Location())
+		// 获取下个月的第一天
+		nextMonth := firstDay.AddDate(0, 1, 0)
+		// 获取当前月份的最后一天（下个月第一天减去一天）
+		lastDay := nextMonth.Add(-time.Second)
+		db = db.Where("created_at BETWEEN ? AND ?", firstDay, lastDay)
+		resp.Month = info.SettlementMonth.Format("1")
+	}
+	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
+		db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
+	}
+	if info.OrderSn != "" {
+		db = db.Where("order_sn LIKE ?", "%"+info.OrderSn+"%")
+	}
+	if info.ShipmentName != "" {
+		db = db.Where("shipment_name LIKE ?", "%"+info.ShipmentName+"%")
+	}
+	if info.ShipmentMobile != "" {
+		db = db.Where("shipment_mobile LIKE ?", "%"+info.ShipmentMobile+"%")
+	}
+	if info.ShipmentAddress != "" {
+		db = db.Where("shipment_address LIKE ?", "%"+info.ShipmentAddress+"%")
+	}
+
+	if info.StartShipmentTime != nil && info.EndShipmentTime != nil {
+		db = db.Where("shipment_time BETWEEN ? AND ? ", info.StartShipmentTime, info.EndShipmentTime)
+	}
+	if info.StartReceiveTime != nil && info.EndReceiveTime != nil {
+		db = db.Where("receive_time BETWEEN ? AND ? ", info.StartReceiveTime, info.EndReceiveTime)
+	}
+	if info.StartCancelTime != nil && info.EndCancelTime != nil {
+		db = db.Where("cancel_time BETWEEN ? AND ? ", info.StartCancelTime, info.EndCancelTime)
+	}
+
+	err = db.Find(&resp).Error
+
+	if info.UserId != nil {
+		resp.UserId = user.ID
+	}
+
+	return resp, err
 }

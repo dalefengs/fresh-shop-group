@@ -8,7 +8,14 @@
             format="YYYY-MM"
             type="month"
             placeholder="请选择结算月"
+            @change="()=>{getTableData()}"
           />
+        </el-form-item>
+        <el-form-item label="月结状态" prop="settlementType">
+          <el-select v-model="searchInfo.settlementType" clearable placeholder="请选择" @clear="()=>{searchInfo.settlementType=undefined}">
+            <el-option label="全部月结" :value="-1" />
+            <el-option v-for="(item,key) in settlementTypeOptions" :key="key" :label="item.label" :value="item.value" />
+          </el-select>
         </el-form-item>
         <el-form-item label="订单状态" prop="status">
           <el-select v-model="searchInfo.status" clearable placeholder="请选择" @clear="()=>{searchInfo.status=undefined}">
@@ -21,30 +28,34 @@
         <el-form-item label="收货人姓名">
           <el-input v-model="searchInfo.shipmentName" placeholder="搜索条件" />
         </el-form-item>
-        <el-form-item label="收货人手机号">
-          <el-input v-model="searchInfo.shipmentMobile" placeholder="搜索条件" />
-        </el-form-item>
-        <el-form-item label="收获人地址">
-          <el-input v-model="searchInfo.shipingAddress" placeholder="搜索条件" />
-        </el-form-item>
+<!--        <el-form-item label="收货人手机号">-->
+<!--          <el-input v-model="searchInfo.shipmentMobile" placeholder="搜索条件" />-->
+<!--        </el-form-item>-->
+<!--        <el-form-item label="收获人地址">-->
+<!--          <el-input v-model="searchInfo.shipingAddress" placeholder="搜索条件" />-->
+<!--        </el-form-item>-->
         <el-form-item label="支付方式" prop="payment">
           <el-select v-model="searchInfo.payment" clearable placeholder="请选择" @clear="()=>{searchInfo.payment=undefined}">
             <el-option v-for="(item,key) in paymentOptions" :key="key" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
-        <el-form-item label="发货时间">
-          <el-date-picker v-model="searchInfo.startShipmentTime" type="datetime" placeholder="搜索条件（起）" />
+<!--        <el-form-item label="发货时间">-->
+<!--          <el-date-picker v-model="searchInfo.startShipmentTime" type="datetime" placeholder="搜索条件（起）" />-->
+<!--          —-->
+<!--          <el-date-picker v-model="searchInfo.endShipmentTime" type="datetime" placeholder="搜索条件（止）" />-->
+<!--        </el-form-item>-->
+        <el-form-item label="下单时间">
+          <el-date-picker v-model="searchInfo.startCreatedAt" type="datetime" placeholder="搜索条件（起）" />
           —
-          <el-date-picker v-model="searchInfo.endShipmentTime" type="datetime" placeholder="搜索条件（止）" />
-
+          <el-date-picker v-model="searchInfo.endCreatedAt" type="datetime" placeholder="搜索条件（止）" />
         </el-form-item>
-        <el-form-item label="收货时间">
+<!--        <el-form-item label="收货时间">-->
 
-          <el-date-picker v-model="searchInfo.startReceiveTime" type="datetime" placeholder="搜索条件（起）" />
-          —
-          <el-date-picker v-model="searchInfo.endReceiveTime" type="datetime" placeholder="搜索条件（止）" />
+<!--          <el-date-picker v-model="searchInfo.startReceiveTime" type="datetime" placeholder="搜索条件（起）" />-->
+<!--          —-->
+<!--          <el-date-picker v-model="searchInfo.endReceiveTime" type="datetime" placeholder="搜索条件（止）" />-->
 
-        </el-form-item>
+<!--        </el-form-item>-->
 <!--        <el-form-item label="取消时间">-->
 
 <!--          <el-date-picker v-model="searchInfo.startCancelTime" type="datetime" placeholder="搜索条件（起）" />-->
@@ -58,19 +69,40 @@
         </el-form-item>
       </el-form>
     </div>
+    <div class="gva-search-box" style="padding-top: 40px">
+      <div>
+        <el-form :inline="true" :model="searchInfo" class="demo-form-inline" @keyup.enter="onSubmit">
+          <el-form-item label="用户手机号">
+            <el-input v-model="searchInfo.userPhone" placeholder="用户注册手机号" />
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" icon="search" @click="onSubmit">查询</el-button>
+            <el-button type="primary" :disabled="(searchInfo.userPhone.length !== 11) || (searchInfo.userPhone.length === 11 && tableData.length === 0)" @click="showUserStatistics">一键结清</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+      <br>
+      <div class="statistics">
+        当前结算月：{{ formatYearMonth(searchInfo.settlementMonth) }}
+      </div>
+      <div class="statistics">
+        月结状态：
+        <span v-if="orderStatistics.settlementUnpaid > 0" style="color:#e8b60c;font-weight: bold"> 未结清</span>
+        <span v-else style="color:#19be6b;font-weight: bold"> 已结清</span>
+      </div>
+      <div class="statistics">
+        <span>当月总订单数：{{ orderStatistics.monthTotal }} 单</span>
+        <span>当月已结订单数：{{ orderStatistics.monthPaid }} 单</span>
+        <span>当月未结订单数：{{ orderStatistics.monthUnpaid }} 单</span>
+      </div>
+      <div class="statistics">
+        <span>当月总金额：{{ orderStatistics.settlementTotal }} 元</span>
+        <span>当月已结金额：{{ orderStatistics.settlementPaid }} 元</span>
+        <span>当月未结金额：{{ orderStatistics.settlementUnpaid }} 元</span>
+      </div>
+
+    </div>
     <div class="gva-table-box">
-      <!--      <div class="gva-btn-list">
-        <el-popover v-model:visible="deleteVisible" placement="top" width="160">
-          <p>确定要删除吗？</p>
-          <div style="text-align: right; margin-top: 8px;">
-            <el-button type="primary" link @click="deleteVisible = false">取消</el-button>
-            <el-button type="primary" @click="onDelete">确定</el-button>
-          </div>
-          <template #reference>
-            <el-button icon="delete" style="margin-left: 10px;" :disabled="!multipleSelection.length" @click="deleteVisible = true">删除</el-button>
-          </template>
-        </el-popover>
-      </div>-->
       <el-table
         ref="multipleTable"
         style="width: 100%"
@@ -86,7 +118,10 @@
                 订单号：<span style="color: #4d70ff">{{ scope.row.orderSn }}</span>
               </div><br>
               <span>编号：{{ scope.row.ID }}</span><el-divider direction="vertical" />
-              <span>订单类型：{{ filterDict(scope.row.goodsArea,goods_areaOptions) }}</span> <br>
+              <span>月结状态：
+                <span v-if="scope.row.settlementType === 1" style="color:#e8b60c;font-weight: bold"> {{ filterDict(scope.row.settlementType,settlementTypeOptions) }}</span>
+                <span v-else-if="scope.row.settlementType === 2" style="color:#19be6b;font-weight: bold"> {{ filterDict(scope.row.settlementType,settlementTypeOptions) }}</span>
+              </span> <br>
 
               <div style="display:inline-block">
                 订单状态：
@@ -240,11 +275,6 @@
         <el-form-item label="订单编号:" prop="orderSn">
           <el-input v-model="formData.orderSn" disabled="disabled" :clearable="true" placeholder="请输入" />
         </el-form-item>
-        <el-form-item label="所属区域:" prop="goodsArea">
-          <el-select v-model="formData.goodsArea" placeholder="请选择" disabled="disabled" style="width:100%" :clearable="true">
-            <el-option v-for="(item,key) in goods_areaOptions" :key="key" :label="item.label" :value="item.value" />
-          </el-select>
-        </el-form-item>
         <el-form-item label="收货人姓名:" prop="shipmentName">
           <el-input v-model="formData.shipmentName" :clearable="true" placeholder="请输入" />
         </el-form-item>
@@ -267,7 +297,7 @@
           <el-input-number v-model="formData.finish" style="width:100%" :precision="2" :clearable="true" />
         </el-form-item>
         <el-form-item label="支付方式:" prop="payment">
-          <el-select v-model="formData.payment" disabled="disabled" placeholder="请选择" style="width:100%" :clearable="true">
+          <el-select v-model="formData.payment" placeholder="请选择" style="width:100%" :clearable="true">
             <el-option v-for="(item,key) in paymentOptions" :key="key" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
@@ -279,6 +309,11 @@
         </el-form-item>
         <el-form-item label="留言:" prop="remarks">
           <el-input v-model="formData.remarks" :clearable="true" placeholder="请输入" />
+        </el-form-item>
+        <el-form-item label="月结状态:" prop="settlementType">
+          <el-select v-model="formData.settlementType" placeholder="请选择" style="width:100%" :clearable="true">
+            <el-option v-for="(item,key) in settlementTypeOptions" :key="key" :label="item.label" :value="item.value" />
+          </el-select>
         </el-form-item>
         <el-form-item label="订单状态:" prop="status">
           <el-select v-model="formData.status" placeholder="请选择" style="width:100%" :clearable="true">
@@ -400,6 +435,50 @@
         </div>
       </template>
     </el-dialog>
+
+    <!--  结算详情  -->
+    <el-dialog v-model="changeUserStatistics" :title="'用户' + searchInfo.userPhone + '  ' + formatYearMonth(searchInfo.settlementMonth) + '月结算详情'" width="800px">
+
+      <el-form :model="settlementForm" style="color: #333333">
+        <el-form-item label="用户手机号" label-width="120px">
+          {{ searchInfo.userPhone }}
+        </el-form-item>
+        <el-form-item label="结算月份" label-width="120px">
+          {{ formatYearMonth(searchInfo.settlementMonth) }}
+        </el-form-item>
+        <el-form-item label="结算详情" label-width="120px">
+          <div class="statistics-from">
+            <span>当月总订单数：{{ orderStatistics.monthTotal }} 单</span>
+            <span>当月已结订单数：{{ orderStatistics.monthPaid }} 单</span>
+            <span>当月未结订单数：{{ orderStatistics.monthUnpaid }} 单</span>
+          </div>
+          <div class="statistics-from">
+            <span>当月总金额：{{ orderStatistics.settlementTotal }} 元</span>
+            <span>当月已结金额：{{ orderStatistics.settlementPaid }} 元</span>
+            <span>当月未结金额：{{ orderStatistics.settlementUnpaid }} 元</span>
+          </div>
+        </el-form-item>
+        <el-form-item label="支付方式" prop="payment">
+          <el-select v-model="settlementForm.payment" clearable placeholder="请选择" @clear="()=>{searchInfo.payment=undefined}">
+            <el-option v-for="(item,key) in paymentOptions" :key="key" :label="item.label" :value="item.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="应缴金额" label-width="120px">
+          <span style="color: #19be6b">{{ orderStatistics.settlementUnpaid }} 元</span>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button
+            @click="changeUserStatistics = false"
+          >取消</el-button>
+          <el-button
+            type="primary"
+            @click="batchSettlementConfirm"
+          >已收款，确认结算</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -415,7 +494,9 @@ import {
   deleteOrder,
   updateOrder,
   findOrder,
-  getOrderList
+  getOrderList,
+  getOrderMonthStatistics,
+  batchSettlement
 } from '@/api/order'
 
 import { getUserDeliveryAllList } from '@/api/userDelivery'
@@ -434,7 +515,13 @@ const paymentOptions = ref([])
 const orderStatusOptions = ref([])
 const GoodsStatusCancelOptions = ref([])
 const OrderStatusRefundOptions = ref([])
+const settlementTypeOptions = ref([])
 const goods_areaOptions = ref([])
+const changeUserStatistics = ref(false)
+const settlementForm = ref({
+  userPhone: '',
+  payment: 5
+})
 const formData = ref({
   userId: 0,
   goodsId: 0,
@@ -459,6 +546,7 @@ const formData = ref({
   shipmentTime: new Date(),
   receiveTime: new Date(),
   cancelTime: new Date(),
+  userPhone: '',
 })
 const route = useRouter()
 watch(
@@ -485,10 +573,15 @@ const tableDetailData = ref([])
 const searchInfo = ref({})
 
 searchInfo.value.settlementMonth = new Date()
+searchInfo.value.userPhone = '18169630262'
+
+// 月结
+const orderStatistics = ref({})
 
 // 重置
 const onReset = () => {
   searchInfo.value = {}
+  searchInfo.value.settlementMonth = new Date()
   getTableData()
 }
 
@@ -513,13 +606,44 @@ const handleCurrentChange = (val) => {
 // 查询
 const getTableData = async() => {
   searchInfo.value.goodsArea = route.currentRoute.value.query.goodsArea
-  searchInfo.value.settlementType = route.currentRoute.value.query.settlementType
+  if (searchInfo.value.userPhone && searchInfo.value.userPhone.length !== 11) {
+    ElMessage({
+      type: 'error',
+      message: '请输入正确的11位用户手机号'
+    })
+    return
+  }
+  if (!searchInfo.value.settlementType) {
+    searchInfo.value.settlementType = -1
+  }
+  if (searchInfo.value.settlementMonth) {
+    const currentDate = new Date(searchInfo.value.settlementMonth.toDateString())
+    currentDate.setHours(currentDate.getHours() + 8)
+    searchInfo.value.settlementMonth = currentDate
+  }
   const table = await getOrderList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
   if (table.code === 0) {
     tableData.value = table.data.list
     total.value = table.data.total
     page.value = table.data.page
     pageSize.value = table.data.pageSize
+  } else {
+    return false
+  }
+  await getOrderMonthStatisticsInfo()
+  return table
+}
+
+// 月结统计
+const getOrderMonthStatisticsInfo = async() => {
+  const result = await getOrderMonthStatistics({ ...searchInfo.value })
+  if (result.code === 0) {
+    orderStatistics.value = result.data
+  } else {
+    ElMessage({
+      type: 'error',
+      message: '获取月结统计失败'
+    })
   }
 }
 
@@ -533,6 +657,7 @@ const setOptions = async() => {
   orderStatusOptions.value = await getDictFunc('orderStatus')
   GoodsStatusCancelOptions.value = await getDictFunc('GoodsStatusCancel')
   OrderStatusRefundOptions.value = await getDictFunc('OrderStatusRefund')
+  settlementTypeOptions.value = await getDictFunc('settlementType')
   goods_areaOptions.value = await getDictFunc('goods_area')
 }
 
@@ -776,6 +901,56 @@ const showOrderShipment = async(row, type) => {
     }, 500)
   }
 }
+
+const batchSettlementConfirm = async() => {
+  const res = await batchSettlement({
+    userId: orderStatistics.value.userId,
+    payment: settlementForm.value.payment,
+    settlementMonth: searchInfo.value.settlementMonth,
+  })
+  if (res.code !== 0) {
+    ElMessage({
+      type: 'error',
+      message: '结算失败，请重试',
+    })
+    return false
+  }
+  ElMessage({
+    type: 'success',
+    message: searchInfo.value.userPhone + '用户结算成功',
+  })
+  changeUserStatistics.value = false
+  await getTableData()
+}
+
+const showUserStatistics = async() => {
+  const res = await getTableData()
+  if (res.code !== 0) {
+    return false
+  }
+  if (res.data.list.length === 0) {
+    ElMessage({
+      type: 'warning',
+      message: searchInfo.value.userPhone + '用户' + formatYearMonth(searchInfo.value.settlementMonth) + '月暂无订单',
+    })
+    return
+  }
+  if (orderStatistics.value.settlementUnpaid === 0) {
+    ElMessage({
+      type: 'success',
+      message: searchInfo.value.userPhone + '用户' + formatYearMonth(searchInfo.value.settlementMonth) + '月暂无未付款订单',
+    })
+    return
+  }
+  changeUserStatistics.value = true
+}
+
+const formatYearMonth = (d) => {
+  const date = new Date(d)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  return `${year}-${month}`
+}
 </script>
 
 <style lang="scss">
@@ -818,4 +993,22 @@ const showOrderShipment = async(row, type) => {
   }
 }
 
+.statistics {
+  margin-left: 18px;
+  margin-bottom: 40px;
+  font-size: 16px;
+  color: #333333;
+  span {
+    display: inline-block;
+    width: 220px;
+  }
+}
+.statistics-from {
+  font-size: 15px;
+  color: #333333;
+  span {
+    display: inline-block;
+    width: 180px;
+  }
+}
 </style>

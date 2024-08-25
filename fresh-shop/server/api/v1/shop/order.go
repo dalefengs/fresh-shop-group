@@ -10,6 +10,7 @@ import (
 	"fresh-shop/server/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"time"
 )
 
 type OrderApi struct {
@@ -39,8 +40,7 @@ func (orderApi *OrderApi) CreateOrder(c *gin.Context) {
 	}
 	userId := utils.GetUserID(c)
 	order.UserId = utils.Pointer(int(userId))
-	userClaims := utils.GetUserInfo(c)
-	if orderResp, err := orderService.CreateOrder(order, userClaims, c.ClientIP()); err != nil {
+	if orderResp, err := orderService.CreateOrder(order, c.ClientIP()); err != nil {
 		global.Log.Error("创建失败!", zap.Error(err))
 		response.FailWithMessage(err.Error(), c)
 	} else {
@@ -175,6 +175,30 @@ func (orderApi *OrderApi) UpdateOrder(c *gin.Context) {
 	}
 }
 
+// BatchSettlement 批量结算用户
+// @Tags Order
+// @Summary 批量结算用户
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body shop.Order true "批量结算用户"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"更新成功"}"
+// @Router /order/batchSettlement [post]
+func (orderApi *OrderApi) BatchSettlement(c *gin.Context) {
+	var settlement shopReq.BatchSettlement
+	err := c.ShouldBindJSON(&settlement)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if err := orderService.BatchSettlement(settlement); err != nil {
+		global.Log.Error("更新失败!", zap.Error(err))
+		response.FailWithMessage(err.Error(), c)
+	} else {
+		response.OkWithMessage("更新成功", c)
+	}
+}
+
 // FindOrder 用id查询Order
 // @Tags Order
 // @Summary 用id查询Order
@@ -209,8 +233,18 @@ func (orderApi *OrderApi) FindOrder(c *gin.Context) {
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"查询成功"}"
 // @Router /order/findUserOrderStatus [get]
 func (orderApi *OrderApi) FindUserOrderStatus(c *gin.Context) {
+	settlementMonthStr := c.Query("settlementMonth")
+	var settlementMonth time.Time
+	var err error
+	if settlementMonthStr != "" {
+		// 格式化为时间
+		settlementMonth, err = time.Parse("2006-01-02 15:04:05", settlementMonthStr)
+		if err != nil {
+			response.FailWithMessage("时间格式错误", c)
+		}
+	}
 	userId := utils.GetUserID(c)
-	if reorder, err := orderService.FindUserOrderStatus(userId); err != nil {
+	if reorder, err := orderService.FindUserOrderStatus(userId, settlementMonth); err != nil {
 		global.Log.Error("查询失败!", zap.Error(err))
 		response.FailWithMessage("查询失败", c)
 	} else {
@@ -264,7 +298,7 @@ func (orderApi *OrderApi) GetOrderList(c *gin.Context) {
 	}
 	if list, total, err := orderService.GetOrderInfoList(pageInfo); err != nil {
 		global.Log.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败", c)
+		response.FailWithMessage(err.Error(), c)
 	} else {
 		response.OkWithDetailed(response.PageResult{
 			List:     list,
@@ -272,6 +306,30 @@ func (orderApi *OrderApi) GetOrderList(c *gin.Context) {
 			Page:     pageInfo.Page,
 			PageSize: pageInfo.PageSize,
 		}, "获取成功", c)
+	}
+}
+
+// GetOrderMonthStatistics 获取月结统计
+// @Tags Order
+// @Summary 获取月结统计
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query shopReq.OrderSearch true "获取月结统计"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /order/GetOrderMonthStatistics [get]
+func (orderApi *OrderApi) GetOrderMonthStatistics(c *gin.Context) {
+	var pageInfo shopReq.OrderSearch
+	err := c.ShouldBindQuery(&pageInfo)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if resp, err := orderService.GetOrderMonthStatistics(pageInfo); err != nil {
+		global.Log.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage(err.Error(), c)
+	} else {
+		response.OkWithData(resp, c)
 	}
 }
 

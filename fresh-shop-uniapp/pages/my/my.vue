@@ -29,8 +29,11 @@
 						</view>
 					</view>
 					<view class="king-flex" v-if="role.authorityId === 1001">
+						<view class="integral king-mr-5">
+						  {{orderStatusCount.month}}月未结：{{ orderStatusCount ? orderStatusCount.monthUnpaid : 0 }} 单
+						</view>
 						<view class="integral">
-						  当月未结：{{ point ? point : 0 }} 元
+						  未结金额：{{ orderStatusCount ? orderStatusCount.settlementUnpaid : 0 }} 元
 						</view>
 					</view>
                 </view>
@@ -130,7 +133,8 @@ import Tabbar from '@/components/tabbar/tabbar.vue'
 import loginPop from '@/components/loginPop/loginPop.vue'
 import {getUserInfo, setSelfInfo, getUnlimitedQRCodeImg} from "@/api/user";
 import {getOrderStatusCount} from "@/api/order";
-import {getUser, getToken, setUser, setToken, setOpenId, getRole, setRole} from '@/store/storage.js'
+import {getUser, getToken, setUser, setToken, setOpenId, getRole, setRole, setSettlmentInfo} from '@/store/storage.js'
+import {parseDateStr} from "@/utils/date";
 import config from '@/config/config.js'
 export default {
     components: {
@@ -201,9 +205,23 @@ export default {
 	            this.point = res.data.point
                 setUser(this.user)
 				setRole(this.role)
-                // 获取订单状态数量
-                const orderStatusRes = await getOrderStatusCount()
-                this.orderStatusCount = orderStatusRes.data
+				
+				// 先获取上月未结，在获取本月
+				const date = new Date()
+				date.setMonth(date.getMonth() - 1)
+				const settlementMonth = parseDateStr(date.toString())
+				const preOrderStatusRes = await getOrderStatusCount({settlementMonth: settlementMonth})
+				if (preOrderStatusRes.data.monthUnpaid > 0) {
+					this.orderStatusCount = preOrderStatusRes.data
+					setSettlmentInfo(this.orderStatusCount)
+				} else {
+					// 获取当月未结的订单状态数量
+					const orderStatusRes = await getOrderStatusCount()
+					this.orderStatusCount = orderStatusRes.data
+					setSettlmentInfo({})
+				}
+				
+				
                 console.log('this.orderStatusCount', this.orderStatusCount)
             }
         },
@@ -365,8 +383,8 @@ export default {
 
     .face {
       flex-shrink: 0;
-      width: 20vw;
-      height: 20vw;
+      width: 18vw;
+      height: 18vw;
       margin-top: 6px;
 
       image {

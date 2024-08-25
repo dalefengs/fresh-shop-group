@@ -77,7 +77,9 @@
             </view>
             <view class="order-info">
                 <text class="order-left">支付状态：</text>
-                <text class="order-right">{{ order.status > 0 ? '已支付' : '未支付' }}</text>
+                <text class="order-right" v-if="order.settlementType === 1">月结</text>
+				<text class="order-right" v-else>{{ order.status > 0 ? '已支付' : '未支付' }}</text>
+				
             </view>
             <view class="order-info">
                 <text class="order-left">下单时间：</text>
@@ -122,11 +124,11 @@
             <view class="menu-btn" v-if="order.return && order.return.ID">
                 <u-button type="primary" :customStyle="menuBtnStyle" @click="confirmOrder">售后详情</u-button>
             </view>
-<!--            <view class="menu-btn" v-if="order.status === 2">-->
-<!--                <u-button type="primary" :customStyle="menuBtnStyle" @click="() => confirmShow = true">确认收货</u-button>-->
-<!--            </view>-->
+           <view class="menu-btn" v-if="order.status === 2">
+               <u-button type="primary" :customStyle="menuBtnStyle" @click="() => confirmShow = true">确认收货</u-button>
+           </view>
             <view class="menu-btn" v-if="order.status === 0 && order.statusCancel === 0">
-                <u-button type="primary" :customStyle="menuBtnStyle" @click="goPay">联系商家</u-button>
+                <u-button type="primary" :customStyle="menuBtnStyle" @click="goPay">立即付款</u-button>
             </view>
         </view>
         <u-toast ref="toast" style="z-index: 9999"></u-toast>
@@ -237,91 +239,88 @@ export default {
         },
         // 订单提交
         async goPay() {
-            // const res = await orderPay({
-            //     ID: this.orderId
-            // }, this.$refs.toast)
-            // if (res.code !== 0) {
-            //     return false
-            // }
-            // // if (!res.data.pay) {
-            // //     this.$message(this.$refs.toast).error("交易失败，请重试")
-            // //     return false
-            // // }
-            // // this.toPay(res.data.pay, res.data.order)
-			// //直接提交订单不支付
-			// // else
+            const res = await orderPay({ID: this.orderId}, this.$refs.toast)
+            if (res.code !== 0) {
+                return false
+            }
+            if (!res.data.pay) {
+                this.$message(this.$refs.toast).error("交易失败，请重试")
+                return false
+            }
+            this.toPay(res.data.pay, res.data.order)
+			// 直接提交订单不支付
+			// else
 			//     this.$message(this.$refs.toast).success("正在跳转商家联系方式").then(res => {
-            //         uni.redirectTo({
-            //             url: '/pages/my/my?showPhone=1'
-            //         })
+   //                  uni.redirectTo({
+   //                      url: '/pages/my/my?showPhone=1'
+   //                  })
 			//     })
 			//     return true
-            this.showPhoneDialog = true
+            // this.showPhoneDialog = true
         },
-		//微信支付功能关闭
         // 发起微信支付
-        // toPay(pay, order) {
-        //     this.$message(this.$refs.toast).loading('正在支付中...')
-        //     const payment = {
-        //         provider: 'wxpay', // 服务提供商，通过 uni.getProvider 获取。
-        //         timeStamp: pay.timestamp,
-        //         nonceStr: pay.nonceStr,
-        //         orderInfo: pay.order,
-        //         package: 'prepay_id=' + pay.prePayId,
-        //         signType: pay.signType,
-        //         paySign: pay.paySign,
-        //         success: res => {
-        //             console.log('success', res)
-        //             this.$message(this.$refs.toast).hide()
-        //             this.paySuccess(order.ID)
-        //         },
-        //         fail: res => {
-        //             console.log('fail', res)
-        //             this.$message(this.$refs.toast).hide()
-        //             if (res.errMsg === 'requestPayment:fail cancel') {
-        //                 this.$message(this.$refs.toast).error("取消支付")
-        //                 return false
-        //             }
-        //             this.$message(this.$refs.toast).error("支付失败")
-        //         }
-        //     }
-        //     console.log('payment', payment)
-        //     uni.requestPayment(payment)
-        // },
+        toPay(pay, order) {
+            this.$message(this.$refs.toast).loading('正在支付中...')
+            const payment = {
+                provider: 'wxpay', // 服务提供商，通过 uni.getProvider 获取。
+                timeStamp: pay.timestamp,
+                nonceStr: pay.nonceStr,
+                orderInfo: pay.order,
+                package: 'prepay_id=' + pay.prePayId,
+                signType: pay.signType,
+                paySign: pay.paySign,
+                success: res => {
+                    console.log('success', res)
+                    this.$message(this.$refs.toast).hide()
+                    this.paySuccess(order.ID)
+                },
+                fail: res => {
+                    console.log('fail', res)
+                    this.$message(this.$refs.toast).hide()
+                    if (res.errMsg === 'requestPayment:fail cancel') {
+                        this.$message(this.$refs.toast).error("取消支付")
+                        return false
+                    }
+                    this.$message(this.$refs.toast).error("支付失败")
+                }
+            }
+            console.log('payment', payment)
+            uni.requestPayment(payment)
+        },
         // 支付成功回调
-        // paySuccess(orderId) {
-        //     this.$message(this.$refs.toast).loading('正在获取支付结果...')
-        //     let count = 0
-        //     let errCount = 0
-        //     const statusInterval = setInterval(async () => {
-        //         const res = await getOrderStatus(orderId);
-        //         if (res.code !== 0) {
-        //             errCount ++
-        //             // 只允许重试 30 次 30秒
-        //             if (errCount > 30) {
-        //                 clearInterval(statusInterval); // 清除定时器
-        //                 this.$message(this.$refs.toast).hide()
-        //                 this.$message(this.$refs.toast).error("获取交易结果超时，请稍后查看")
-        //             }
-        //             return false;
-        //         }
-        //         count++
-        //         if (count > 30) {
-        //             clearInterval(statusInterval); // 清除定时器
-        //             this.$message(this.$refs.toast).hide()
-        //             this.$message(this.$refs.toast).error("获取交易结果超时，请稍后查看")
-        //             return false;
-        //         }
-        //         if (res.data.status === 1) {
-        //             clearInterval(statusInterval); // 清除定时器
-        //             this.$message(this.$refs.toast).hide()
-        //             // 进行其他操作
-        //             this.$message(this.$refs.toast).success("支付成功").then(() => {
-        //                 this.getOrderInfoData()
-        //             })
-        //         }
-        //     }, 1000);
-        // },
+        paySuccess(orderId) {
+            this.$message(this.$refs.toast).loading('正在获取支付结果...')
+            let count = 0
+            let errCount = 0
+            const statusInterval = setInterval(async () => {
+                const res = await getOrderStatus(orderId);
+                if (res.code !== 0) {
+                    errCount ++
+                    // 只允许重试 30 次 30秒
+                    if (errCount > 30) {
+                        clearInterval(statusInterval); // 清除定时器
+                        this.$message(this.$refs.toast).hide()
+                        this.$message(this.$refs.toast).error("获取交易结果超时，请稍后查看")
+                    }
+                    return false;
+                }
+                count++
+                if (count > 30) {
+                    clearInterval(statusInterval); // 清除定时器
+                    this.$message(this.$refs.toast).hide()
+                    this.$message(this.$refs.toast).error("获取交易结果超时，请稍后查看")
+                    return false;
+                }
+                if (res.data.status === 1) {
+                    clearInterval(statusInterval); // 清除定时器
+                    this.$message(this.$refs.toast).hide()
+                    // 进行其他操作
+                    this.$message(this.$refs.toast).success("支付成功").then(() => {
+                        this.getOrderInfoData()
+                    })
+                }
+            }, 1000);
+        },
         toGoodsDetail(goodsId) {
             uni.navigateTo({
                 url: `/pages/goods/detail?id=${goodsId}`
