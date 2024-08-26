@@ -5,14 +5,17 @@
         <el-form-item label="订单编号">
           <el-input v-model="searchInfo.orderSn" placeholder="搜索条件" />
         </el-form-item>
+        <el-form-item label="用户手机号">
+          <el-input v-model="searchInfo.userPhone" placeholder="用户注册手机号" />
+        </el-form-item>
         <el-form-item label="收货人姓名">
           <el-input v-model="searchInfo.shipmentName" placeholder="搜索条件" />
         </el-form-item>
         <el-form-item label="收货人手机号">
           <el-input v-model="searchInfo.shipmentMobile" placeholder="搜索条件" />
         </el-form-item>
-        <el-form-item label="收获人地址">
-          <el-input v-model="searchInfo.shipingAddress" placeholder="搜索条件" />
+        <el-form-item label="收货人地址">
+          <el-input v-model="searchInfo.shipmentAddress" placeholder="搜索条件" />
         </el-form-item>
         <el-form-item label="支付方式" prop="payment">
           <el-select v-model="searchInfo.payment" clearable placeholder="请选择" @clear="()=>{searchInfo.payment=undefined}">
@@ -508,6 +511,7 @@ const handleCurrentChange = (val) => {
 // 查询
 const getTableData = async() => {
   searchInfo.value.goodsArea = route.currentRoute.value.query.goodsArea
+  searchInfo.value.settlementType = route.currentRoute.value.query.settlementType
   const table = await getOrderList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
   if (table.code === 0) {
     tableData.value = table.data.list

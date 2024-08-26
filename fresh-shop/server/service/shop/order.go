@@ -414,6 +414,7 @@ func (orderService *OrderService) FindUserOrderStatus(userId uint, settlementMon
 		Table("shop_order").
 		Select("COUNT(CASE WHEN status = 0 and status_cancel = 0 THEN 1 ELSE null END ) as unpaid,COUNT(CASE WHEN status = 1 and status_cancel = 0 and status_refund = 0 THEN 1 ELSE null END ) as delivered,COUNT(CASE WHEN status = 2 and status_cancel = 0 and status_refund = 0 THEN 1 ELSE null END ) as shipped,COUNT(CASE WHEN status = 3 and status_cancel = 0 and status_refund = 0 THEN 1 ELSE null END) as success").
 		Where("user_id = ?", userId).
+		Where("deleted_at is null").
 		Scan(&resp).Error
 	info := shopReq.OrderSearch{}
 	info.UserId = utils.Pointer(int(userId))
