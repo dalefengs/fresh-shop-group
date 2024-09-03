@@ -2,6 +2,7 @@ package shop
 
 import (
 	"fresh-shop/server/global"
+	"fresh-shop/server/model/system"
 	"time"
 )
 
@@ -37,6 +38,7 @@ type Order struct {
 	AddressId       int            `json:"addressId" form:"addressId" gorm:"-"`       // 收货地址id
 	OrderDetails    []OrderDetails `json:"details"`                                   // 订单详情
 	OrderReturn     OrderReturn    `json:"return"`                                    // 订单售后
+	User            system.SysUser `json:"user"`                                      // 订单售后
 	OrderDelivery   OrderDelivery  `json:"delivery" gorm:"foreignKey:order_id"`       // 订单发货信息
 	PointGoodsId    int            `json:"pointGoodsId" form:"pointGoodsId" gorm:"-"` // 积分商品id 下单用
 }

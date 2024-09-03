@@ -450,7 +450,7 @@ func (orderService *OrderService) GetOrderInfoList(info shopReq.OrderSearch) (li
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	// 创建db
-	db := global.DB.Debug().Model(&shop.Order{}).Preload("OrderDetails").Preload("OrderDelivery").Joins("OrderReturn")
+	db := global.DB.Debug().Model(&shop.Order{}).Preload("OrderDetails").Preload("OrderDelivery").Joins("OrderReturn").Preload("User")
 	var orders []shop.Order
 	// 如果有条件搜索 下方会自动创建搜索语句
 

@@ -82,6 +82,12 @@
         <el-table-column align="left" label="基本信息" prop="orderInfo" width="300">
           <template #default="scope">
             <div class="table-multi-line">
+              <div>
+                客户名：<span style="color: #000000; margin-right: 10px">{{ scope.row.user.originContactName }}</span>
+              </div>
+              <div>
+                客户手机号：<span style="color: #000000">{{ scope.row.user.phone }}</span>
+              </div>
               <div style="display:inline-block;">
                 订单号：<span style="color: #4d70ff">{{ scope.row.orderSn }}</span>
               </div><br>
