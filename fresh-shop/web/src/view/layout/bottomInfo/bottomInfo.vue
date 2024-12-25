@@ -12,9 +12,9 @@
         <a href="https://github.com/flipped-aurora">flipped-aurora团队</a>
       </span>
       <el-divider direction="vertical" />
-      <span>
+      <a href="https://beian.miit.gov.cn/">
         渝ICP备2023007060号-1
-      </span>
+      </a>
     </div>
   </div>
 </template>
